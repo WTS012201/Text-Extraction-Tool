@@ -3,12 +3,18 @@
 ImageFrame::ImageFrame(QWidget* parent):
   scene{nullptr}
 {
-  this->setContentsMargins(0,0,0,0);
-  this->setParent(parent);
-//  this->setMinimumSize(1000,1000);
+  initUi(parent);
 }
 
-void ImageFrame::mousePressEvent(QMouseEvent * event) {
+void ImageFrame::initUi(QWidget* parent){
+  parent->setContentsMargins(0,0,0,0);
+  this->setParent(parent);
+  this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+  this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+
+}
+
+void ImageFrame::mousePressEvent(QMouseEvent* event) {
   qDebug() << "TEST\n";
 }
 
@@ -25,5 +31,4 @@ void ImageFrame::setImage(QString imageName){
 
   this->setScene(scene);
   this->setMinimumSize(image.size());
-  qDebug() << this->size();
 }

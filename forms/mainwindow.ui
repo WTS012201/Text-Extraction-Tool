@@ -1160,9 +1160,23 @@ QProgressBar::chunk
                          <x>0</x>
                          <y>0</y>
                          <width>584</width>
-                         <height>387</height>
+                         <height>370</height>
                         </rect>
                        </property>
+                       <layout class="QVBoxLayout" name="verticalLayout_5">
+                        <property name="leftMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="topMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="rightMargin">
+                         <number>0</number>
+                        </property>
+                        <property name="bottomMargin">
+                         <number>0</number>
+                        </property>
+                       </layout>
                       </widget>
                      </widget>
                     </item>

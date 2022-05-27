@@ -24,7 +24,7 @@ public:
 private:
   QString currImage;
   void mousePressEvent(QMouseEvent * event) override;
-
+  void initUi(QWidget* parent);
 };
 
 #endif // IMAGEFRAME_H

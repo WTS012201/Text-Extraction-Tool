@@ -15,20 +15,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUi(){
   ui->setupUi(this);
-  ui->scrollAreaWidgetContents->setContentsMargins(0,0,0,0);
-
-  QVBoxLayout* layout = new QVBoxLayout{ui->scrollAreaWidgetContents};
-
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents);
-  layout->addWidget(iFrame);
-//  iFrame->setImage(":/img/galaxy.jpg");
-
-
-//  auto view = new QGraphicsView{ui->scrollAreaWidgetContents};
-//  view->setMinimumSize(10000,10000);
-
-
-
+  iFrame->setImage(":/img/galaxy.jpg");
+  ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
   //image details next
 }
 

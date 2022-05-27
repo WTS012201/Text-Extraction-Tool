@@ -25,7 +25,6 @@ HEADERS = \
 
 FORMS = \
     ./forms/mainwindow.ui \
-    ./forms/imageframe.ui
 
 RESOURCES += \
     ./res/res.qrc \

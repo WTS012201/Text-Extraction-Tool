@@ -1,22 +1,8 @@
 ﻿#include "../headers/imageframe.h"
-#include "ui_imageframe.h"
 
-ImageFrame::ImageFrame(QWidget *parent) :
-  QWidget(parent),
-  ui(new Ui::ImageFrame)
+ImageFrame::ImageFrame(QGraphicsView* __parent):
+  parent{__parent}
 {
- initUi(parent);
-}
-
-ImageFrame::~ImageFrame()
-{
-  delete ui;
-}
-
-void ImageFrame::initUi(QWidget *parent){
-  ui->setupUi(this);
-  ui->frame->hide();
-  this->setMaximumSize(this->size());
 
 }
 
@@ -25,13 +11,9 @@ void ImageFrame::setImage(QString imageName){
   imageName = ":/img/" + imageName;
 
   QPixmap image{imageName};
-
-  this->resize(image.size() + QSize{25, 25});
-
-  scene = new QGraphicsScene(this);
+  scene = new QGraphicsScene(parent);
   scene->addPixmap(image);
   scene->setSceneRect(image.rect());
 
-  ui->imageView->setScene(scene);
-  ui->frame->show();
+  parent->setScene(scene);
 }

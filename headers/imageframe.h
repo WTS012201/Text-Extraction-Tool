@@ -6,25 +6,22 @@
 #include "tesseract/baseapi.h"
 #include <QLabel>
 #include <QGraphicsScene>
+#include <QGraphicsView>
 
-namespace Ui {
-class ImageFrame;
-}
-
-class ImageFrame : public QWidget
+class ImageFrame : public QGraphicsView
 {
   Q_OBJECT
 
 public:
-  explicit ImageFrame(QWidget *parent = nullptr);
-  ~ImageFrame();
+  ImageFrame(QGraphicsView* parent = nullptr);
   void setImage(QString);
+
+  QGraphicsView* parent;
+  QGraphicsScene* scene;
 
 private:
   QString currImage;
-  QGraphicsScene *scene;
-  Ui::ImageFrame *ui;
-  void initUi(QWidget *parent);
+
 };
 
 #endif // IMAGEFRAME_H

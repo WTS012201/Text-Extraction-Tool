@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/style">
+        <file>style.qss</file>
+    </qresource>
+    <qresource prefix="/img">
+        <file>test.jpg</file>
+        <file>galaxy.jpg</file>
+    </qresource>
+</RCC>

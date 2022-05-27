@@ -7,20 +7,23 @@
 #include <QLabel>
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QLayout>
 
 class ImageFrame : public QGraphicsView
 {
   Q_OBJECT
 
 public:
-  ImageFrame(QGraphicsView* parent = nullptr);
+//  ImageFrame(QGraphicsView* parent = nullptr);
+  ImageFrame(QWidget* parent = nullptr);
   void setImage(QString);
 
-  QGraphicsView* parent;
   QGraphicsScene* scene;
+  QWidget* parent;
 
 private:
   QString currImage;
+  void mousePressEvent(QMouseEvent * event) override;
 
 };
 

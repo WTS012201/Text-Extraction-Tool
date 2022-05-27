@@ -1,6 +1,7 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QFileDialog>
 #include <QMainWindow>
 #include <QFile>
 #include "../headers/imageframe.h"
@@ -19,7 +20,11 @@ public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
+private slots:
+  void on_actionOpen_Image_triggered();
+
 private:
+  ImageFrame *iFrame;
   Ui::MainWindow *ui;
   void initUi();
 };

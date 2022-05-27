@@ -6,6 +6,7 @@
 #include "../headers/imageframe.h"
 #include <QSplitter>
 #include <QTextEdit>
+
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE

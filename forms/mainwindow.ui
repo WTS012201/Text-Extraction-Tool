@@ -1004,10 +1004,10 @@ QProgressBar::chunk
          <string notr="true"/>
         </property>
         <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+         <enum>QFrame::Panel</enum>
         </property>
         <property name="frameShadow">
-         <enum>QFrame::Sunken</enum>
+         <enum>QFrame::Raised</enum>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <property name="spacing">
@@ -1116,15 +1116,7 @@ QProgressBar::chunk
            <property name="frameShadow">
             <enum>QFrame::Sunken</enum>
            </property>
-           <layout class="QVBoxLayout" name="verticalLayout_21">
-            <item>
-             <widget class="QLabel" name="label">
-              <property name="text">
-               <string>Some random text</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
+           <layout class="QVBoxLayout" name="verticalLayout_21"/>
           </widget>
           <widget class="QWidget" name="widget_3" native="true">
            <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -1134,10 +1126,22 @@ QProgressBar::chunk
                <layout class="QVBoxLayout" name="Edit">
                 <item>
                  <widget class="QSplitter" name="splitter">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
                   <property name="orientation">
                    <enum>Qt::Vertical</enum>
                   </property>
                   <widget class="QWidget" name="Edit_2" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>8</verstretch>
+                    </sizepolicy>
+                   </property>
                    <layout class="QVBoxLayout" name="verticalLayout_2">
                     <item>
                      <widget class="QScrollArea" name="scrollArea">
@@ -1184,15 +1188,33 @@ QProgressBar::chunk
                     </item>
                    </layout>
                   </widget>
-                  <widget class="QWidget" name="Image" native="true">
+                  <widget class="QWidget" name="TextEditContainer" native="true">
+                   <property name="sizePolicy">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                     <horstretch>0</horstretch>
+                     <verstretch>1</verstretch>
+                    </sizepolicy>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>16777215</width>
+                     <height>16777215</height>
+                    </size>
+                   </property>
                    <layout class="QVBoxLayout" name="verticalLayout">
                     <item>
-                     <widget class="QTextEdit" name="textEdit_2">
+                     <widget class="QTextEdit" name="textEdit">
                       <property name="sizePolicy">
                        <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="baseSize">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
                       </property>
                      </widget>
                     </item>
@@ -1225,10 +1247,28 @@ QProgressBar::chunk
    </property>
    <widget class="QMenu" name="menutest">
     <property name="title">
-     <string>Options</string>
+     <string>File</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuTools">
+    <property name="title">
+     <string>Tools</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
     </property>
    </widget>
    <addaction name="menutest"/>
+   <addaction name="menuEdit"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>

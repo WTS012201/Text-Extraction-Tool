@@ -15,14 +15,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUi(){
   ui->setupUi(this);
-
 //  auto edit = new QTextEdit{};
   auto pFrame = new ImageFrame(ui->scrollArea->widget());
   pFrame->setImage("galaxy.jpg");
 
 //  auto splitter = new QSplitter{Qt::Vertical};
 //  splitter->addWidget(pFrame);
-
+  qDebug() << ui->TextEditContainer->size();
 //  splitter->setSizes(QList<int>{1000,800});
 
 }

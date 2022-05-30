@@ -5,8 +5,11 @@ MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent)
   , ui(new Ui::MainWindow)
 {
+  loadData();
   initUi();
 }
+
+
 
 MainWindow::~MainWindow()
 {
@@ -16,9 +19,26 @@ MainWindow::~MainWindow()
 void MainWindow::initUi(){
   ui->setupUi(this);
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents);
-  iFrame->setImage(":/img/galaxy.jpg");
+  iFrame->setZoomFactor(ui->zoomFactor);
   ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
+
   //image details next
+}
+
+void MainWindow::loadData(){
+  QFileInfo check_file("eng.traineddata");
+
+  if (check_file.exists() && check_file.isFile()) {
+    return;
+  }
+  QFile file{"eng.traineddata"}, qrcFile(":/other/eng.traineddata");
+  if(!qrcFile.open(QFile::ReadOnly | QFile::Text)){
+    qDebug() << "failed to open qrc file";
+  }
+  if(!file.open(QFile::WriteOnly | QFile::Text)){
+    qDebug() << "failed to write to file";
+  }
+  file.write(qrcFile.readAll());
 }
 
 void MainWindow::on_actionOpen_Image_triggered()

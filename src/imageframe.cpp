@@ -1,9 +1,11 @@
 ﻿#include "../headers/imageframe.h"
 
-ImageFrame::ImageFrame(QWidget* parent):
+ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* ui):
   scene{new QGraphicsScene(this)}, scalar{1.0}, scaleFactor{0.1}
 {
   initUi(parent);
+  setWidgets(ui);
+  buildConnections();
 }
 
 ImageFrame::~ImageFrame(){
@@ -11,21 +13,40 @@ ImageFrame::~ImageFrame(){
 }
 
 void ImageFrame::changeZoom(){
-  scalar = (zoomEdit -> text()).toFloat();
+  float val = (zoomEdit -> text()).toFloat();
+
+  scalar = (val < 0.1) ? 0.1 : val;
+  scalar = (scalar > 10.0) ? 10.0 : scalar;
+  zoomEdit->setText(QString::number(scalar));
   resize(originalSize * scalar);
 }
 
-void ImageFrame::setZoomFactor(QLineEdit* __zoomEdit){
-  zoomEdit = __zoomEdit;
+void ImageFrame::buildConnections(){
   connect(zoomEdit, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
+  connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
+}
+
+void ImageFrame::setRawText(){
+  qDebug() << rawText;
+}
+
+void ImageFrame::setWidgets(Ui::MainWindow* ui){
+  zoomEdit = ui->zoomFactor;
+  progressBar = ui->progressBar;
+  zoomLabel = ui->label;
+
+  zoomEdit->hide();
+  zoomLabel->hide();
+  progressBar->hide();
 }
 
 void ImageFrame::initUi(QWidget* parent){
   parent->setContentsMargins(0,0,0,0);
+
   this->setParent(parent);
   this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   this->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
+  this->hide();
 }
 
 void ImageFrame::resize(QSize newSize){
@@ -40,13 +61,13 @@ void ImageFrame::resize(QSize newSize){
 }
 
 void ImageFrame::zoomIn(){
-  scalar += scaleFactor;
+  (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   zoomEdit->setText(QString::number(scalar));
   resize(originalSize * scalar);
 }
 
 void ImageFrame::zoomOut(){
-  scalar -= scaleFactor;
+  (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   zoomEdit->setText(QString::number(scalar));
   resize(originalSize * scalar);
 }
@@ -105,10 +126,29 @@ void ImageFrame::setImage(QString imageName){
   this->setScene(scene);
 
   originalSize = image.size();
-  qDebug() << parentWidget()->objectName();
-  this->parentWidget()->setMaximumSize(image.size());
+//  this->parentWidget()->setMaximumSize(image.size());
   this->setMinimumSize(image.size());
-//  extract();
+  extract();
+}
+
+void ImageFrame::showAll(){
+  zoomEdit->show();
+  zoomLabel->show();
+  this->show();
+}
+
+QString ImageFrame::collect(cv::Mat& matrix){
+  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+
+  api->Init(nullptr, "eng", tesseract::OEM_LSTM_ONLY);
+  api->SetPageSegMode(tesseract::PSM_AUTO);
+  api->SetImage(matrix.data, matrix.cols, matrix.rows, 4, matrix.step);
+  auto text = QString{api->GetUTF8Text()};
+
+  api->End();
+  delete api;
+
+  return text;
 }
 
 void ImageFrame::extract(){
@@ -127,14 +167,16 @@ void ImageFrame::extract(){
   // upscale/downscale here maybe
   matrix.convertTo(matrix, -1, 2, 0);
 
-  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
-  api->Init(nullptr, "eng", tesseract::OEM_LSTM_ONLY);
-  api->SetPageSegMode(tesseract::PSM_AUTO);
-  api->SetImage(matrix.data, matrix.cols, matrix.rows, 4, matrix.step);
+  progressBar->show();
+  auto thread = QThread::create(
+    [this](cv::Mat matrix) mutable -> auto{
+        rawText = collect(matrix);
+        emit rawTextChanged();
+      },
+    matrix
+  );
 
-  auto text = QString{api->GetUTF8Text()};
-  qDebug() << text;
-
-  api->End();
-  delete api;
+  thread->start();
+  progressBar->hide();
+  showAll();
 }

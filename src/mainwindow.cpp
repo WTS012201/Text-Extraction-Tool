@@ -18,10 +18,9 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUi(){
   ui->setupUi(this);
-  iFrame = new ImageFrame(ui->scrollAreaWidgetContents);
-  iFrame->setZoomFactor(ui->zoomFactor);
+  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui);
+//  iFrame->setWidgets(ui);
   ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
-
   //image details next
 }
 

@@ -101,11 +101,14 @@ void ImageFrame::setImage(QString imageName){
 
   scene->addPixmap(image);
   scene->setSceneRect(image.rect());
-  originalSize = image.size();
-
+  scene->update();
   this->setScene(scene);
+
+  originalSize = image.size();
+  qDebug() << parentWidget()->objectName();
+  this->parentWidget()->setMaximumSize(image.size());
   this->setMinimumSize(image.size());
-  extract();
+//  extract();
 }
 
 void ImageFrame::extract(){

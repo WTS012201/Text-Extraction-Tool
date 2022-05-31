@@ -986,6 +986,9 @@ QProgressBar::chunk
       <property name="spacing">
        <number>0</number>
       </property>
+      <property name="bottomMargin">
+       <number>4</number>
+      </property>
       <item>
        <widget class="QFrame" name="SideBar">
         <property name="sizePolicy">
@@ -1009,7 +1012,7 @@ QProgressBar::chunk
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3">
+        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0">
          <property name="spacing">
           <number>4</number>
          </property>
@@ -1097,7 +1100,7 @@ QProgressBar::chunk
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="MainContent">
+       <layout class="QHBoxLayout" name="MainContent" stretch="0">
         <item>
          <widget class="QSplitter" name="splitter_4">
           <property name="orientation">
@@ -1107,9 +1110,15 @@ QProgressBar::chunk
            <number>10</number>
           </property>
           <widget class="QFrame" name="ImageContent">
-           <property name="maximumSize">
+           <property name="minimumSize">
             <size>
              <width>100</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
              <height>16777215</height>
             </size>
            </property>
@@ -1123,6 +1132,9 @@ QProgressBar::chunk
           </widget>
           <widget class="QWidget" name="widget_3" native="true">
            <layout class="QVBoxLayout" name="verticalLayout_20">
+            <property name="bottomMargin">
+             <number>0</number>
+            </property>
             <item>
              <layout class="QVBoxLayout" name="ImageScrollLayout">
               <item>
@@ -1143,12 +1155,73 @@ QProgressBar::chunk
                   </property>
                   <widget class="QWidget" name="Edit_2" native="true">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                    <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
                      <horstretch>0</horstretch>
                      <verstretch>8</verstretch>
                     </sizepolicy>
                    </property>
                    <layout class="QVBoxLayout" name="verticalLayout_2">
+                    <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout">
+                      <item>
+                       <widget class="QLabel" name="label">
+                        <property name="text">
+                         <string>Zoom factor:</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="zoomFactor">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="autoFillBackground">
+                         <bool>false</bool>
+                        </property>
+                        <property name="styleSheet">
+                         <string notr="true">.QLineEdit{
+	background: rgba(255, 255, 255, 10)
+}</string>
+                        </property>
+                        <property name="text">
+                         <string>1.0</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
+                    </item>
+                    <item>
+                     <widget class="QProgressBar" name="progressBar">
+                      <property name="maximum">
+                       <number>100</number>
+                      </property>
+                      <property name="value">
+                       <number>0</number>
+                      </property>
+                      <property name="invertedAppearance">
+                       <bool>false</bool>
+                      </property>
+                      <property name="format">
+                       <string>%p%</string>
+                      </property>
+                     </widget>
+                    </item>
                     <item>
                      <widget class="QScrollArea" name="scrollArea">
                       <property name="widgetResizable">
@@ -1159,8 +1232,8 @@ QProgressBar::chunk
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>584</width>
-                         <height>370</height>
+                         <width>526</width>
+                         <height>318</height>
                         </rect>
                        </property>
                        <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1189,13 +1262,28 @@ QProgressBar::chunk
                      <verstretch>1</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="minimumSize">
+                    <size>
+                     <width>0</width>
+                     <height>100</height>
+                    </size>
+                   </property>
                    <property name="maximumSize">
                     <size>
                      <width>16777215</width>
                      <height>16777215</height>
                     </size>
                    </property>
+                   <property name="baseSize">
+                    <size>
+                     <width>0</width>
+                     <height>0</height>
+                    </size>
+                   </property>
                    <layout class="QVBoxLayout" name="verticalLayout">
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
                     <item>
                      <widget class="QTextEdit" name="textEdit">
                       <property name="sizePolicy">
@@ -1203,6 +1291,12 @@ QProgressBar::chunk
                         <horstretch>0</horstretch>
                         <verstretch>0</verstretch>
                        </sizepolicy>
+                      </property>
+                      <property name="minimumSize">
+                       <size>
+                        <width>0</width>
+                        <height>0</height>
+                       </size>
                       </property>
                       <property name="baseSize">
                        <size>

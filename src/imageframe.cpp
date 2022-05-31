@@ -27,7 +27,7 @@ void ImageFrame::buildConnections(){
 }
 
 void ImageFrame::setRawText(){
-  qDebug() << rawText;
+  //qDebug() << rawText;
 }
 
 void ImageFrame::setWidgets(Ui::MainWindow* ui){
@@ -143,12 +143,91 @@ QString ImageFrame::collect(cv::Mat& matrix){
   api->Init(nullptr, "eng", tesseract::OEM_LSTM_ONLY);
   api->SetPageSegMode(tesseract::PSM_AUTO);
   api->SetImage(matrix.data, matrix.cols, matrix.rows, 4, matrix.step);
-  auto text = QString{api->GetUTF8Text()};
+  api->Recognize(0);
 
+  auto text = QString{api->GetUTF8Text()};
+  tesseract::ResultIterator* ri = api->GetIterator();
+  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
+  QString line{""};
+  ImageTextObject* textObject = new ImageTextObject{nullptr};
+  QPair<cv::Point, cv::Point> space;
+  bool newLine = true;
+  int x1, y1, x2, y2;
+  auto newBlock = [&](){
+    textObject->setText(line);
+    line = "";
+    space.second = cv::Point{x2, y2};
+    textObject->addLineSpace(space);
+    newLine = true;
+    textObjects.push_back(textObject);
+    textObject = new ImageTextObject{nullptr};
+  };
+
+  if (ri != 0) {
+      do {
+        QString word = ri->GetUTF8Text(level);
+//        float conf = ri->Confidence(level);
+        ri->BoundingBox(level, &x1, &y1, &x2, &y2);
+        qDebug() << word;
+        if(newLine){
+          space.first = cv::Point{x1, y1};
+          newLine = false;
+        }
+
+        if(word == "+"){
+          line += '\n';
+          space.second = cv::Point{x2, y2};
+          textObject->addLineSpace(space);
+          newLine = true;
+          qDebug() << "joined";
+        } else if(word.contains('\n') || word.contains(' ')){
+          newBlock();
+        } else{
+          line += word + " ";
+        }
+      } while (ri->Next(level));
+    newBlock();
+  }
   api->End();
   delete api;
 
+//  for(auto& obj : textObjects){
+//    qDebug() << "BLOCK";
+//    for(auto& pair : obj->getLineSpaces()){
+//      qDebug() << "Pair1: (" << pair.first.x << ", " << pair.first.y << ")";
+//      qDebug() << "Pair2: (" << pair.second.x << ", " << pair.second.y << ")";
+//    }
+//  }
+
+  qDebug() << "COMPLETE";
   return text;
+}
+
+
+
+QVector<QString> ImageFrame::getLastWords(QVector<QString> lines){
+  QVector<QString> lastWords;
+
+  for(const auto& line : lines){
+    int i = line.length();
+
+    while(i > 0 && line.at(i -= 1) != ' ');
+    lastWords.push_back(line.mid(i + 1, line.length()));
+  }
+
+  return lastWords;
+}
+
+QVector<QString> ImageFrame::getLines(QString text){
+  QVector<QString> lines;
+
+  while(!text.isEmpty()){
+    auto pos = text.indexOf("\n");
+    lines.push_back(text.mid(0, pos));
+    text = text.mid(pos + 1, text.length());
+  }
+
+  return lines;
 }
 
 void ImageFrame::extract(){
@@ -166,7 +245,6 @@ void ImageFrame::extract(){
   // transform matrix for darker images
   // upscale/downscale here maybe
   matrix.convertTo(matrix, -1, 2, 0);
-
   progressBar->show();
   auto thread = QThread::create(
     [this](cv::Mat matrix) mutable -> auto{

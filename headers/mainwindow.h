@@ -27,5 +27,6 @@ private:
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
   void initUi();
+  void loadData();
 };
 #endif // MAINWINDOW_H

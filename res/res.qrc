@@ -6,4 +6,7 @@
         <file>test.jpg</file>
         <file>galaxy.jpg</file>
     </qresource>
+    <qresource prefix="/other">
+        <file>eng.traineddata</file>
+    </qresource>
 </RCC>

@@ -17,14 +17,17 @@ PKGCONFIG +=  tesseract
 SOURCES = \
     ./src/main.cpp \
     ./src/mainwindow.cpp \
-    ./src/imageframe.cpp
+    ./src/imageframe.cpp \
+    ./src/imagetextobject.cpp
 
 HEADERS = \
     ./headers/mainwindow.h \
-    ./headers/imageframe.h
+    ./headers/imageframe.h \
+    ./headers/imagetextobject.h
 
 FORMS = \
     ./forms/mainwindow.ui \
+    ./forms/imagetextobject.ui
 
 RESOURCES += \
     ./res/res.qrc \

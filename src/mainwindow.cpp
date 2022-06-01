@@ -9,8 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
   initUi();
 }
 
-
-
 MainWindow::~MainWindow()
 {
   delete ui;
@@ -19,8 +17,8 @@ MainWindow::~MainWindow()
 void MainWindow::initUi(){
   ui->setupUi(this);
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui);
-//  iFrame->setWidgets(ui);
   ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
+  iFrame->setImage("/home/will/screenshots/aaaaaaa.png");
   //image details next
 }
 

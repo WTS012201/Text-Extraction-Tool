@@ -14,14 +14,16 @@ ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject& old) :
   ui(new Ui::ImageTextObject)
 {
   ui->setupUi(this);
-  this->setText(old.getText());
-  this->setLineSpaces(old.getLineSpaces());
-  this->setPos();
+  setText(old.getText());
+
+  setLineSpaces(old.getLineSpaces());
+  highlightSpaces();
+  setPos();
 }
 
 void ImageTextObject::setText(QString __text){
   text = __text;
-  ui->lineEdit->setText(text);
+//  ui->lineEdit->setPlainText(text);
 }
 
 QString ImageTextObject::getText(){
@@ -48,5 +50,38 @@ QVector<QPair<QPoint, QPoint>> ImageTextObject::getLineSpaces(){
 }
 
 void ImageTextObject::setPos(){
-  move(lineSpace.first().first);
+  topLeft = lineSpace.first().first;
+  bottomRight = lineSpace.last().second;
+
+  auto size = bottomRight - topLeft;
+
+  if(size.x() < 0 || size.y() < 0){
+    qDebug() << "failed to establish size";
+    return;
+  }
+
+  this->setFixedSize(QSize{size.x(), size.y()});
+  ui->frame->setFixedSize(QSize{size.x(), size.y()});
+  this->adjustSize();
+  ui->frame->adjustSize();
+  move(topLeft);
+}
+
+void ImageTextObject::highlightSpaces(){
+
+  for(auto space : lineSpace){
+    auto highlight = new QFrame{ui->frame};
+    auto size = space.second - space.first;
+
+    if(size.x() < 0 || size.y() < 0){
+      delete highlight;
+      continue;
+    }
+
+    highlight->setMinimumSize(QSize{size.x(), size.y()});
+    highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+    highlight->show();
+
+//    qDebug() << "";
+  }
 }

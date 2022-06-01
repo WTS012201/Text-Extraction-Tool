@@ -1,6 +1,7 @@
 ﻿#ifndef IMAGETEXTOBJECT_H
 #define IMAGETEXTOBJECT_H
 
+#include <QFrame>
 #include <QWidget>
 #include <QVector>
 #include <QPair>
@@ -28,6 +29,7 @@ public:
   QVector<QPair<QPoint, QPoint>> getLineSpaces();
   void setLineSpaces(QVector<QPair<QPoint, QPoint>> spaces);
   void setPos();
+  void highlightSpaces();
 private:
   QVector<QPair<QPoint, QPoint>> lineSpace;
   Ui::ImageTextObject *ui;

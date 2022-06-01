@@ -57,6 +57,7 @@ void ImageFrame::resize(QSize newSize){
 
   this->setScene(scene);
   this->setMinimumSize(image.size());
+  this->setMaximumSize(image.size());
 }
 
 void ImageFrame::zoomIn(){
@@ -79,40 +80,6 @@ void ImageFrame::mousePressEvent(QMouseEvent* event) {
   }
 }
 
-cv::Mat ImageFrame::QImageToMat(QImage image){
-    cv::Mat mat;
-
-    switch(image.format()){
-        case QImage::Format_ARGB32:
-        case QImage::Format_RGB32:
-        case QImage::Format_ARGB32_Premultiplied:
-            mat = cv::Mat(
-                image.height(), image.width(),
-                CV_8UC4, (void*)image.constBits(),
-                image.bytesPerLine()
-            );
-            break;
-        case QImage::Format_RGB888:
-            mat = cv::Mat(
-                image.height(), image.width(),
-                CV_8UC3, (void*)image.constBits(),
-                image.bytesPerLine()
-            );
-            cv::cvtColor(mat, mat, cv::COLOR_BGR2RGB);
-            break;
-        case QImage::Format_Grayscale8:
-            mat = cv::Mat(
-                image.height(), image.width(),
-                CV_8UC1, (void*)image.constBits(),
-                image.bytesPerLine()
-            );
-            break;
-        default:
-            break;
-    }
-    return mat;
-}
-
 void ImageFrame::setImage(QString imageName){
   currImage = imageName;
   scalar = 1.0;
@@ -127,6 +94,7 @@ void ImageFrame::setImage(QString imageName){
   originalSize = image.size();
 //  this->parentWidget()->setMaximumSize(image.size());
   this->setMinimumSize(image.size());
+  this->setMaximumSize(image.size());
   extract();
 //  emit rawTextChanged();
   populateTextObjects();
@@ -207,12 +175,13 @@ QString ImageFrame::collect(cv::Mat& matrix){
   QString line{""};
   ImageTextObject* textObject = new ImageTextObject{nullptr};
   QPair<QPoint, QPoint> space;
+  QPoint prevPoint;
   bool newLine = true;
   int x1, y1, x2, y2;
   auto newBlock = [&](){
     textObject->setText(line);
     line = "";
-    space.second = QPoint{x2, y2};
+    space.second = prevPoint;
     textObject->addLineSpace(space);
     newLine = true;
     textObjects.push_back(textObject);
@@ -223,29 +192,37 @@ QString ImageFrame::collect(cv::Mat& matrix){
       do {
         QString word = ri->GetUTF8Text(level);
 //        float conf = ri->Confidence(level);
+
         ri->BoundingBox(level, &x1, &y1, &x2, &y2);
+        qDebug() << word;
 
         if(newLine){
           space.first = QPoint{x1, y1};
           newLine = false;
+          qDebug() << "JOINED";
         }
 
+        // new line in block
         if(word == "+"){
           line += '\n';
-          space.second = QPoint{x2, y2};
+          space.second = prevPoint;
           textObject->addLineSpace(space);
           newLine = true;
+
         } else if(word.contains('\n') || word.contains(' ')){
           newBlock();
+          qDebug() << "NEW BLOCK";
         } else{
+          prevPoint = QPoint{x2, y2};
           line += word + " ";
         }
       } while (ri->Next(level));
+    qDebug() << "NEW BLOCK";
     newBlock();
   }
   api->End();
   delete api;
-
+  qDebug() << text;
   return text;
 }
 

@@ -27,9 +27,8 @@ void ImageFrame::buildConnections(){
 }
 
 void ImageFrame::setRawText(){
-  //qDebug() << rawText;
+  populateTextObjects();
 }
-
 void ImageFrame::setWidgets(Ui::MainWindow* ui){
   zoomEdit = ui->zoomFactor;
   progressBar = ui->progressBar;
@@ -129,6 +128,8 @@ void ImageFrame::setImage(QString imageName){
 //  this->parentWidget()->setMaximumSize(image.size());
   this->setMinimumSize(image.size());
   extract();
+//  emit rawTextChanged();
+  populateTextObjects();
 }
 
 void ImageFrame::showAll(){
@@ -136,73 +137,6 @@ void ImageFrame::showAll(){
   zoomLabel->show();
   this->show();
 }
-
-QString ImageFrame::collect(cv::Mat& matrix){
-  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
-
-  api->Init(nullptr, "eng", tesseract::OEM_LSTM_ONLY);
-  api->SetPageSegMode(tesseract::PSM_AUTO);
-  api->SetImage(matrix.data, matrix.cols, matrix.rows, 4, matrix.step);
-  api->Recognize(0);
-
-  auto text = QString{api->GetUTF8Text()};
-  tesseract::ResultIterator* ri = api->GetIterator();
-  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
-  QString line{""};
-  ImageTextObject* textObject = new ImageTextObject{nullptr};
-  QPair<cv::Point, cv::Point> space;
-  bool newLine = true;
-  int x1, y1, x2, y2;
-  auto newBlock = [&](){
-    textObject->setText(line);
-    line = "";
-    space.second = cv::Point{x2, y2};
-    textObject->addLineSpace(space);
-    newLine = true;
-    textObjects.push_back(textObject);
-    textObject = new ImageTextObject{nullptr};
-  };
-
-  if (ri != 0) {
-      do {
-        QString word = ri->GetUTF8Text(level);
-//        float conf = ri->Confidence(level);
-        ri->BoundingBox(level, &x1, &y1, &x2, &y2);
-        qDebug() << word;
-        if(newLine){
-          space.first = cv::Point{x1, y1};
-          newLine = false;
-        }
-
-        if(word == "+"){
-          line += '\n';
-          space.second = cv::Point{x2, y2};
-          textObject->addLineSpace(space);
-          newLine = true;
-          qDebug() << "joined";
-        } else if(word.contains('\n') || word.contains(' ')){
-          newBlock();
-        } else{
-          line += word + " ";
-        }
-      } while (ri->Next(level));
-    newBlock();
-  }
-  api->End();
-  delete api;
-
-//  for(auto& obj : textObjects){
-//    qDebug() << "BLOCK";
-//    for(auto& pair : obj->getLineSpaces()){
-//      qDebug() << "Pair1: (" << pair.first.x << ", " << pair.first.y << ")";
-//      qDebug() << "Pair2: (" << pair.second.x << ", " << pair.second.y << ")";
-//    }
-//  }
-
-  qDebug() << "COMPLETE";
-  return text;
-}
-
 
 
 QVector<QString> ImageFrame::getLastWords(QVector<QString> lines){
@@ -230,6 +164,9 @@ QVector<QString> ImageFrame::getLines(QString text){
   return lines;
 }
 
+void ImageFrame::test(){
+
+}
 void ImageFrame::extract(){
   cv::Mat matrix;
   try{
@@ -246,15 +183,84 @@ void ImageFrame::extract(){
   // upscale/downscale here maybe
   matrix.convertTo(matrix, -1, 2, 0);
   progressBar->show();
-  auto thread = QThread::create(
-    [this](cv::Mat matrix) mutable -> auto{
-        rawText = collect(matrix);
-        emit rawTextChanged();
-      },
-    matrix
-  );
 
-  thread->start();
+  QFuture<void> future = QtConcurrent::run(
+  [&](cv::Mat matrix) mutable -> void{
+      rawText = collect(matrix);
+  }, matrix).then([&](){emit rawTextChanged();});
+
   progressBar->hide();
   showAll();
+}
+
+QString ImageFrame::collect(cv::Mat& matrix){
+  tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
+
+  api->Init(nullptr, "eng", tesseract::OEM_LSTM_ONLY);
+  api->SetPageSegMode(tesseract::PSM_AUTO);
+  api->SetImage(matrix.data, matrix.cols, matrix.rows, 4, matrix.step);
+  api->Recognize(0);
+
+  auto text = QString{api->GetUTF8Text()};
+  tesseract::ResultIterator* ri = api->GetIterator();
+  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
+  QString line{""};
+  ImageTextObject* textObject = new ImageTextObject{nullptr};
+  QPair<QPoint, QPoint> space;
+  bool newLine = true;
+  int x1, y1, x2, y2;
+  auto newBlock = [&](){
+    textObject->setText(line);
+    line = "";
+    space.second = QPoint{x2, y2};
+    textObject->addLineSpace(space);
+    newLine = true;
+    textObjects.push_back(textObject);
+    textObject = new ImageTextObject{nullptr};
+  };
+
+  if (ri != 0) {
+      do {
+        QString word = ri->GetUTF8Text(level);
+//        float conf = ri->Confidence(level);
+        ri->BoundingBox(level, &x1, &y1, &x2, &y2);
+
+        if(newLine){
+          space.first = QPoint{x1, y1};
+          newLine = false;
+        }
+
+        if(word == "+"){
+          line += '\n';
+          space.second = QPoint{x2, y2};
+          textObject->addLineSpace(space);
+          newLine = true;
+        } else if(word.contains('\n') || word.contains(' ')){
+          newBlock();
+        } else{
+          line += word + " ";
+        }
+      } while (ri->Next(level));
+    newBlock();
+  }
+  api->End();
+  delete api;
+
+  return text;
+}
+
+void ImageFrame::populateTextObjects(){
+  QVector<ImageTextObject*> tempObjects;
+
+  // since widgets were created in another thread
+  // have to rebuild them in main thread
+  for(auto& obj : textObjects){
+    ImageTextObject* temp = new ImageTextObject{this, *obj};
+    tempObjects.push_back(temp);
+    temp->show();
+
+    delete obj;
+  }
+
+  textObjects = tempObjects;
 }

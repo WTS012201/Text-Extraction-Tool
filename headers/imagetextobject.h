@@ -18,16 +18,18 @@ public:
   explicit ImageTextObject
   (QWidget *parent = nullptr);
   ~ImageTextObject();
+  ImageTextObject(QWidget *parent, ImageTextObject& old);
 
-  cv::Point topLeft, bottomRight;
+  QPoint topLeft, bottomRight;
 
   void setText(QString __text);
   QString getText();
-  void addLineSpace(QPair<cv::Point, cv::Point>);
-  QVector<QPair<cv::Point, cv::Point>> getLineSpaces();
-
+  void addLineSpace(QPair<QPoint, QPoint>);
+  QVector<QPair<QPoint, QPoint>> getLineSpaces();
+  void setLineSpaces(QVector<QPair<QPoint, QPoint>> spaces);
+  void setPos();
 private:
-  QVector<QPair<cv::Point, cv::Point>> lineSpace;
+  QVector<QPair<QPoint, QPoint>> lineSpace;
   Ui::ImageTextObject *ui;
   QString text;
 };

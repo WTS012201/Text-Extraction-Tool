@@ -9,8 +9,19 @@ ImageTextObject::ImageTextObject(
   ui->setupUi(this);
 }
 
+ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject& old) :
+  QWidget(parent),
+  ui(new Ui::ImageTextObject)
+{
+  ui->setupUi(this);
+  this->setText(old.getText());
+  this->setLineSpaces(old.getLineSpaces());
+  this->setPos();
+}
+
 void ImageTextObject::setText(QString __text){
   text = __text;
+  ui->lineEdit->setText(text);
 }
 
 QString ImageTextObject::getText(){
@@ -23,10 +34,19 @@ ImageTextObject::~ImageTextObject()
 }
 
 void ImageTextObject::addLineSpace
-(QPair<cv::Point, cv::Point> space){
+(QPair<QPoint, QPoint> space){
   lineSpace.push_back(space);
 }
 
-QVector<QPair<cv::Point, cv::Point>> ImageTextObject::getLineSpaces(){
+void ImageTextObject::setLineSpaces(
+    QVector<QPair<QPoint, QPoint>> spaces){
+  lineSpace = spaces;
+}
+
+QVector<QPair<QPoint, QPoint>> ImageTextObject::getLineSpaces(){
   return lineSpace;
+}
+
+void ImageTextObject::setPos(){
+  move(lineSpace.first().first);
 }

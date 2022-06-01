@@ -19,6 +19,10 @@
 #include <thread>
 #include <QVector>
 #include <QPair>
+#include <QPoint>
+#include <QFuture>
+#include <QtConcurrent/QtConcurrent>
+#include <QThreadPool>
 
 class ImageFrame : public QGraphicsView
 {
@@ -61,8 +65,10 @@ private:
   void zoomOut();
   void showAll();
   void resize(QSize size);
+  void populateTextObjects();
   QString collect(cv::Mat& matrix);
   cv::Mat QImageToMat(QImage);
+  void test();
 };
 
 #endif // IMAGEFRAME_H

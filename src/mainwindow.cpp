@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
-  : QMainWindow(parent)
+  : QMainWindow(parent), iFrame{nullptr}
   , ui(new Ui::MainWindow)
 {
   loadData();
@@ -16,11 +16,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUi(){
   ui->setupUi(this);
-  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui);
-  ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
-  iFrame->setImage("/home/will/screenshots/aaaaaaa.png");
-//  iFrame->setImage("/home/will/screenshots/testimg.png");
-  //image details next
 }
 
 void MainWindow::loadData(){
@@ -50,6 +45,11 @@ void MainWindow::on_actionOpen_Image_triggered()
       return;
   }
   selection = dialog.selectedFiles();
+  if(iFrame){
+    delete iFrame;
+  }
+  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui);
+  ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
   iFrame->setImage(selection.first());
 }
 

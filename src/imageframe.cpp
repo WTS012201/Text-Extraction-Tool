@@ -10,6 +10,18 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* ui):
 
 ImageFrame::~ImageFrame(){
   delete scene;
+
+  for(auto& obj : textObjects){
+    delete obj;
+  }
+}
+
+void ImageFrame::removeObjects(){
+  delete scene;
+
+  for(auto& obj : textObjects){
+    delete obj;
+  }
 }
 
 void ImageFrame::changeZoom(){
@@ -115,7 +127,6 @@ QVector<QString> ImageFrame::getLastWords(QVector<QString> lines){
 
     while(i > 0 && line.at(--i) != ' ');
     lastWords.push_back(line.mid(i ? i + 1 : 0, line.length()));
-    qDebug() << lastWords.last();
   }
 
   return lastWords;
@@ -128,7 +139,6 @@ QVector<QString> ImageFrame::getLines(QString text){
     auto pos = text.indexOf("\n");
     lines.push_back(text.mid(0, pos));
     text = text.mid(pos + 1, text.length());
-    qDebug() << lines.last();
   }
 
   return lines;
@@ -153,14 +163,16 @@ void ImageFrame::extract(){
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
-      rawText = collect(matrix);
+      rawText = collect(matrix, tesseract::RIL_WORD);
   }, matrix).then([&](){emit rawTextChanged();});
 
   progressBar->hide();
   showAll();
 }
 
-QString ImageFrame::collect(cv::Mat& matrix){
+QString ImageFrame::collect(
+    cv::Mat& matrix, tesseract::PageIteratorLevel mode
+    ){
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
   api->Init(nullptr, "eng", tesseract::OEM_DEFAULT);
@@ -170,65 +182,28 @@ QString ImageFrame::collect(cv::Mat& matrix){
 
   QString text = QString{api->GetUTF8Text()};
   tesseract::ResultIterator* ri = api->GetIterator();
-  tesseract::PageIteratorLevel level = tesseract::RIL_TEXTLINE;
-//  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
 
   typedef QPair<QPoint, QPoint> Space;
-  QVector<QPair<QString, Space>> words;
+  QVector<QPair<QString, Space>> partials;
   int x1, y1, x2, y2;
 
   if (ri != 0) {
     do {
-      QString word = ri->GetUTF8Text(level);
-      ri->BoundingBox(level, &x1, &y1, &x2, &y2);
+      QString word = ri->GetUTF8Text(mode);
+      ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
 
-      words.push_back(QPair<QString, Space>{word, Space{p1, p2}});
+      partials.push_back(QPair<QString, Space>{word, Space{p1, p2}});
 
-    } while (ri->Next(level));
+    } while (ri->Next(mode));
   }
 
-  for(auto& word : words){
+  for(auto& partial : partials){
     ImageTextObject* textObject = new ImageTextObject{nullptr};
-    textObject->setText(word.first);
-    textObject->addLineSpace(word.second);
+    textObject->setText(partial.first);
+    textObject->addLineSpace(partial.second);
     textObjects.push_back(textObject);
   }
-
-
-//  auto lWords = getLastWords(getLines(text));
-//  ImageTextObject* textObject = new ImageTextObject{nullptr};
-//  QString body{""};
-
-//  for(auto& lWord : lWords){
-//    bool first = true;
-//    QPoint p1;
-//    qDebug() << "ON: " << lWord;
-//    if(lWord.isEmpty()){
-//      qDebug() << "EMPTY";
-//      textObject->setText(body);
-//      textObjects.push_back(textObject);
-//      textObject = new ImageTextObject{nullptr};
-//      body = "";
-//      continue;
-//    }
-
-//    for(auto& word : words){
-//      qDebug() << word.first << " " << word.second.second;
-//      if(first){
-//        p1 = word.second.first;
-//        first = false;
-//      }
-//      body += word.first;
-//      if(word.first == lWord){
-//        qDebug() << "NEXT";
-//        textObject->addLineSpace(Space{p1, word.second.second});
-//        words.remove(words.indexOf(word));
-//        break;
-//      }
-//      words.remove(words.indexOf(word));
-//    }
-//  }
 
   api->End();
   delete api;

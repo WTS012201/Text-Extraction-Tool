@@ -83,10 +83,7 @@ QPoint ImageTextObject::findBottomRightCorner(){
 void ImageTextObject::setPos(){
   topLeft = findTopLeftCorner();
   bottomRight = findBottomRightCorner();
-  qDebug() << "TL: " << topLeft;
-  qDebug() << "BR: " << bottomRight;
   auto size = bottomRight - topLeft;
-  qDebug() << "Size: " << size;
 
   if(size.x() < 0 || size.y() < 0){
     qDebug() << "failed to establish size";

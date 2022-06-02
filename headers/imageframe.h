@@ -34,6 +34,7 @@ public:
   void setImage(QString);
   void setWidgets(Ui::MainWindow* ui);
   void extract();
+  void removeObjects();
 
 private slots:
   void changeZoom();
@@ -66,7 +67,7 @@ private:
   void showAll();
   void resize(QSize size);
   void populateTextObjects();
-  QString collect(cv::Mat& matrix);
+  QString collect(cv::Mat& matrix, tesseract::PageIteratorLevel mode);
   cv::Mat QImageToMat(QImage);
   void test();
 };

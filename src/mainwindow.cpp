@@ -19,6 +19,7 @@ void MainWindow::initUi(){
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui);
   ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
   iFrame->setImage("/home/will/screenshots/aaaaaaa.png");
+//  iFrame->setImage("/home/will/screenshots/testimg.png");
   //image details next
 }
 

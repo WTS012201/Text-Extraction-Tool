@@ -49,11 +49,44 @@ QVector<QPair<QPoint, QPoint>> ImageTextObject::getLineSpaces(){
   return lineSpace;
 }
 
-void ImageTextObject::setPos(){
-  topLeft = lineSpace.first().first;
-  bottomRight = lineSpace.last().second;
 
+QPoint ImageTextObject::findTopLeftCorner(){
+  QPoint minPoint = lineSpace.first().first;
+
+  for(auto& p : lineSpace){
+    if(p.first.x() < minPoint.x()){
+      minPoint.setX(p.first.x());
+    }
+    if(p.first.y() < minPoint.y()){
+      minPoint.setY(p.first.y());
+    }
+  }
+
+  return minPoint;
+}
+
+QPoint ImageTextObject::findBottomRightCorner(){
+  QPoint maxPoint = lineSpace.first().first;
+
+  for(auto& p : lineSpace){
+    if(p.second.x() > maxPoint.x()){
+      maxPoint.setX(p.second.x());
+    }
+    if(p.second.y() > maxPoint.y()){
+      maxPoint.setY(p.second.y());
+    }
+  }
+
+  return maxPoint;
+}
+
+void ImageTextObject::setPos(){
+  topLeft = findTopLeftCorner();
+  bottomRight = findBottomRightCorner();
+  qDebug() << "TL: " << topLeft;
+  qDebug() << "BR: " << bottomRight;
   auto size = bottomRight - topLeft;
+  qDebug() << "Size: " << size;
 
   if(size.x() < 0 || size.y() < 0){
     qDebug() << "failed to establish size";
@@ -74,6 +107,7 @@ void ImageTextObject::highlightSpaces(){
     auto size = space.second - space.first;
 
     if(size.x() < 0 || size.y() < 0){
+      qDebug() << "failed to establish size";
       delete highlight;
       continue;
     }
@@ -81,7 +115,5 @@ void ImageTextObject::highlightSpaces(){
     highlight->setMinimumSize(QSize{size.x(), size.y()});
     highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
     highlight->show();
-
-//    qDebug() << "";
   }
 }

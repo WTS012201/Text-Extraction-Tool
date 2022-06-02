@@ -113,8 +113,9 @@ QVector<QString> ImageFrame::getLastWords(QVector<QString> lines){
   for(const auto& line : lines){
     int i = line.length();
 
-    while(i > 0 && line.at(i -= 1) != ' ');
-    lastWords.push_back(line.mid(i + 1, line.length()));
+    while(i > 0 && line.at(--i) != ' ');
+    lastWords.push_back(line.mid(i ? i + 1 : 0, line.length()));
+    qDebug() << lastWords.last();
   }
 
   return lastWords;
@@ -127,14 +128,12 @@ QVector<QString> ImageFrame::getLines(QString text){
     auto pos = text.indexOf("\n");
     lines.push_back(text.mid(0, pos));
     text = text.mid(pos + 1, text.length());
+    qDebug() << lines.last();
   }
 
   return lines;
 }
 
-void ImageFrame::test(){
-
-}
 void ImageFrame::extract(){
   cv::Mat matrix;
   try{
@@ -164,65 +163,75 @@ void ImageFrame::extract(){
 QString ImageFrame::collect(cv::Mat& matrix){
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
-  api->Init(nullptr, "eng", tesseract::OEM_LSTM_ONLY);
+  api->Init(nullptr, "eng", tesseract::OEM_DEFAULT);
   api->SetPageSegMode(tesseract::PSM_AUTO);
-  api->SetImage(matrix.data, matrix.cols, matrix.rows, 4, matrix.step);
+  api->SetImage(matrix.data, matrix.cols, matrix.rows, 3, matrix.step);
   api->Recognize(0);
 
-  auto text = QString{api->GetUTF8Text()};
+  QString text = QString{api->GetUTF8Text()};
   tesseract::ResultIterator* ri = api->GetIterator();
-  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
-  QString line{""};
-  ImageTextObject* textObject = new ImageTextObject{nullptr};
-  QPair<QPoint, QPoint> space;
-  QPoint prevPoint;
-  bool newLine = true;
+  tesseract::PageIteratorLevel level = tesseract::RIL_TEXTLINE;
+//  tesseract::PageIteratorLevel level = tesseract::RIL_WORD;
+
+  typedef QPair<QPoint, QPoint> Space;
+  QVector<QPair<QString, Space>> words;
   int x1, y1, x2, y2;
-  auto newBlock = [&](){
-    textObject->setText(line);
-    line = "";
-    space.second = prevPoint;
-    textObject->addLineSpace(space);
-    newLine = true;
-    textObjects.push_back(textObject);
-    textObject = new ImageTextObject{nullptr};
-  };
 
   if (ri != 0) {
-      do {
-        QString word = ri->GetUTF8Text(level);
-//        float conf = ri->Confidence(level);
+    do {
+      QString word = ri->GetUTF8Text(level);
+      ri->BoundingBox(level, &x1, &y1, &x2, &y2);
+      QPoint p1{x1, y1}, p2{x2, y2};
 
-        ri->BoundingBox(level, &x1, &y1, &x2, &y2);
-        qDebug() << word;
+      words.push_back(QPair<QString, Space>{word, Space{p1, p2}});
 
-        if(newLine){
-          space.first = QPoint{x1, y1};
-          newLine = false;
-          qDebug() << "JOINED";
-        }
-
-        // new line in block
-        if(word == "+"){
-          line += '\n';
-          space.second = prevPoint;
-          textObject->addLineSpace(space);
-          newLine = true;
-
-        } else if(word.contains('\n') || word.contains(' ')){
-          newBlock();
-          qDebug() << "NEW BLOCK";
-        } else{
-          prevPoint = QPoint{x2, y2};
-          line += word + " ";
-        }
-      } while (ri->Next(level));
-    qDebug() << "NEW BLOCK";
-    newBlock();
+    } while (ri->Next(level));
   }
+
+  for(auto& word : words){
+    ImageTextObject* textObject = new ImageTextObject{nullptr};
+    textObject->setText(word.first);
+    textObject->addLineSpace(word.second);
+    textObjects.push_back(textObject);
+  }
+
+
+//  auto lWords = getLastWords(getLines(text));
+//  ImageTextObject* textObject = new ImageTextObject{nullptr};
+//  QString body{""};
+
+//  for(auto& lWord : lWords){
+//    bool first = true;
+//    QPoint p1;
+//    qDebug() << "ON: " << lWord;
+//    if(lWord.isEmpty()){
+//      qDebug() << "EMPTY";
+//      textObject->setText(body);
+//      textObjects.push_back(textObject);
+//      textObject = new ImageTextObject{nullptr};
+//      body = "";
+//      continue;
+//    }
+
+//    for(auto& word : words){
+//      qDebug() << word.first << " " << word.second.second;
+//      if(first){
+//        p1 = word.second.first;
+//        first = false;
+//      }
+//      body += word.first;
+//      if(word.first == lWord){
+//        qDebug() << "NEXT";
+//        textObject->addLineSpace(Space{p1, word.second.second});
+//        words.remove(words.indexOf(word));
+//        break;
+//      }
+//      words.remove(words.indexOf(word));
+//    }
+//  }
+
   api->End();
   delete api;
-  qDebug() << text;
   return text;
 }
 

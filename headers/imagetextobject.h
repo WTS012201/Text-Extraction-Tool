@@ -34,6 +34,8 @@ private:
   QVector<QPair<QPoint, QPoint>> lineSpace;
   Ui::ImageTextObject *ui;
   QString text;
+  QPoint findTopLeftCorner();
+  QPoint findBottomRightCorner();
 };
 
 #endif // IMAGETEXTOBJECT_H

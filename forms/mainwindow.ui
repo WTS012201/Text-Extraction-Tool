@@ -1348,6 +1348,7 @@ QProgressBar::chunk
     <property name="title">
      <string>Tools</string>
     </property>
+    <addaction name="actionOptions"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -1363,6 +1364,11 @@ QProgressBar::chunk
   <action name="actionOpen_Image">
    <property name="text">
     <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionOptions">
+   <property name="text">
+    <string>Options</string>
    </property>
   </action>
  </widget>

@@ -98,7 +98,6 @@ void ImageTextObject::setPos(){
 }
 
 void ImageTextObject::highlightSpaces(){
-
   for(auto space : lineSpace){
     auto highlight = new QFrame{ui->frame};
     auto size = space.second - space.first;

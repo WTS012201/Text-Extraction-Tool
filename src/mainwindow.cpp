@@ -16,6 +16,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::initUi(){
   ui->setupUi(this);
+  options = new Options{this};
 }
 
 void MainWindow::loadData(){
@@ -45,11 +46,21 @@ void MainWindow::on_actionOpen_Image_triggered()
       return;
   }
   selection = dialog.selectedFiles();
+
   if(iFrame){
     delete iFrame;
   }
-  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui);
+  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
   ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
   iFrame->setImage(selection.first());
+}
+
+
+void MainWindow::on_actionOptions_triggered()
+{
+//  options->setView(0);
+  options->setModal(true);
+  if(options->exec() == QDialog::DialogCode::Rejected)
+    return;
 }
 

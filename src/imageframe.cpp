@@ -1,11 +1,14 @@
 ﻿#include "../headers/imageframe.h"
 
-ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* ui):
+ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* ui, Options* options):
   scene{new QGraphicsScene(this)}, scalar{1.0}, scaleFactor{0.1}
 {
+
+  mode = tesseract::RIL_PARA;
   initUi(parent);
   setWidgets(ui);
   buildConnections();
+  setOptions(options);
 }
 
 ImageFrame::~ImageFrame(){
@@ -16,12 +19,8 @@ ImageFrame::~ImageFrame(){
   }
 }
 
-void ImageFrame::removeObjects(){
-  delete scene;
-
-  for(auto& obj : textObjects){
-    delete obj;
-  }
+void ImageFrame::setOptions(Options* options){
+  setMode(options->getPartialSelection());
 }
 
 void ImageFrame::changeZoom(){
@@ -163,9 +162,8 @@ void ImageFrame::extract(){
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
-      rawText = collect(matrix, tesseract::RIL_WORD);
+      rawText = collect(matrix, mode);
   }, matrix).then([&](){emit rawTextChanged();});
-
   progressBar->hide();
   showAll();
 }
@@ -224,4 +222,8 @@ void ImageFrame::populateTextObjects(){
   }
 
   textObjects = tempObjects;
+}
+
+void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
+  mode = __mode;
 }

@@ -4,7 +4,7 @@
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QFile>
-#include "../headers/imageframe.h"
+#include "imageframe.h"
 #include <QSplitter>
 #include <QTextEdit>
 
@@ -23,9 +23,12 @@ public:
 private slots:
   void on_actionOpen_Image_triggered();
 
+  void on_actionOptions_triggered();
+
 private:
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
+  Options* options;
   void initUi();
   void loadData();
 };

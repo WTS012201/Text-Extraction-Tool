@@ -5,6 +5,7 @@
 #include "tesseract/baseapi.h"
 #include "ui_mainwindow.h"
 #include "imagetextobject.h"
+#include "options.h"
 
 #include <QWidget>
 #include <QLabel>
@@ -29,12 +30,17 @@ class ImageFrame : public QGraphicsView
   Q_OBJECT
 
 public:
-  ImageFrame(QWidget* parent = nullptr, Ui::MainWindow* ui = nullptr);
+  ImageFrame(
+      QWidget* parent = nullptr,
+      Ui::MainWindow* ui = nullptr,
+      Options* options = nullptr
+      );
   ~ImageFrame();
   void setImage(QString);
   void setWidgets(Ui::MainWindow* ui);
+  void setMode(tesseract::PageIteratorLevel __mode);
   void extract();
-  void removeObjects();
+  void clear();
 
 private slots:
   void changeZoom();
@@ -47,6 +53,7 @@ private:
   QGraphicsScene* scene;
   QWidget* parent;
   QSize originalSize;
+  tesseract::PageIteratorLevel mode;
 
   QLineEdit* zoomEdit;
   QProgressBar* progressBar;
@@ -65,6 +72,7 @@ private:
   void zoomIn();
   void zoomOut();
   void showAll();
+  void setOptions(Options* options);
   void resize(QSize size);
   void populateTextObjects();
   QString collect(cv::Mat& matrix, tesseract::PageIteratorLevel mode);

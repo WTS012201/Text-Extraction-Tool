@@ -17,6 +17,13 @@ ImageFrame::~ImageFrame(){
   for(auto& obj : textObjects){
     delete obj;
   }
+  if(contentLayout != nullptr){
+    while(contentLayout->count() != 1){
+      QLayoutItem* item = contentLayout->takeAt(0);
+      delete item->widget();
+      delete item;
+    }
+  }
 }
 
 void ImageFrame::setOptions(Options* options){
@@ -44,6 +51,8 @@ void ImageFrame::setWidgets(Ui::MainWindow* ui){
   zoomEdit = ui->zoomFactor;
   progressBar = ui->progressBar;
   zoomLabel = ui->label;
+  contentLayout = qobject_cast<QVBoxLayout*>(ui->contentScrollLayout->layout());
+  textEdit = ui->textEdit;
 
   zoomEdit->hide();
   zoomLabel->hide();
@@ -103,11 +112,10 @@ void ImageFrame::setImage(QString imageName){
   this->setScene(scene);
 
   originalSize = image.size();
-//  this->parentWidget()->setMaximumSize(image.size());
+
   this->setMinimumSize(image.size());
   this->setMaximumSize(image.size());
   extract();
-//  emit rawTextChanged();
   populateTextObjects();
 }
 
@@ -155,8 +163,7 @@ void ImageFrame::extract(){
     qDebug() << "empty matrix";
     return;
   }  
-  // transform matrix for darker images
-  // upscale/downscale here maybe
+  // transform matrix for better output here
   matrix.convertTo(matrix, -1, 2, 0);
   progressBar->show();
 
@@ -191,8 +198,14 @@ QString ImageFrame::collect(
       ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
 
-      partials.push_back(QPair<QString, Space>{word, Space{p1, p2}});
+      while(word.endsWith('\n') || word.endsWith(' ')){
+        word = word.remove(word.length() - 1, word.length());
+      }
+      if(word.isEmpty()){
+        continue;
+      }
 
+      partials.push_back(QPair<QString, Space>{word, Space{p1, p2}});
     } while (ri->Next(mode));
   }
 
@@ -211,12 +224,16 @@ QString ImageFrame::collect(
 void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
-  // since widgets were created in another thread
-  // have to rebuild them in main thread
   for(auto& obj : textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj};
+    ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit};
     tempObjects.push_back(temp);
     temp->show();
+
+    QLabel* contentLabel = new QLabel{};
+
+    contentLabel->setText(temp->getText());
+    contentLabel->setStyleSheet("border: 1px solid black");
+    contentLayout->insertWidget(contentLayout->count() - 1, contentLabel);
 
     delete obj;
   }

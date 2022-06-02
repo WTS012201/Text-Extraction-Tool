@@ -5,6 +5,9 @@
 #include <QWidget>
 #include <QVector>
 #include <QPair>
+#include <QPushButton>
+#include <QTextEdit>
+
 #include "opencv2/opencv.hpp"
 
 namespace Ui {
@@ -19,7 +22,7 @@ public:
   explicit ImageTextObject
   (QWidget *parent = nullptr);
   ~ImageTextObject();
-  ImageTextObject(QWidget *parent, ImageTextObject& old);
+  ImageTextObject(QWidget *parent, ImageTextObject& old, QTextEdit* tEdit);
 
   QPoint topLeft, bottomRight;
 
@@ -34,6 +37,8 @@ private:
   QVector<QPair<QPoint, QPoint>> lineSpace;
   Ui::ImageTextObject *ui;
   QString text;
+  QTextEdit* textEdit;
+
   QPoint findTopLeftCorner();
   QPoint findBottomRightCorner();
 };

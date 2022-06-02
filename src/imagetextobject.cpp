@@ -9,9 +9,10 @@ ImageTextObject::ImageTextObject(
   ui->setupUi(this);
 }
 
-ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject& old) :
-  QWidget(parent),
-  ui(new Ui::ImageTextObject)
+ImageTextObject::ImageTextObject(
+    QWidget *parent, ImageTextObject& old, QTextEdit* tEdit) :
+  QWidget(parent), ui(new Ui::ImageTextObject),
+  textEdit{tEdit}
 {
   ui->setupUi(this);
   setText(old.getText());
@@ -23,7 +24,6 @@ ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject& old) :
 
 void ImageTextObject::setText(QString __text){
   text = __text;
-//  ui->lineEdit->setPlainText(text);
 }
 
 QString ImageTextObject::getText(){
@@ -99,7 +99,7 @@ void ImageTextObject::setPos(){
 
 void ImageTextObject::highlightSpaces(){
   for(auto space : lineSpace){
-    auto highlight = new QFrame{ui->frame};
+    auto highlight = new QPushButton{ui->frame};
     auto size = space.second - space.first;
 
     if(size.x() < 0 || size.y() < 0){
@@ -108,8 +108,14 @@ void ImageTextObject::highlightSpaces(){
       continue;
     }
 
+    highlight->setCursor(Qt::CursorShape::PointingHandCursor);
     highlight->setMinimumSize(QSize{size.x(), size.y()});
     highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
     highlight->show();
+
+    QObject::connect(
+          highlight, &QPushButton::clicked,
+          this, [=](){textEdit->setText(text);}
+          );
   }
 }

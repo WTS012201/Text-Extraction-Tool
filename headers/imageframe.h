@@ -58,6 +58,8 @@ private:
   QLineEdit* zoomEdit;
   QProgressBar* progressBar;
   QLabel* zoomLabel;
+  QVBoxLayout* contentLayout;
+  QTextEdit* textEdit;
 
   float scalar;
   float scaleFactor;

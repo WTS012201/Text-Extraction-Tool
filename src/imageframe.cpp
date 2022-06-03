@@ -45,10 +45,21 @@ void ImageFrame::changeZoom(){
 void ImageFrame::buildConnections(){
   connect(zoomEdit, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
+  connect(highlightAll, &QPushButton::pressed, this, &ImageFrame::showHighlights);
 }
 
 void ImageFrame::setRawText(){
   populateTextObjects();
+}
+
+void ImageFrame::showHighlights(){
+  QString text = highlightAll->text();
+  text = (text == "Highlight All: On") ? "Highlight All: Off" : "Highlight All: On";
+  highlightAll->setText(text);
+
+  for(const auto& obj : textObjects){
+    obj->isHidden() ? obj->show() : obj->hide();
+  }
 }
 void ImageFrame::setWidgets(Ui::MainWindow* ui){
   zoomEdit = ui->zoomFactor;
@@ -56,6 +67,7 @@ void ImageFrame::setWidgets(Ui::MainWindow* ui){
   contentLayout = qobject_cast<QVBoxLayout*>(ui->contentScrollLayout->layout());
   textEdit = ui->textEdit;
   fontSizeEdit = ui->fontSizeInput;
+  highlightAll = ui->highlightAll;
 
   zoomEdit->hide();
   zoomLabel->hide();

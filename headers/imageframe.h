@@ -45,6 +45,8 @@ public:
 private slots:
   void changeZoom();
   void setRawText();
+  void showHighlights();
+
 signals:
   void rawTextChanged();
 
@@ -60,6 +62,7 @@ private:
   QVBoxLayout* contentLayout;
   QTextEdit* textEdit;
   QLineEdit* fontSizeEdit;
+  QPushButton* highlightAll;
 
   float scalar;
   float scaleFactor;

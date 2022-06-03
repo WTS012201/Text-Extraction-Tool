@@ -982,123 +982,13 @@ QProgressBar::chunk
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout_22">
     <item>
-     <layout class="QHBoxLayout" name="Content" stretch="0,0">
+     <layout class="QHBoxLayout" name="Content" stretch="0">
       <property name="spacing">
        <number>0</number>
       </property>
       <property name="bottomMargin">
        <number>4</number>
       </property>
-      <item>
-       <widget class="QFrame" name="SideBar">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>100</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="styleSheet">
-         <string notr="true"/>
-        </property>
-        <property name="frameShape">
-         <enum>QFrame::Panel</enum>
-        </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_3" stretch="0">
-         <property name="spacing">
-          <number>4</number>
-         </property>
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <layout class="QVBoxLayout" name="SideBarContent_4">
-           <property name="leftMargin">
-            <number>3</number>
-           </property>
-           <property name="topMargin">
-            <number>6</number>
-           </property>
-           <property name="rightMargin">
-            <number>3</number>
-           </property>
-           <property name="bottomMargin">
-            <number>6</number>
-           </property>
-           <item>
-            <widget class="QPushButton" name="pushButton">
-             <property name="minimumSize">
-              <size>
-               <width>92</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>button</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_3">
-             <property name="minimumSize">
-              <size>
-               <width>92</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>button</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QPushButton" name="pushButton_2">
-             <property name="minimumSize">
-              <size>
-               <width>92</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>button</string>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-          </layout>
-         </item>
-        </layout>
-       </widget>
-      </item>
       <item>
        <layout class="QHBoxLayout" name="MainContent" stretch="0">
         <item>
@@ -1154,7 +1044,7 @@ QProgressBar::chunk
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>97</width>
+                 <width>96</width>
                  <height>525</height>
                 </rect>
                </property>
@@ -1240,6 +1130,19 @@ QProgressBar::chunk
                        </widget>
                       </item>
                       <item>
+                       <widget class="QPushButton" name="highlightAll">
+                        <property name="minimumSize">
+                         <size>
+                          <width>92</width>
+                          <height>0</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string>Highlight All: On</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
                        <spacer name="horizontalSpacer">
                         <property name="orientation">
                          <enum>Qt::Horizontal</enum>
@@ -1264,8 +1167,8 @@ QProgressBar::chunk
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>525</width>
-                         <height>351</height>
+                         <width>626</width>
+                         <height>349</height>
                         </rect>
                        </property>
                        <layout class="QVBoxLayout" name="verticalLayout_5">

@@ -1154,7 +1154,7 @@ QProgressBar::chunk
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>96</width>
+                 <width>97</width>
                  <height>525</height>
                 </rect>
                </property>
@@ -1255,22 +1255,6 @@ QProgressBar::chunk
                      </layout>
                     </item>
                     <item>
-                     <widget class="QProgressBar" name="progressBar">
-                      <property name="maximum">
-                       <number>100</number>
-                      </property>
-                      <property name="value">
-                       <number>0</number>
-                      </property>
-                      <property name="invertedAppearance">
-                       <bool>false</bool>
-                      </property>
-                      <property name="format">
-                       <string>%p%</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item>
                      <widget class="QScrollArea" name="scrollArea">
                       <property name="widgetResizable">
                        <bool>true</bool>
@@ -1280,8 +1264,8 @@ QProgressBar::chunk
                         <rect>
                          <x>0</x>
                          <y>0</y>
-                         <width>526</width>
-                         <height>318</height>
+                         <width>525</width>
+                         <height>351</height>
                         </rect>
                        </property>
                        <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -1353,6 +1337,90 @@ QProgressBar::chunk
                        </size>
                       </property>
                      </widget>
+                    </item>
+                    <item>
+                     <layout class="QHBoxLayout" name="textOptions" stretch="0,2,0,1,5">
+                      <item>
+                       <widget class="QLabel" name="label_2">
+                        <property name="text">
+                         <string>Font:</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="fontBox">
+                        <item>
+                         <property name="text">
+                          <string>Sans Serif</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>FreeMono</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>FreeSans</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>FreeSerif</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Monospace</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Source Code Pro</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Arial</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>Open Sans</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="fontSizeLabel">
+                        <property name="text">
+                         <string>Font size:</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="fontSizeInput">
+                        <property name="styleSheet">
+                         <string notr="true">.QLineEdit{
+background:transparent;
+}</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_2">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                     </layout>
                     </item>
                    </layout>
                   </widget>

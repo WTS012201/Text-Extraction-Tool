@@ -7,6 +7,11 @@ MainWindow::MainWindow(QWidget *parent)
 {
   loadData();
   initUi();
+  connections();
+
+  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
+  ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
+  iFrame->setImage("/home/will/screenshots/test.png");
 }
 
 MainWindow::~MainWindow()
@@ -64,3 +69,23 @@ void MainWindow::on_actionOptions_triggered()
     return;
 }
 
+void MainWindow::connections(){
+  connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
+  QObject::connect(
+        ui->fontSizeInput,
+        &QLineEdit::returnPressed,
+        this,
+        &MainWindow::fontSizeChanged
+        );
+}
+
+void MainWindow::fontSelected(){
+  QString text = ui->fontBox->currentText();
+  ui->textEdit->setFont(QFont{text, ui->textEdit->font().pointSize()});
+}
+
+void MainWindow::fontSizeChanged(){
+  QFont font = ui->textEdit->font();
+  font.setPointSize(ui->fontSizeInput->text().toInt());
+  ui->textEdit->setFont(font);
+}

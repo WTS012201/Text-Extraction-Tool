@@ -56,10 +56,10 @@ private:
   tesseract::PageIteratorLevel mode;
 
   QLineEdit* zoomEdit;
-  QProgressBar* progressBar;
   QLabel* zoomLabel;
   QVBoxLayout* contentLayout;
   QTextEdit* textEdit;
+  QLineEdit* fontSizeEdit;
 
   float scalar;
   float scaleFactor;
@@ -77,7 +77,7 @@ private:
   void setOptions(Options* options);
   void resize(QSize size);
   void populateTextObjects();
-  QString collect(cv::Mat& matrix, tesseract::PageIteratorLevel mode);
+  QString collect(cv::Mat& matrix);
   cv::Mat QImageToMat(QImage);
   void test();
 };

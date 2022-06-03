@@ -59,7 +59,7 @@
               <widget class="QComboBox" name="partialBox">
                <item>
                 <property name="text">
-                 <string>Paragraph</string>
+                 <string>Line</string>
                 </property>
                </item>
                <item>
@@ -69,12 +69,12 @@
                </item>
                <item>
                 <property name="text">
-                 <string>Line</string>
+                 <string>Word</string>
                 </property>
                </item>
                <item>
                 <property name="text">
-                 <string>Word</string>
+                 <string>Paragraph</string>
                 </property>
                </item>
                <item>

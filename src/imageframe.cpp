@@ -49,14 +49,13 @@ void ImageFrame::setRawText(){
 }
 void ImageFrame::setWidgets(Ui::MainWindow* ui){
   zoomEdit = ui->zoomFactor;
-  progressBar = ui->progressBar;
   zoomLabel = ui->label;
   contentLayout = qobject_cast<QVBoxLayout*>(ui->contentScrollLayout->layout());
   textEdit = ui->textEdit;
+  fontSizeEdit = ui->fontSizeInput;
 
   zoomEdit->hide();
   zoomLabel->hide();
-  progressBar->hide();
 }
 
 void ImageFrame::initUi(QWidget* parent){
@@ -165,18 +164,16 @@ void ImageFrame::extract(){
   }  
   // transform matrix for better output here
   matrix.convertTo(matrix, -1, 2, 0);
-  progressBar->show();
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
-      rawText = collect(matrix, mode);
+      rawText = collect(matrix);
   }, matrix).then([&](){emit rawTextChanged();});
-  progressBar->hide();
   showAll();
 }
 
 QString ImageFrame::collect(
-    cv::Mat& matrix, tesseract::PageIteratorLevel mode
+    cv::Mat& matrix
     ){
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
@@ -191,6 +188,15 @@ QString ImageFrame::collect(
   typedef QPair<QPoint, QPoint> Space;
   QVector<QPair<QString, Space>> partials;
   int x1, y1, x2, y2;
+
+  bool a1, a2, a3, a4, a5, a6;
+  int a7, a8;
+  ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
+
+  QFont font = textEdit->font();
+  font.setPointSize(a7);
+  textEdit->setFont(font);
+  fontSizeEdit->setText(QString::number(a7));
 
   if (ri != 0) {
     do {

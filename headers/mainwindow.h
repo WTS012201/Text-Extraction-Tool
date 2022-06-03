@@ -22,7 +22,8 @@ public:
 
 private slots:
   void on_actionOpen_Image_triggered();
-
+  void fontSelected();
+  void fontSizeChanged();
   void on_actionOptions_triggered();
 
 private:
@@ -31,5 +32,6 @@ private:
   Options* options;
   void initUi();
   void loadData();
+  void connections();
 };
 #endif // MAINWINDOW_H

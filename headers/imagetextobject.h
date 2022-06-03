@@ -7,6 +7,7 @@
 #include <QPair>
 #include <QPushButton>
 #include <QTextEdit>
+#include <QHash>
 
 #include "opencv2/opencv.hpp"
 
@@ -28,13 +29,16 @@ public:
 
   void setText(QString __text);
   QString getText();
-  void addLineSpace(QPair<QPoint, QPoint>);
-  QVector<QPair<QPoint, QPoint>> getLineSpaces();
-  void setLineSpaces(QVector<QPair<QPoint, QPoint>> spaces);
-  void setPos();
+  void addLineSpace(QPair<QPoint, QPoint>*);
+  QVector<QPair<QPoint, QPoint>*> getLineSpaces();
+  void setLineSpaces(QVector<QPair<QPoint, QPoint>*> spaces);
+  void initSizeAndPos();
   void highlightSpaces();
+  void scaleAndPosition(float scalar);
 private:
-  QVector<QPair<QPoint, QPoint>> lineSpace;
+  QVector<QPair<QPoint, QPoint>*> lineSpace;
+  QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;
+
   Ui::ImageTextObject *ui;
   QString text;
   QTextEdit* textEdit;

@@ -37,6 +37,9 @@ void ImageFrame::changeZoom(){
   scalar = (scalar > 10.0) ? 10.0 : scalar;
   zoomEdit->setText(QString::number(scalar));
   resize(originalSize * scalar);
+  for(auto& obj : textObjects){
+    obj->scaleAndPosition(scalar);
+  }
 }
 
 void ImageFrame::buildConnections(){
@@ -83,12 +86,18 @@ void ImageFrame::zoomIn(){
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   zoomEdit->setText(QString::number(scalar));
   resize(originalSize * scalar);
+  for(auto& obj : textObjects){
+    obj->scaleAndPosition(scalar);
+  }
 }
 
 void ImageFrame::zoomOut(){
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   zoomEdit->setText(QString::number(scalar));
   resize(originalSize * scalar);
+  for(auto& obj : textObjects){
+    obj->scaleAndPosition(scalar);
+  }
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent* event) {
@@ -186,7 +195,7 @@ QString ImageFrame::collect(
   tesseract::ResultIterator* ri = api->GetIterator();
 
   typedef QPair<QPoint, QPoint> Space;
-  QVector<QPair<QString, Space>> partials;
+  QVector<QPair<QString, Space*>> partials;
   int x1, y1, x2, y2;
 
   bool a1, a2, a3, a4, a5, a6;
@@ -211,7 +220,7 @@ QString ImageFrame::collect(
         continue;
       }
 
-      partials.push_back(QPair<QString, Space>{word, Space{p1, p2}});
+      partials.push_back(QPair<QString, Space*>{word, new Space{p1, p2}});
     } while (ri->Next(mode));
   }
 

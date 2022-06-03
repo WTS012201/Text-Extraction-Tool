@@ -19,7 +19,7 @@ ImageTextObject::ImageTextObject(
 
   setLineSpaces(old.getLineSpaces());
   highlightSpaces();
-  setPos();
+  initSizeAndPos();
 }
 
 void ImageTextObject::setText(QString __text){
@@ -36,29 +36,29 @@ ImageTextObject::~ImageTextObject()
 }
 
 void ImageTextObject::addLineSpace
-(QPair<QPoint, QPoint> space){
+(QPair<QPoint, QPoint>* space){
   lineSpace.push_back(space);
 }
 
 void ImageTextObject::setLineSpaces(
-    QVector<QPair<QPoint, QPoint>> spaces){
+    QVector<QPair<QPoint, QPoint>*> spaces){
   lineSpace = spaces;
 }
 
-QVector<QPair<QPoint, QPoint>> ImageTextObject::getLineSpaces(){
+QVector<QPair<QPoint, QPoint>*> ImageTextObject::getLineSpaces(){
   return lineSpace;
 }
 
 
 QPoint ImageTextObject::findTopLeftCorner(){
-  QPoint minPoint = lineSpace.first().first;
+  QPoint minPoint = lineSpace.first()->first;
 
   for(auto& p : lineSpace){
-    if(p.first.x() < minPoint.x()){
-      minPoint.setX(p.first.x());
+    if(p->first.x() < minPoint.x()){
+      minPoint.setX(p->first.x());
     }
-    if(p.first.y() < minPoint.y()){
-      minPoint.setY(p.first.y());
+    if(p->first.y() < minPoint.y()){
+      minPoint.setY(p->first.y());
     }
   }
 
@@ -66,21 +66,21 @@ QPoint ImageTextObject::findTopLeftCorner(){
 }
 
 QPoint ImageTextObject::findBottomRightCorner(){
-  QPoint maxPoint = lineSpace.first().first;
+  QPoint maxPoint = lineSpace.first()->first;
 
   for(auto& p : lineSpace){
-    if(p.second.x() > maxPoint.x()){
-      maxPoint.setX(p.second.x());
+    if(p->second.x() > maxPoint.x()){
+      maxPoint.setX(p->second.x());
     }
-    if(p.second.y() > maxPoint.y()){
-      maxPoint.setY(p.second.y());
+    if(p->second.y() > maxPoint.y()){
+      maxPoint.setY(p->second.y());
     }
   }
 
   return maxPoint;
 }
 
-void ImageTextObject::setPos(){
+void ImageTextObject::initSizeAndPos(){
   topLeft = findTopLeftCorner();
   bottomRight = findBottomRightCorner();
   auto size = bottomRight - topLeft;
@@ -94,13 +94,13 @@ void ImageTextObject::setPos(){
   ui->frame->setFixedSize(QSize{size.x(), size.y()});
   this->adjustSize();
   ui->frame->adjustSize();
-  move(topLeft);
+  this->move(topLeft);
 }
 
 void ImageTextObject::highlightSpaces(){
   for(auto space : lineSpace){
     auto highlight = new QPushButton{ui->frame};
-    auto size = space.second - space.first;
+    auto size = space->second - space->first;
 
     if(size.x() < 0 || size.y() < 0){
       qDebug() << "failed to establish size";
@@ -117,5 +117,25 @@ void ImageTextObject::highlightSpaces(){
           highlight, &QPushButton::clicked,
           this, [=](){textEdit->setText(text);}
           );
+    highlights[space] = highlight;
   }
+}
+
+void ImageTextObject::scaleAndPosition(float scalar){
+
+  for(auto& space : lineSpace){
+    QPushButton* highlight = highlights[space];
+    auto size = scalar*(space->second - space->first);
+    highlight->setMinimumSize(QSize{size.x(), size.y()});
+  }
+  auto tempBR = bottomRight * scalar;
+  auto tempTL = topLeft * scalar;
+
+  auto size = tempBR - tempTL;
+
+  this->setFixedSize(QSize{size.x(), size.y()});
+  ui->frame->setFixedSize(QSize{size.x(), size.y()});
+  this->adjustSize();
+  ui->frame->adjustSize();
+  this->move(tempTL);
 }

@@ -55,6 +55,7 @@ private:
   QGraphicsScene* scene;
   QWidget* parent;
   QSize originalSize;
+  QHash<int, bool> keysPressed;
   tesseract::PageIteratorLevel mode;
 
   QLineEdit* zoomEdit;
@@ -71,6 +72,8 @@ private:
 
   QVector<QString> getLines(QString);
   QVector<QString> getLastWords(QVector<QString> lines);
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void keyPressEvent(QKeyEvent* event) override;
   void buildConnections();
   void mousePressEvent(QMouseEvent * event) override;
   void initUi(QWidget* parent);

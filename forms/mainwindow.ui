@@ -1184,6 +1184,9 @@ QProgressBar::chunk
                         <property name="bottomMargin">
                          <number>0</number>
                         </property>
+                        <item>
+                         <layout class="QHBoxLayout" name="scrollHorizontalLayout"/>
+                        </item>
                        </layout>
                       </widget>
                      </widget>

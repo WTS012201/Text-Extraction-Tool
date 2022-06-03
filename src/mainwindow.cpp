@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
   connections();
 
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-  ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
+  ui->scrollHorizontalLayout->addWidget(iFrame);
   iFrame->setImage("/home/will/screenshots/test.png");
 }
 
@@ -56,7 +56,7 @@ void MainWindow::on_actionOpen_Image_triggered()
     delete iFrame;
   }
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-  ui->scrollAreaWidgetContents->layout()->addWidget(iFrame);
+  ui->scrollHorizontalLayout->addWidget(iFrame);
   iFrame->setImage(selection.first());
 }
 

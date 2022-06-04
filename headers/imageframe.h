@@ -24,6 +24,7 @@
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
 #include <QThreadPool>
+#include <QGraphicsTextItem>
 
 class ImageFrame : public QGraphicsView
 {
@@ -57,6 +58,8 @@ private:
   QSize originalSize;
   QHash<int, bool> keysPressed;
   tesseract::PageIteratorLevel mode;
+  QImage* image;
+  cv::Mat* matrix;
 
   QLineEdit* zoomEdit;
   QLabel* zoomLabel;
@@ -83,6 +86,7 @@ private:
   void setOptions(Options* options);
   void resize(QSize size);
   void populateTextObjects();
+  cv::Mat* buildImageMatrix();
   QString collect(cv::Mat& matrix);
   cv::Mat QImageToMat(QImage);
   void test();

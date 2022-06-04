@@ -8,8 +8,29 @@
 #include <QPushButton>
 #include <QTextEdit>
 #include <QHash>
-
+#include <QImage>
+#include <QList>
+#include <cmath>
 #include "opencv2/opencv.hpp"
+
+class QcvScalar : public cv::Scalar{
+  friend inline bool operator==(
+      const QcvScalar &e1, const QcvScalar &e2
+      ) noexcept{
+    bool rVal = (e1.val[0] == e2.val[0]);
+    rVal &= (e1.val[1] == e2.val[1]);
+    rVal &= (e1.val[2] == e2.val[2]);
+    return rVal;
+  }
+
+  friend inline uint qHash(const QcvScalar &key, uint seed) noexcept{
+    QtPrivate::QHashCombine hash;
+    seed = hash(seed, key.val[0]);
+    seed = hash(seed, key.val[1]);
+    seed = hash(seed, key.val[2]);
+    return seed;
+  }
+};
 
 namespace Ui {
 class ImageTextObject;
@@ -35,16 +56,23 @@ public:
   void initSizeAndPos();
   void highlightSpaces();
   void scaleAndPosition(float scalar);
+  void setImage(cv::Mat* __image);
+  void showCVImage();
+
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;
   QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;
 
   Ui::ImageTextObject *ui;
   QString text;
+  cv::Mat* image;
   QTextEdit* textEdit;
+  cv::Scalar bgIntensity;
 
   QPoint findTopLeftCorner();
   QPoint findBottomRightCorner();
+  cv::Mat QImageToMat();
+  void determineBgColor();
 };
 
 #endif // IMAGETEXTOBJECT_H

@@ -28,6 +28,7 @@ void ImageFrame::keyReleaseEvent(QKeyEvent* event){
 
 ImageFrame::~ImageFrame(){
   delete scene;
+  delete image;
 
   for(auto& obj : textObjects){
     delete obj;
@@ -145,17 +146,17 @@ void ImageFrame::setImage(QString imageName){
   currImage = imageName;
   scalar = 1.0;
 
-  QPixmap image{imageName};
+  image = new QImage{imageName};
+  QPixmap imagePixmap{imageName};
 
-  scene->addPixmap(image);
-  scene->setSceneRect(image.rect());
+  scene->addPixmap(imagePixmap);
+  scene->setSceneRect(imagePixmap.rect());
   scene->update();
   this->setScene(scene);
+  originalSize = imagePixmap.size();
 
-  originalSize = image.size();
-
-  this->setMinimumSize(image.size());
-  this->setMaximumSize(image.size());
+  this->setMinimumSize(imagePixmap.size());
+  this->setMaximumSize(imagePixmap.size());
   extract();
   populateTextObjects();
 }
@@ -273,8 +274,10 @@ QString ImageFrame::collect(
 void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
+  matrix = buildImageMatrix();
   for(auto& obj : textObjects){
     ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit};
+    temp->setImage(matrix);
     tempObjects.push_back(temp);
     temp->show();
 
@@ -293,3 +296,38 @@ void ImageFrame::populateTextObjects(){
 void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
   mode = __mode;
 }
+
+cv::Mat* ImageFrame::buildImageMatrix(){
+    cv::Mat* mat = nullptr;
+
+    switch(image->format()){
+        case QImage::Format_ARGB32:
+        case QImage::Format_RGB32:
+        case QImage::Format_ARGB32_Premultiplied:
+            mat = new cv::Mat(
+                image->height(), image->width(),
+                CV_8UC4, (void*)image->constBits(),
+                image->bytesPerLine()
+            );
+            break;
+        case QImage::Format_RGB888:
+            mat = new cv::Mat(
+                image->height(), image->width(),
+                CV_8UC3, (void*)image->constBits(),
+                image->bytesPerLine()
+            );
+            cv::cvtColor(*mat, *mat, cv::COLOR_BGR2RGB);
+            break;
+        case QImage::Format_Grayscale8:
+            mat = new cv::Mat(
+                image->height(), image->width(),
+                CV_8UC1, (void*)image->constBits(),
+                image->bytesPerLine()
+            );
+            break;
+        default:
+            break;
+    }
+    return mat;
+}
+

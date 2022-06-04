@@ -2,17 +2,17 @@
 #include "ui_imagetextobject.h"
 
 ImageTextObject::ImageTextObject(
-    QWidget *parent) :
-  QWidget(parent),
-  ui(new Ui::ImageTextObject)
+    QWidget *parent, cv::Mat* __mat) :
+  QWidget(parent), ui(new Ui::ImageTextObject),
+  mat{*__mat}
 {
   ui->setupUi(this);
 }
 
 ImageTextObject::ImageTextObject(
-    QWidget *parent, ImageTextObject& old, QTextEdit* tEdit, QString __filepath) :
-  QWidget(parent), ui(new Ui::ImageTextObject), filepath{__filepath},
-  textEdit{tEdit}
+    QWidget *parent, ImageTextObject& old, QTextEdit* tEdit, cv::Mat* __mat):
+  QWidget(parent), ui(new Ui::ImageTextObject), textEdit{tEdit},
+  mat{*__mat}
 {
   ui->setupUi(this);
   setText(old.getText());
@@ -21,7 +21,7 @@ ImageTextObject::ImageTextObject(
   highlightSpaces();
   initSizeAndPos();
   determineBgColor();
-  fillText();
+//  fillText();
 }
 
 void ImageTextObject::setFilepath(QString __filepath){
@@ -145,7 +145,7 @@ void ImageTextObject::scaleAndPosition(float scalar){
   this->move(tempTL);
 }
 
-void ImageTextObject::showCVImage(const cv::Mat mat){
+void ImageTextObject::showCVImage(){
   cv::namedWindow("image");
   cv::imshow("image", mat);
   cv::waitKey();
@@ -153,13 +153,13 @@ void ImageTextObject::showCVImage(const cv::Mat mat){
 
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
-  cv::Mat mat = cv::imread(filepath.toStdString());
   // adjust method for this later
+  qDebug() << "HERE";
   if(!(mat.type() & CV_8UC3)){
     qDebug() << "Image must have 3 channels";
     return;
   }
-
+  qDebug() << "HERE2";
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   QHash<QcvScalar, int> scalars;
@@ -225,7 +225,6 @@ void ImageTextObject::determineBgColor(){
 
 
 void ImageTextObject::fillText(){
-  cv::Mat mat = cv::imread(filepath.toStdString());
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   cv::Vec3b bg;

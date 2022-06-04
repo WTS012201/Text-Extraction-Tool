@@ -29,6 +29,7 @@ void ImageFrame::keyReleaseEvent(QKeyEvent* event){
 ImageFrame::~ImageFrame(){
   delete scene;
   delete image;
+  delete matrix;
 
   for(auto& obj : textObjects){
     delete obj;
@@ -194,25 +195,24 @@ QVector<QString> ImageFrame::getLines(QString text){
 }
 
 void ImageFrame::extract(){
-  cv::Mat matrix;
   try{
-    matrix = cv::imread(filepath.toStdString(), cv::IMREAD_COLOR);
+    matrix = new cv::Mat{cv::imread(filepath.toStdString())};
   }catch(...){
     qDebug() << "error reading image";
     return;
   }
 
-  if(matrix.empty()){
+  if(matrix->empty()){
     qDebug() << "empty matrix";
     return;
   }  
   // transform matrix for better output here
-  matrix.convertTo(matrix, -1, 2, 0);
+  matrix->convertTo(*matrix, -1, 2, 0);
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
       rawText = collect(matrix);
-  }, matrix).then([&](){emit rawTextChanged();});
+  }, *matrix).then([&](){emit rawTextChanged();});
   showAll();
 }
 
@@ -275,8 +275,7 @@ void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
   for(auto& obj : textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit, filepath};
-//    temp->setFilepath(filepath);
+    ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit, matrix};
     tempObjects.push_back(temp);
     temp->show();
 

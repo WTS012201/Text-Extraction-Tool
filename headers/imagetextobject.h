@@ -42,12 +42,12 @@ class ImageTextObject : public QWidget
 
 public:
   explicit ImageTextObject
-  (QWidget *parent = nullptr);
+  (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);
   ~ImageTextObject();
   ImageTextObject(QWidget *parent,
                   ImageTextObject& old,
                   QTextEdit* tEdit,
-                  QString filepath
+                  cv::Mat* mat
                   );
 
   QPoint topLeft, bottomRight;
@@ -61,7 +61,7 @@ public:
   void highlightSpaces();
   void scaleAndPosition(float scalar);
   void setImage(cv::Mat* __image);
-  void showCVImage(const cv::Mat mat);
+  void showCVImage();
   void setFilepath(QString __filepath);
   void fillText();
 private:
@@ -71,10 +71,9 @@ private:
   Ui::ImageTextObject *ui;
   QString filepath;
   QString text;
-  cv::Mat* image;
   QTextEdit* textEdit;
   cv::Scalar bgIntensity;
-  cv::Mat mat;
+  cv::Mat& mat;
 
   QPoint findTopLeftCorner();
   QPoint findBottomRightCorner();

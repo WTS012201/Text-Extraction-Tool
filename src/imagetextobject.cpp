@@ -21,6 +21,11 @@ ImageTextObject::ImageTextObject(
   highlightSpaces();
   initSizeAndPos();
   determineBgColor();
+  fillText();
+}
+
+void ImageTextObject::setFilepath(QString __filepath){
+  filepath = __filepath;
 }
 
 void ImageTextObject::setText(QString __text){
@@ -140,10 +145,10 @@ void ImageTextObject::scaleAndPosition(float scalar){
   this->move(tempTL);
 }
 
-void ImageTextObject::showCVImage(){
-//  cv::namedWindow("image");
-//  cv::imshow("image", *image);
-//  cv::waitKey();
+void ImageTextObject::showCVImage(const cv::Mat mat){
+  cv::namedWindow("image");
+  cv::imshow("image", mat);
+  cv::waitKey();
 }
 
 void ImageTextObject::determineBgColor(){
@@ -208,6 +213,7 @@ void ImageTextObject::determineBgColor(){
   }
 
   int max = 0;
+
   for(const auto& key : scalars.keys()){
     if(scalars[key] > max){
       max = scalars[key];
@@ -217,6 +223,26 @@ void ImageTextObject::determineBgColor(){
   bgIntensity = intensity;
 }
 
-void ImageTextObject::setFilepath(QString __filepath){
-  filepath = __filepath;
+
+void ImageTextObject::fillText(){
+  cv::Mat mat = cv::imread(filepath.toStdString());
+  auto left{topLeft.x()}, top{topLeft.y()};
+  auto right{bottomRight.x()}, bottom{bottomRight.y()};
+  cv::Vec3b bg;
+  bg.val[0] = bgIntensity.val[0];
+  bg.val[1] = bgIntensity.val[1];
+  bg.val[2] = bgIntensity.val[2];
+
+  (left > 0) ? left -= 1 : left;
+  (right < mat.cols - 1) ? right += 1 : right;
+
+  (top > 0) ? top -= 1 : top;
+  (bottom < mat.rows - 1) ? bottom += 1 : bottom;
+
+  for(auto i = top; i <= bottom; i++){
+    for(auto j = left; j <= right; j++){
+      auto& scalarRef = mat.at<cv::Vec3b>(cv::Point{j,i});
+      scalarRef = bg;
+    }
+  }
 }

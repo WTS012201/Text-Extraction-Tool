@@ -61,9 +61,9 @@ public:
   void highlightSpaces();
   void scaleAndPosition(float scalar);
   void setImage(cv::Mat* __image);
-  void showCVImage();
+  void showCVImage(const cv::Mat mat);
   void setFilepath(QString __filepath);
-
+  void fillText();
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;
   QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;

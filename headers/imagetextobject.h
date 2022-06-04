@@ -44,7 +44,11 @@ public:
   explicit ImageTextObject
   (QWidget *parent = nullptr);
   ~ImageTextObject();
-  ImageTextObject(QWidget *parent, ImageTextObject& old, QTextEdit* tEdit);
+  ImageTextObject(QWidget *parent,
+                  ImageTextObject& old,
+                  QTextEdit* tEdit,
+                  QString filepath
+                  );
 
   QPoint topLeft, bottomRight;
 
@@ -58,16 +62,19 @@ public:
   void scaleAndPosition(float scalar);
   void setImage(cv::Mat* __image);
   void showCVImage();
+  void setFilepath(QString __filepath);
 
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;
   QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;
 
   Ui::ImageTextObject *ui;
+  QString filepath;
   QString text;
   cv::Mat* image;
   QTextEdit* textEdit;
   cv::Scalar bgIntensity;
+  cv::Mat mat;
 
   QPoint findTopLeftCorner();
   QPoint findBottomRightCorner();

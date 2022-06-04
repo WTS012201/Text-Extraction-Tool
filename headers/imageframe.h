@@ -52,7 +52,7 @@ signals:
   void rawTextChanged();
 
 private:
-  QString currImage, rawText;
+  QString filepath, rawText;
   QGraphicsScene* scene;
   QWidget* parent;
   QSize originalSize;

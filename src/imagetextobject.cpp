@@ -10,8 +10,8 @@ ImageTextObject::ImageTextObject(
 }
 
 ImageTextObject::ImageTextObject(
-    QWidget *parent, ImageTextObject& old, QTextEdit* tEdit) :
-  QWidget(parent), ui(new Ui::ImageTextObject),
+    QWidget *parent, ImageTextObject& old, QTextEdit* tEdit, QString __filepath) :
+  QWidget(parent), ui(new Ui::ImageTextObject), filepath{__filepath},
   textEdit{tEdit}
 {
   ui->setupUi(this);
@@ -20,6 +20,7 @@ ImageTextObject::ImageTextObject(
   setLineSpaces(old.getLineSpaces());
   highlightSpaces();
   initSizeAndPos();
+  determineBgColor();
 }
 
 void ImageTextObject::setText(QString __text){
@@ -139,25 +140,18 @@ void ImageTextObject::scaleAndPosition(float scalar){
   this->move(tempTL);
 }
 
-void ImageTextObject::setImage(cv::Mat* __image){
-  image = __image;
-  determineBgColor();
-//  showCVImage();
-}
-
 void ImageTextObject::showCVImage(){
-  cv::namedWindow("image");
-  cv::imshow("image", *image);
-  cv::waitKey();
+//  cv::namedWindow("image");
+//  cv::imshow("image", *image);
+//  cv::waitKey();
 }
 
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
-  cv::Mat& mat = *image;
-
+  cv::Mat mat = cv::imread(filepath.toStdString());
   // adjust method for this later
   if(!(mat.type() & CV_8UC3)){
-    qDebug() << "change channel to CV_8UC3";
+    qDebug() << "Image must have 3 channels";
     return;
   }
 
@@ -173,15 +167,18 @@ void ImageTextObject::determineBgColor(){
 
   // Top / Bottom
   for(auto i = left; i <= right; i++){
-    auto key = QcvScalar{mat.at<cv::Vec3b>(i, top)};
-
+    QcvScalar key = QcvScalar{
+        mat.at<cv::Vec3b>(cv::Point{i, top})
+    };
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
       scalars[key]++;
     }
 
-    key = QcvScalar{mat.at<cv::Vec3b>(i, bottom)};
+    key = QcvScalar{
+        mat.at<cv::Vec3b>(cv::Point{i, bottom})
+    };
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
@@ -189,16 +186,20 @@ void ImageTextObject::determineBgColor(){
     }
   }
 
-  // Right / Left
+//   Right / Left
   for(auto i = top; i <= bottom; i++){
-    auto key = QcvScalar{mat.at<cv::Vec3b>(left, i)};
+    auto key = QcvScalar{
+        mat.at<cv::Vec3b>(cv::Point{left, i})
+    };
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
       scalars[key]++;
     }
 
-    key = QcvScalar{mat.at<cv::Vec3b>(right, i)};
+    key = QcvScalar{
+        mat.at<cv::Vec3b>(cv::Point{right, i})
+    };
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
@@ -208,20 +209,14 @@ void ImageTextObject::determineBgColor(){
 
   int max = 0;
   for(const auto& key : scalars.keys()){
-    if(!(key.val[0] && key.val[1] && key.val[2]))
-      continue;
-    qDebug() << "vals: ";
-    qDebug() << key.val[0];
-    qDebug() << key.val[1];
-    qDebug() << key.val[2];
-    qDebug() << "amount: " << scalars[key];
     if(scalars[key] > max){
       max = scalars[key];
       intensity = key;
     }
   }
   bgIntensity = intensity;
-  qDebug() << bgIntensity.val[0];
-  qDebug() << bgIntensity.val[1];
-  qDebug() << bgIntensity.val[2];
+}
+
+void ImageTextObject::setFilepath(QString __filepath){
+  filepath = __filepath;
 }

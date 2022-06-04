@@ -99,7 +99,7 @@ void ImageFrame::initUi(QWidget* parent){
 }
 
 void ImageFrame::resize(QSize newSize){
-  QPixmap image = QPixmap{currImage}.scaled(newSize);
+  QPixmap image = QPixmap{filepath}.scaled(newSize);
 
   scene->clear();
   scene->addPixmap(image);
@@ -143,7 +143,7 @@ void ImageFrame::mousePressEvent(QMouseEvent* event) {
 }
 
 void ImageFrame::setImage(QString imageName){
-  currImage = imageName;
+  filepath = imageName;
   scalar = 1.0;
 
   image = new QImage{imageName};
@@ -196,7 +196,7 @@ QVector<QString> ImageFrame::getLines(QString text){
 void ImageFrame::extract(){
   cv::Mat matrix;
   try{
-    matrix = cv::imread(currImage.toStdString(), cv::IMREAD_COLOR);
+    matrix = cv::imread(filepath.toStdString(), cv::IMREAD_COLOR);
   }catch(...){
     qDebug() << "error reading image";
     return;
@@ -274,10 +274,9 @@ QString ImageFrame::collect(
 void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
-  matrix = buildImageMatrix();
   for(auto& obj : textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit};
-    temp->setImage(matrix);
+    ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit, filepath};
+//    temp->setFilepath(filepath);
     tempObjects.push_back(temp);
     temp->show();
 
@@ -296,38 +295,3 @@ void ImageFrame::populateTextObjects(){
 void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
   mode = __mode;
 }
-
-cv::Mat* ImageFrame::buildImageMatrix(){
-    cv::Mat* mat = nullptr;
-
-    switch(image->format()){
-        case QImage::Format_ARGB32:
-        case QImage::Format_RGB32:
-        case QImage::Format_ARGB32_Premultiplied:
-            mat = new cv::Mat(
-                image->height(), image->width(),
-                CV_8UC4, (void*)image->constBits(),
-                image->bytesPerLine()
-            );
-            break;
-        case QImage::Format_RGB888:
-            mat = new cv::Mat(
-                image->height(), image->width(),
-                CV_8UC3, (void*)image->constBits(),
-                image->bytesPerLine()
-            );
-            cv::cvtColor(*mat, *mat, cv::COLOR_BGR2RGB);
-            break;
-        case QImage::Format_Grayscale8:
-            mat = new cv::Mat(
-                image->height(), image->width(),
-                CV_8UC1, (void*)image->constBits(),
-                image->bytesPerLine()
-            );
-            break;
-        default:
-            break;
-    }
-    return mat;
-}
-

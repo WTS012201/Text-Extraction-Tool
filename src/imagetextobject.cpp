@@ -247,4 +247,5 @@ void ImageTextObject::fillText(){
       scalarRef = bg;
     }
   }
+//  showCVImage();
 }

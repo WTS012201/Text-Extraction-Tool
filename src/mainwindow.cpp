@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
   ui->scrollHorizontalLayout->addWidget(iFrame);
-  iFrame->setImage("/home/will/screenshots/testimg.png");
+  iFrame->setImage("/home/will/screenshots/use_this.png");
 }
 
 MainWindow::~MainWindow()

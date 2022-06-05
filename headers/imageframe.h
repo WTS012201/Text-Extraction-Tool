@@ -49,6 +49,7 @@ private slots:
   void changeZoom();
   void setRawText();
   void showHighlights();
+  void changeText();
 
 signals:
   void rawTextChanged();

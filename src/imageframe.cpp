@@ -57,36 +57,37 @@ void ImageFrame::changeZoom(){
   }
 }
 
+void ImageFrame::changeText(){
+  if(!selection){
+    qDebug() << "No selection";
+    return;
+  }
+  selection->fillText();
+  // fix image formatting
+  QImage img{
+    (uchar*)matrix->data,
+        matrix->cols,
+        matrix->rows,
+        (int)matrix->step,
+        QImage::Format_BGR888
+  };
+  auto imagePixmap = QPixmap::fromImage(img);
+  // zooming uses image, fix this
+  scene->addPixmap(imagePixmap);
+  scene->setSceneRect(imagePixmap.rect());
+  scene->update();
+  this->setScene(scene);
+  originalSize = imagePixmap.size();
+
+  this->setMinimumSize(imagePixmap.size());
+  this->setMaximumSize(imagePixmap.size());
+}
+
 void ImageFrame::connections(){
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::showHighlights);
-  connect(ui->changeButton, &QPushButton::pressed, this, [&](){
-    if(!selection){
-      qDebug() << "No selection";
-      return;
-    }
-    selection->fillText();
-    // fix image formatting
-    QImage img{
-      (uchar*)matrix->data,
-          matrix->cols,
-          matrix->rows,
-          (int)matrix->step,
-          QImage::Format_BGR888
-    };
-    auto imagePixmap = QPixmap::fromImage(img);
-    // zooming uses image, fix this
-    scene->addPixmap(imagePixmap);
-    scene->setSceneRect(imagePixmap.rect());
-    scene->update();
-    this->setScene(scene);
-    originalSize = imagePixmap.size();
-
-    this->setMinimumSize(imagePixmap.size());
-    this->setMaximumSize(imagePixmap.size());
-
-  });
+  connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 }
 
 void ImageFrame::setRawText(){
@@ -213,7 +214,7 @@ QVector<QString> ImageFrame::getLines(QString text){
 
 void ImageFrame::extract(){
   try{
-    matrix = new cv::Mat{cv::imread(filepath.toStdString())};
+    matrix = new cv::Mat{cv::imread(filepath.toStdString(), cv::IMREAD_COLOR)};
   }catch(...){
     qDebug() << "error reading image";
     return;
@@ -223,8 +224,8 @@ void ImageFrame::extract(){
     qDebug() << "empty matrix";
     return;
   }  
+
   // transform matrix for better output here
-  matrix->convertTo(*matrix, -1, 2, 0);
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{

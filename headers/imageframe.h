@@ -8,6 +8,7 @@
 #include "options.h"
 #include "content.h"
 
+#include <QStack>
 #include <QWidget>
 #include <QLabel>
 #include <QGraphicsScene>
@@ -59,10 +60,11 @@ private:
   QSize originalSize;
   QHash<int, bool> keysPressed;
   tesseract::PageIteratorLevel mode;
-  QImage* image;
+//  QImage* image;
   cv::Mat* matrix;
   ImageTextObject* selection;
   Ui::MainWindow* ui;
+  QStack<ImageFrame> undo, redo;
 
   float scalar;
   float scaleFactor;
@@ -73,7 +75,7 @@ private:
   QVector<QString> getLastWords(QVector<QString> lines);
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
-  void buildConnections();
+  void connections();
   void mousePressEvent(QMouseEvent * event) override;
   void initUi(QWidget* parent);
   void zoomIn();

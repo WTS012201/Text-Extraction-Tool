@@ -42,6 +42,9 @@ class ImageTextObject : public QWidget
 {
   Q_OBJECT
 
+signals:
+  void selection();
+
 public:
   explicit ImageTextObject
   (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);

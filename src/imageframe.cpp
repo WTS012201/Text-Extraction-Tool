@@ -1,13 +1,12 @@
 ﻿#include "../headers/imageframe.h"
 
 ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
-  scene{new QGraphicsScene(this)}, scalar{1.0}, scaleFactor{0.1}, ui{__ui}
+  scene{new QGraphicsScene(this)}, mode{tesseract::RIL_PARA},
+  selection{nullptr}, ui{__ui}, scalar{1.0}, scaleFactor{0.1}
 {
-
-  mode = tesseract::RIL_PARA;
   initUi(parent);
   setWidgets();
-  buildConnections();
+  connections();
   setOptions(options);
 }
 
@@ -28,7 +27,6 @@ void ImageFrame::keyReleaseEvent(QKeyEvent* event){
 
 ImageFrame::~ImageFrame(){
   delete scene;
-  delete image;
   delete matrix;
 
   for(auto& obj : textObjects){
@@ -59,10 +57,36 @@ void ImageFrame::changeZoom(){
   }
 }
 
-void ImageFrame::buildConnections(){
+void ImageFrame::connections(){
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::showHighlights);
+  connect(ui->changeButton, &QPushButton::pressed, this, [&](){
+    if(!selection){
+      qDebug() << "No selection";
+      return;
+    }
+    selection->fillText();
+    // fix image formatting
+    QImage img{
+      (uchar*)matrix->data,
+          matrix->cols,
+          matrix->rows,
+          (int)matrix->step,
+          QImage::Format_BGR888
+    };
+    auto imagePixmap = QPixmap::fromImage(img);
+    // zooming uses image, fix this
+    scene->addPixmap(imagePixmap);
+    scene->setSceneRect(imagePixmap.rect());
+    scene->update();
+    this->setScene(scene);
+    originalSize = imagePixmap.size();
+
+    this->setMinimumSize(imagePixmap.size());
+    this->setMaximumSize(imagePixmap.size());
+
+  });
 }
 
 void ImageFrame::setRawText(){
@@ -80,13 +104,6 @@ void ImageFrame::showHighlights(){
   }
 }
 void ImageFrame::setWidgets(){
-//  zoomEdit = ui->zoomFactor;
-//  zoomLabel = ui->label;
-//  contentLayout = qobject_cast<QVBoxLayout*>(ui->contentScrollLayout->layout());
-//  textEdit = ui->textEdit;
-//  fontSizeEdit = ui->fontSizeInput;
-//  highlightAll = ui->highlightAll;
-
   ui->zoomFactor->hide();
   ui->zoomLabel->hide();
 }
@@ -148,7 +165,6 @@ void ImageFrame::setImage(QString imageName){
   filepath = imageName;
   scalar = 1.0;
 
-  image = new QImage{imageName};
   QPixmap imagePixmap{imageName};
 
   scene->addPixmap(imagePixmap);
@@ -288,6 +304,10 @@ void ImageFrame::populateTextObjects(){
     contentLabel->setText(temp->getText());
     contentLabel->setStyleSheet("border: 1px solid black");
     layout->insertWidget(layout->count() - 1, content);
+
+    connect(temp, &ImageTextObject::selection, this, [&](){
+      selection = qobject_cast<ImageTextObject*>(sender());
+    });
 
     delete obj;
   }

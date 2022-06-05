@@ -122,7 +122,10 @@ void ImageTextObject::highlightSpaces(){
 
     QObject::connect(
           highlight, &QPushButton::clicked,
-          this, [=](){mUi->textEdit->setText(text);}
+          this, [=](){
+              mUi->textEdit->setText(text);
+              emit selection();
+            }
           );
     highlights[space] = highlight;
   }

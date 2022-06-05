@@ -1372,6 +1372,9 @@ background:transparent;
     <property name="title">
      <string>Edit</string>
     </property>
+    <addaction name="actionUndo"/>
+    <addaction name="separator"/>
+    <addaction name="actionRedo_2"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1398,6 +1401,21 @@ background:transparent;
   <action name="actionOptions">
    <property name="text">
     <string>Options</string>
+   </property>
+  </action>
+  <action name="actionUndo">
+   <property name="text">
+    <string>Undo</string>
+   </property>
+  </action>
+  <action name="actionRedo">
+   <property name="text">
+    <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionRedo_2">
+   <property name="text">
+    <string>Redo</string>
    </property>
   </action>
  </widget>

@@ -57,13 +57,7 @@ void ImageFrame::changeZoom(){
   }
 }
 
-void ImageFrame::changeText(){
-  if(!selection){
-    qDebug() << "No selection";
-    return;
-  }
-  selection->fillText();
-  // fix image formatting
+void ImageFrame::changeImage(){
   QImage img{
     (uchar*)matrix->data,
         matrix->cols,
@@ -81,6 +75,20 @@ void ImageFrame::changeText(){
 
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
+}
+
+void ImageFrame::changeText(){
+  if(!selection){
+    qDebug() << "No selection";
+    return;
+  }
+
+  cv::Mat old;
+  matrix->copyTo(old);
+  undo.push(old);
+
+  selection->fillText();
+  changeImage();
 }
 
 void ImageFrame::connections(){
@@ -184,32 +192,6 @@ void ImageFrame::showAll(){
   ui->zoomFactor->show();
   ui->zoomLabel->show();
   this->show();
-}
-
-
-QVector<QString> ImageFrame::getLastWords(QVector<QString> lines){
-  QVector<QString> lastWords;
-
-  for(const auto& line : lines){
-    int i = line.length();
-
-    while(i > 0 && line.at(--i) != ' ');
-    lastWords.push_back(line.mid(i ? i + 1 : 0, line.length()));
-  }
-
-  return lastWords;
-}
-
-QVector<QString> ImageFrame::getLines(QString text){
-  QVector<QString> lines;
-
-  while(!text.isEmpty()){
-    auto pos = text.indexOf("\n");
-    lines.push_back(text.mid(0, pos));
-    text = text.mid(pos + 1, text.length());
-  }
-
-  return lines;
 }
 
 void ImageFrame::extract(){
@@ -318,4 +300,26 @@ void ImageFrame::populateTextObjects(){
 
 void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
   mode = __mode;
+}
+
+void ImageFrame::undoAction(){
+  if(undo.empty()){
+    return;
+  }
+
+  auto old = undo.pop();
+  redo.push(*matrix);
+  *matrix = old;
+  changeImage();
+}
+
+void ImageFrame::redoAction(){
+  if(redo.empty()){
+    return;
+  }
+
+  auto old = redo.pop();
+  undo.push(*matrix);
+  *matrix = old;
+  changeImage();
 }

@@ -25,6 +25,8 @@ private slots:
   void fontSelected();
   void fontSizeChanged();
   void on_actionOptions_triggered();
+  void on_actionUndo_triggered();
+  void on_actionRedo_2_triggered();
 
 private:
   ImageFrame *iFrame;

@@ -89,3 +89,17 @@ void MainWindow::fontSizeChanged(){
   font.setPointSize(ui->fontSizeInput->text().toInt());
   ui->textEdit->setFont(font);
 }
+
+void MainWindow::on_actionUndo_triggered(){
+  if(!iFrame){
+    return;
+  }
+  iFrame->undoAction();
+}
+
+void MainWindow::on_actionRedo_2_triggered(){
+  if(!iFrame){
+    return;
+  }
+  iFrame->redoAction();
+}

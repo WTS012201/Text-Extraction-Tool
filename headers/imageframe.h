@@ -39,6 +39,8 @@ public:
       Options* options = nullptr
       );
   ~ImageFrame();
+  void undoAction();
+  void redoAction();
   void setImage(QString);
   void setWidgets();
   void setMode(tesseract::PageIteratorLevel __mode);
@@ -61,19 +63,17 @@ private:
   QSize originalSize;
   QHash<int, bool> keysPressed;
   tesseract::PageIteratorLevel mode;
-//  QImage* image;
-  cv::Mat* matrix;
   ImageTextObject* selection;
   Ui::MainWindow* ui;
-  QStack<ImageFrame> undo, redo;
+  QStack<cv::Mat> undo, redo;
+
+  cv::Mat* matrix;
 
   float scalar;
   float scaleFactor;
 
   QVector<ImageTextObject*> textObjects;
 
-  QVector<QString> getLines(QString);
-  QVector<QString> getLastWords(QVector<QString> lines);
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
   void connections();
@@ -85,10 +85,10 @@ private:
   void setOptions(Options* options);
   void resize(QSize size);
   void populateTextObjects();
+  void changeImage();
   cv::Mat* buildImageMatrix();
   QString collect(cv::Mat& matrix);
   cv::Mat QImageToMat(QImage);
-  void test();
 };
 
 #endif // IMAGEFRAME_H

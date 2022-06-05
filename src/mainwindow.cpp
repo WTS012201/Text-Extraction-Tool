@@ -17,6 +17,8 @@ MainWindow::MainWindow(QWidget *parent)
 MainWindow::~MainWindow()
 {
   delete ui;
+  delete undo;
+  delete redo;
 }
 
 void MainWindow::initUi(){
@@ -63,13 +65,15 @@ void MainWindow::on_actionOpen_Image_triggered()
 
 void MainWindow::on_actionOptions_triggered()
 {
-//  options->setView(0);
   options->setModal(true);
   if(options->exec() == QDialog::DialogCode::Rejected)
     return;
 }
 
 void MainWindow::connections(){
+  undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
+  redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(
         ui->fontSizeInput,
@@ -77,6 +81,13 @@ void MainWindow::connections(){
         this,
         &MainWindow::fontSizeChanged
         );
+
+  QObject::connect(undo, &QShortcut::activated, this, [&](){
+    on_actionUndo_triggered();
+  });
+  QObject::connect(redo, &QShortcut::activated, this, [&](){
+    on_actionRedo_2_triggered();
+  });
 }
 
 void MainWindow::fontSelected(){

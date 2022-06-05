@@ -7,6 +7,7 @@
 #include "imageframe.h"
 #include <QSplitter>
 #include <QTextEdit>
+#include <QShortcut>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,6 +30,7 @@ private slots:
   void on_actionRedo_2_triggered();
 
 private:
+  QShortcut *undo, *redo;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
   Options* options;

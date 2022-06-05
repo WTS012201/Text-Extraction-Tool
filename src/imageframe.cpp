@@ -13,7 +13,6 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 void ImageFrame::keyPressEvent(QKeyEvent* event){
     keysPressed[event->key()] = true;
     if(event->key() & Qt::Key_Control){
-      qDebug() << "PRESSED";
       this->setCursor(Qt::CursorShape::PointingHandCursor);
     }
 }
@@ -21,7 +20,6 @@ void ImageFrame::keyPressEvent(QKeyEvent* event){
 void ImageFrame::keyReleaseEvent(QKeyEvent* event){
     keysPressed[event->key()] = false;
     if(event->key() & Qt::Key_Control){
-      qDebug() << "RELEASED";
       this->setCursor(Qt::CursorShape::ArrowCursor);
     }
 }

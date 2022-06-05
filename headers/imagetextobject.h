@@ -1,6 +1,9 @@
 ﻿#ifndef IMAGETEXTOBJECT_H
 #define IMAGETEXTOBJECT_H
 
+#include "ui_mainwindow.h"
+#include "opencv2/opencv.hpp"
+
 #include <QFrame>
 #include <QWidget>
 #include <QVector>
@@ -11,7 +14,6 @@
 #include <QImage>
 #include <QList>
 #include <cmath>
-#include "opencv2/opencv.hpp"
 
 class QcvScalar : public cv::Scalar{
   friend inline bool operator==(
@@ -46,7 +48,7 @@ public:
   ~ImageTextObject();
   ImageTextObject(QWidget *parent,
                   ImageTextObject& old,
-                  QTextEdit* tEdit,
+                  Ui::MainWindow* __ui,
                   cv::Mat* mat
                   );
 
@@ -67,11 +69,12 @@ public:
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;
   QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;
+  Ui::MainWindow* mUi;
 
   Ui::ImageTextObject *ui;
   QString filepath;
   QString text;
-  QTextEdit* textEdit;
+//  QTextEdit* textEdit;
   cv::Scalar bgIntensity;
   cv::Mat& mat;
 

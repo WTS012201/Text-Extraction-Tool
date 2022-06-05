@@ -39,7 +39,7 @@ public:
       );
   ~ImageFrame();
   void setImage(QString);
-  void setWidgets(Ui::MainWindow* ui);
+  void setWidgets();
   void setMode(tesseract::PageIteratorLevel __mode);
   void extract();
   void clear();
@@ -61,13 +61,8 @@ private:
   tesseract::PageIteratorLevel mode;
   QImage* image;
   cv::Mat* matrix;
-
-  QLineEdit* zoomEdit;
-  QLabel* zoomLabel;
-  QVBoxLayout* contentLayout;
-  QTextEdit* textEdit;
-  QLineEdit* fontSizeEdit;
-  QPushButton* highlightAll;
+  ImageTextObject* selection;
+  Ui::MainWindow* ui;
 
   float scalar;
   float scaleFactor;

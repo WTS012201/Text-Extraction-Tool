@@ -1,12 +1,12 @@
 ﻿#include "../headers/imageframe.h"
 
-ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* ui, Options* options):
-  scene{new QGraphicsScene(this)}, scalar{1.0}, scaleFactor{0.1}
+ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
+  scene{new QGraphicsScene(this)}, scalar{1.0}, scaleFactor{0.1}, ui{__ui}
 {
 
   mode = tesseract::RIL_PARA;
   initUi(parent);
-  setWidgets(ui);
+  setWidgets();
   buildConnections();
   setOptions(options);
 }
@@ -34,9 +34,9 @@ ImageFrame::~ImageFrame(){
   for(auto& obj : textObjects){
     delete obj;
   }
-  if(contentLayout != nullptr){
-    while(contentLayout->count() != 1){
-      QLayoutItem* item = contentLayout->takeAt(0);
+  if(ui->content->layout() != nullptr){
+    while(ui->content->layout()->count() != 1){
+      QLayoutItem* item = ui->content->layout()->takeAt(0);
       delete item->widget();
       delete item;
     }
@@ -48,11 +48,11 @@ void ImageFrame::setOptions(Options* options){
 }
 
 void ImageFrame::changeZoom(){
-  float val = (zoomEdit -> text()).toFloat();
+  float val = (ui->zoomFactor->text()).toFloat();
 
   scalar = (val < 0.1) ? 0.1 : val;
   scalar = (scalar > 10.0) ? 10.0 : scalar;
-  zoomEdit->setText(QString::number(scalar));
+  ui->zoomFactor->setText(QString::number(scalar));
   resize(originalSize * scalar);
   for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
@@ -60,9 +60,9 @@ void ImageFrame::changeZoom(){
 }
 
 void ImageFrame::buildConnections(){
-  connect(zoomEdit, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
+  connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
-  connect(highlightAll, &QPushButton::pressed, this, &ImageFrame::showHighlights);
+  connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::showHighlights);
 }
 
 void ImageFrame::setRawText(){
@@ -70,25 +70,25 @@ void ImageFrame::setRawText(){
 }
 
 void ImageFrame::showHighlights(){
-  QString text = highlightAll->text();
+  QString text = ui->highlightAll->text();
   bool on = (text == "Highlight All: On");
   text = on ? "Highlight All: Off" : "Highlight All: On";
-  highlightAll->setText(text);
+  ui->highlightAll->setText(text);
 
   for(const auto& obj : textObjects){
     on ? obj->hide() : obj->show();
   }
 }
-void ImageFrame::setWidgets(Ui::MainWindow* ui){
-  zoomEdit = ui->zoomFactor;
-  zoomLabel = ui->label;
-  contentLayout = qobject_cast<QVBoxLayout*>(ui->contentScrollLayout->layout());
-  textEdit = ui->textEdit;
-  fontSizeEdit = ui->fontSizeInput;
-  highlightAll = ui->highlightAll;
+void ImageFrame::setWidgets(){
+//  zoomEdit = ui->zoomFactor;
+//  zoomLabel = ui->label;
+//  contentLayout = qobject_cast<QVBoxLayout*>(ui->contentScrollLayout->layout());
+//  textEdit = ui->textEdit;
+//  fontSizeEdit = ui->fontSizeInput;
+//  highlightAll = ui->highlightAll;
 
-  zoomEdit->hide();
-  zoomLabel->hide();
+  ui->zoomFactor->hide();
+  ui->zoomLabel->hide();
 }
 
 void ImageFrame::initUi(QWidget* parent){
@@ -117,7 +117,7 @@ void ImageFrame::zoomIn(){
     return;
   }
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
-  zoomEdit->setText(QString::number(scalar));
+  ui->zoomFactor->setText(QString::number(scalar));
   resize(originalSize * scalar);
   for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
@@ -129,7 +129,7 @@ void ImageFrame::zoomOut(){
     return;
   }
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
-  zoomEdit->setText(QString::number(scalar));
+  ui->zoomFactor->setText(QString::number(scalar));
   resize(originalSize * scalar);
   for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
@@ -164,8 +164,8 @@ void ImageFrame::setImage(QString imageName){
 }
 
 void ImageFrame::showAll(){
-  zoomEdit->show();
-  zoomLabel->show();
+  ui->zoomFactor->show();
+  ui->zoomLabel->show();
   this->show();
 }
 
@@ -238,10 +238,10 @@ QString ImageFrame::collect(
   int a7, a8;
   ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
 
-  QFont font = textEdit->font();
+  QFont font = ui->textEdit->font();
   font.setPointSize(a7);
-  textEdit->setFont(font);
-  fontSizeEdit->setText(QString::number(a7));
+  ui->textEdit->setFont(font);
+  ui->fontSizeInput->setText(QString::number(a7));
 
   if (ri != 0) {
     do {
@@ -274,9 +274,10 @@ QString ImageFrame::collect(
 
 void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
+  auto layout = qobject_cast<QVBoxLayout*>(ui->content->layout());
 
   for(auto& obj : textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, textEdit, matrix};
+    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, matrix};
     tempObjects.push_back(temp);
     temp->show();
 
@@ -286,7 +287,7 @@ void ImageFrame::populateTextObjects(){
     auto contentLabel = content->getLabel();
     contentLabel->setText(temp->getText());
     contentLabel->setStyleSheet("border: 1px solid black");
-    contentLayout->insertWidget(contentLayout->count() - 1, content);
+    layout->insertWidget(layout->count() - 1, content);
 
     delete obj;
   }

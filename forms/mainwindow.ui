@@ -1039,7 +1039,7 @@ QProgressBar::chunk
               <property name="widgetResizable">
                <bool>true</bool>
               </property>
-              <widget class="QWidget" name="contentScrollLayout">
+              <widget class="QWidget" name="content">
                <property name="geometry">
                 <rect>
                  <x>0</x>
@@ -1102,7 +1102,7 @@ QProgressBar::chunk
                     <item>
                      <layout class="QHBoxLayout" name="horizontalLayout">
                       <item>
-                       <widget class="QLabel" name="label">
+                       <widget class="QLabel" name="zoomLabel">
                         <property name="text">
                          <string>Zoom factor:</string>
                         </property>
@@ -1245,7 +1245,7 @@ QProgressBar::chunk
                      </widget>
                     </item>
                     <item>
-                     <layout class="QHBoxLayout" name="textOptions" stretch="0,2,0,1,5">
+                     <layout class="QHBoxLayout" name="textOptions" stretch="0,2,0,1,5,0">
                       <item>
                        <widget class="QLabel" name="label_2">
                         <property name="text">
@@ -1325,6 +1325,13 @@ background:transparent;
                          </size>
                         </property>
                        </spacer>
+                      </item>
+                      <item>
+                       <widget class="QPushButton" name="changeButton">
+                        <property name="text">
+                         <string>Change</string>
+                        </property>
+                       </widget>
                       </item>
                      </layout>
                     </item>

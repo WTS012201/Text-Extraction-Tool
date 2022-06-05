@@ -11,10 +11,9 @@ ImageTextObject::ImageTextObject(
 
 ImageTextObject::ImageTextObject(
     QWidget *parent, ImageTextObject& old,
-    QTextEdit* tEdit, cv::Mat* __mat):
-  QWidget(parent), ui(new Ui::ImageTextObject),
-  textEdit{tEdit},
-  mat{*__mat}
+    Ui::MainWindow* __ui, cv::Mat* __mat):
+  QWidget(parent), mUi{__ui},
+  ui(new Ui::ImageTextObject), mat{*__mat}
 {
   ui->setupUi(this);
   setText(old.getText());
@@ -123,7 +122,7 @@ void ImageTextObject::highlightSpaces(){
 
     QObject::connect(
           highlight, &QPushButton::clicked,
-          this, [=](){textEdit->setText(text);}
+          this, [=](){mUi->textEdit->setText(text);}
           );
     highlights[space] = highlight;
   }

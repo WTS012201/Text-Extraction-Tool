@@ -71,11 +71,12 @@ void ImageFrame::setRawText(){
 
 void ImageFrame::showHighlights(){
   QString text = highlightAll->text();
-  text = (text == "Highlight All: On") ? "Highlight All: Off" : "Highlight All: On";
+  bool on = (text == "Highlight All: On");
+  text = on ? "Highlight All: Off" : "Highlight All: On";
   highlightAll->setText(text);
 
   for(const auto& obj : textObjects){
-    obj->isHidden() ? obj->show() : obj->hide();
+    on ? obj->hide() : obj->show();
   }
 }
 void ImageFrame::setWidgets(Ui::MainWindow* ui){
@@ -279,11 +280,13 @@ void ImageFrame::populateTextObjects(){
     tempObjects.push_back(temp);
     temp->show();
 
-    QLabel* contentLabel = new QLabel{};
+    Content* content = new Content{};
+    content->setTextObject(temp);
 
+    auto contentLabel = content->getLabel();
     contentLabel->setText(temp->getText());
     contentLabel->setStyleSheet("border: 1px solid black");
-    contentLayout->insertWidget(contentLayout->count() - 1, contentLabel);
+    contentLayout->insertWidget(contentLayout->count() - 1, content);
 
     delete obj;
   }

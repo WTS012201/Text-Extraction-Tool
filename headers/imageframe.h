@@ -6,6 +6,7 @@
 #include "ui_mainwindow.h"
 #include "imagetextobject.h"
 #include "options.h"
+#include "content.h"
 
 #include <QWidget>
 #include <QLabel>

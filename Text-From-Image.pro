@@ -19,18 +19,21 @@ SOURCES = \
     ./src/mainwindow.cpp \
     ./src/imageframe.cpp \
     ./src/imagetextobject.cpp \
-    ./src/options.cpp
+    ./src/options.cpp \
+    ./src/content.cpp
 
 HEADERS = \
     ./headers/mainwindow.h \
     ./headers/imageframe.h \
     ./headers/imagetextobject.h \
-    ./headers/options.h
+    ./headers/options.h \
+    ./headers/content.h
 
 FORMS = \
     ./forms/mainwindow.ui \
     ./forms/imagetextobject.ui \
-    ./forms/options.ui
+    ./forms/options.ui \
+    ./forms/content.ui
 
 RESOURCES += \
     ./res/res.qrc \

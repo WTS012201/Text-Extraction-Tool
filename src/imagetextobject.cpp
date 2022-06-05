@@ -10,8 +10,10 @@ ImageTextObject::ImageTextObject(
 }
 
 ImageTextObject::ImageTextObject(
-    QWidget *parent, ImageTextObject& old, QTextEdit* tEdit, cv::Mat* __mat):
-  QWidget(parent), ui(new Ui::ImageTextObject), textEdit{tEdit},
+    QWidget *parent, ImageTextObject& old,
+    QTextEdit* tEdit, cv::Mat* __mat):
+  QWidget(parent), ui(new Ui::ImageTextObject),
+  textEdit{tEdit},
   mat{*__mat}
 {
   ui->setupUi(this);
@@ -154,12 +156,10 @@ void ImageTextObject::showCVImage(){
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
   // adjust method for this later
-  qDebug() << "HERE";
   if(!(mat.type() & CV_8UC3)){
     qDebug() << "Image must have 3 channels";
     return;
   }
-  qDebug() << "HERE2";
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   QHash<QcvScalar, int> scalars;
@@ -178,7 +178,7 @@ void ImageTextObject::determineBgColor(){
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
-      scalars[key]++;
+      ++scalars[key];
     }
 
     key = QcvScalar{
@@ -187,7 +187,7 @@ void ImageTextObject::determineBgColor(){
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
-      scalars[key]++;
+      ++scalars[key];
     }
   }
 
@@ -199,7 +199,7 @@ void ImageTextObject::determineBgColor(){
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
-      scalars[key]++;
+      ++scalars[key];
     }
 
     key = QcvScalar{
@@ -208,7 +208,7 @@ void ImageTextObject::determineBgColor(){
     if(!scalars.contains(key)){
       scalars[key] = 1;
     } else{
-      scalars[key]++;
+      ++scalars[key];
     }
   }
 
@@ -228,6 +228,7 @@ void ImageTextObject::fillText(){
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   cv::Vec3b bg;
+
   bg.val[0] = bgIntensity.val[0];
   bg.val[1] = bgIntensity.val[1];
   bg.val[2] = bgIntensity.val[2];

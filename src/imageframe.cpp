@@ -13,6 +13,7 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 void ImageFrame::keyPressEvent(QKeyEvent* event){
     keysPressed[event->key()] = true;
     if(event->key() & Qt::Key_Control){
+      qDebug() << "PRESSED";
       this->setCursor(Qt::CursorShape::PointingHandCursor);
     }
 }
@@ -20,6 +21,7 @@ void ImageFrame::keyPressEvent(QKeyEvent* event){
 void ImageFrame::keyReleaseEvent(QKeyEvent* event){
     keysPressed[event->key()] = false;
     if(event->key() & Qt::Key_Control){
+      qDebug() << "RELEASED";
       this->setCursor(Qt::CursorShape::ArrowCursor);
     }
 }
@@ -51,18 +53,25 @@ void ImageFrame::changeZoom(){
   scalar = (val < 0.1) ? 0.1 : val;
   scalar = (scalar > 10.0) ? 10.0 : scalar;
   ui->zoomFactor->setText(QString::number(scalar));
-  resize(originalSize * scalar);
+  changeImage();
   for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
 
 void ImageFrame::changeImage(){
+  matrix->copyTo(display);
+  cv::resize(
+        display, display,
+        cv::Size{},
+        scalar, scalar,
+        cv::INTER_CUBIC
+        );
   QImage img{
-    (uchar*)matrix->data,
-        matrix->cols,
-        matrix->rows,
-        (int)matrix->step,
+    (uchar*)display.data,
+        display.cols,
+        display.rows,
+        (int)display.step,
         QImage::Format_BGR888
   };
   auto imagePixmap = QPixmap::fromImage(img);
@@ -71,7 +80,6 @@ void ImageFrame::changeImage(){
   scene->setSceneRect(imagePixmap.rect());
   scene->update();
   this->setScene(scene);
-  originalSize = imagePixmap.size();
 
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
@@ -88,6 +96,7 @@ void ImageFrame::changeText(){
   undo.push(old);
 
   selection->fillText();
+  matrix->copyTo(display);
   changeImage();
 }
 
@@ -126,25 +135,13 @@ void ImageFrame::initUi(QWidget* parent){
   this->hide();
 }
 
-void ImageFrame::resize(QSize newSize){
-  QPixmap image = QPixmap{filepath}.scaled(newSize);
-
-  scene->clear();
-  scene->addPixmap(image);
-  scene->setSceneRect(image.rect());
-
-  this->setScene(scene);
-  this->setMinimumSize(image.size());
-  this->setMaximumSize(image.size());
-}
-
 void ImageFrame::zoomIn(){
   if(!keysPressed[Qt::Key_Control]){
     return;
   }
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
-  resize(originalSize * scalar);
+  changeImage();
   for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
   }
@@ -156,7 +153,7 @@ void ImageFrame::zoomOut(){
   }
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
-  resize(originalSize * scalar);
+  changeImage();
   for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
   }
@@ -180,7 +177,6 @@ void ImageFrame::setImage(QString imageName){
   scene->setSceneRect(imagePixmap.rect());
   scene->update();
   this->setScene(scene);
-  originalSize = imagePixmap.size();
 
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
@@ -212,7 +208,10 @@ void ImageFrame::extract(){
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
       rawText = collect(matrix);
-  }, *matrix).then([&](){emit rawTextChanged();});
+  }, *matrix).then([&](){
+    matrix->copyTo(display);
+    emit rawTextChanged();
+  });
   showAll();
 }
 

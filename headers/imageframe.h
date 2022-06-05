@@ -60,7 +60,7 @@ private:
   QString filepath, rawText;
   QGraphicsScene* scene;
   QWidget* parent;
-  QSize originalSize;
+  cv::Mat display;
   QHash<int, bool> keysPressed;
   tesseract::PageIteratorLevel mode;
   ImageTextObject* selection;
@@ -69,8 +69,8 @@ private:
 
   cv::Mat* matrix;
 
-  float scalar;
-  float scaleFactor;
+  double scalar;
+  double scaleFactor;
 
   QVector<ImageTextObject*> textObjects;
 
@@ -83,7 +83,6 @@ private:
   void zoomOut();
   void showAll();
   void setOptions(Options* options);
-  void resize(QSize size);
   void populateTextObjects();
   void changeImage();
   cv::Mat* buildImageMatrix();

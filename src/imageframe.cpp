@@ -10,21 +10,6 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   setOptions(options);
 }
 
-void ImageFrame::keyPressEvent(QKeyEvent* event){
-    keysPressed[event->key()] = true;
-    if(event->key() & Qt::Key_Control){
-      this->setCursor(Qt::CursorShape::PointingHandCursor);
-    }
-}
-
-void ImageFrame::keyReleaseEvent(QKeyEvent* event){
-    keysPressed[event->key()] = false;
-    if(event->key() & Qt::Key_Control){
-      this->setCursor(Qt::CursorShape::ArrowCursor);
-    }
-}
-
-
 ImageFrame::~ImageFrame(){
   delete scene;
   delete matrix;

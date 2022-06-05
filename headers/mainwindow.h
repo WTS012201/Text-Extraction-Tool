@@ -30,7 +30,9 @@ private slots:
   void on_actionRedo_2_triggered();
 
 private:
-  QShortcut *undo, *redo;
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void keyPressEvent(QKeyEvent* event) override;
+  QShortcut *undo, *redo, *ctrl;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
   Options* options;

@@ -65,6 +65,7 @@ void MainWindow::on_actionOpen_Image_triggered()
 
 void MainWindow::on_actionOptions_triggered()
 {
+//  options->setView(0);
   options->setModal(true);
   if(options->exec() == QDialog::DialogCode::Rejected)
     return;
@@ -113,4 +114,18 @@ void MainWindow::on_actionRedo_2_triggered(){
     return;
   }
   iFrame->redoAction();
+}
+
+void MainWindow::keyPressEvent(QKeyEvent* event){
+    iFrame->keysPressed[event->key()] = true;
+    if(event->key() & Qt::Key_Control){
+      this->setCursor(Qt::CursorShape::PointingHandCursor);
+    }
+}
+
+void MainWindow::keyReleaseEvent(QKeyEvent* event){
+    iFrame->keysPressed[event->key()] = false;
+    if(event->key() & Qt::Key_Control){
+      this->setCursor(Qt::CursorShape::ArrowCursor);
+    }
 }

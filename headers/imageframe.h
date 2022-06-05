@@ -33,6 +33,7 @@ class ImageFrame : public QGraphicsView
   Q_OBJECT
 
 public:
+  QHash<int, bool> keysPressed;
   ImageFrame(
       QWidget* parent = nullptr,
       Ui::MainWindow* ui = nullptr,
@@ -61,7 +62,6 @@ private:
   QGraphicsScene* scene;
   QWidget* parent;
   cv::Mat display;
-  QHash<int, bool> keysPressed;
   tesseract::PageIteratorLevel mode;
   ImageTextObject* selection;
   Ui::MainWindow* ui;
@@ -74,8 +74,6 @@ private:
 
   QVector<ImageTextObject*> textObjects;
 
-  void keyReleaseEvent(QKeyEvent* event) override;
-  void keyPressEvent(QKeyEvent* event) override;
   void connections();
   void mousePressEvent(QMouseEvent * event) override;
   void initUi(QWidget* parent);

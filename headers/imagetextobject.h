@@ -69,6 +69,9 @@ public:
   void showCVImage();
   void setFilepath(QString __filepath);
   void fillText();
+  void selectHighlight();
+  void highlight();
+  void highlightAll(bool all);
 
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;

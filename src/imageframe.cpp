@@ -102,7 +102,8 @@ void ImageFrame::showHighlights(){
   ui->highlightAll->setText(text);
 
   for(const auto& obj : textObjects){
-    on ? obj->hide() : obj->show();
+    obj->highlightAll(!on);
+//    on ? obj->hide() : obj->show();
   }
 }
 void ImageFrame::setWidgets(){
@@ -200,7 +201,7 @@ void ImageFrame::inSelection(QPair<QPoint, QPoint> boundingBox){
 
     // in selection
     if(xOverlap && yOverlap){
-      obj->hide();
+      obj->selectHighlight();
     }
   }
 }

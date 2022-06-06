@@ -28,6 +28,13 @@ void Content::connections(){
       qDebug() << "Text Object null";
       return;
     }
-    textObject->isHidden() ? textObject->show() : textObject->hide();
+    textObject->show();
+    textObject->highlight();
+    QString text = ui->highlightButton->text();
+    if(text == "Highlight: On"){
+      ui->highlightButton->setText("Highlight: Off");
+    } else{
+      ui->highlightButton->setText("Highlight: On");
+    }
   });
 }

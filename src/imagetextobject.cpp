@@ -118,7 +118,7 @@ void ImageTextObject::highlightSpaces(){
     highlight->setCursor(Qt::CursorShape::PointingHandCursor);
     highlight->setMinimumSize(QSize{size.x(), size.y()});
     highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
-    highlight->show();
+    highlight->hide();
 
     QObject::connect(
           highlight, &QPushButton::clicked,
@@ -248,4 +248,30 @@ void ImageTextObject::fillText(){
     }
   }
 //  showCVImage();
+}
+
+void ImageTextObject::highlightAll(bool all){
+  for(auto& highlight : highlights.values()){
+    if(all){
+      highlight->show();
+    }else {
+      highlight->hide();
+    }
+  }
+}
+
+void ImageTextObject::highlight(){
+  for(auto& highlight : highlights.values()){
+    highlight->isHidden() ? highlight->show() : highlight->hide();
+  }
+}
+
+void ImageTextObject::selectHighlight(){
+  for(auto& highlight : highlights.values()){
+    if(highlight->isHidden()){
+      highlight->show();
+    }else {
+      highlight->setStyleSheet("background:  rgba(37,122,253,100);");
+    }
+  }
 }

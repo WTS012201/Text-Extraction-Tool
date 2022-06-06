@@ -2,7 +2,8 @@
 
 ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   scene{new QGraphicsScene(this)}, mode{tesseract::RIL_PARA},
-  selection{nullptr}, ui{__ui}, scalar{1.0}, scaleFactor{0.1}
+  selection{nullptr}, ui{__ui}, scalar{1.0}, scaleFactor{0.1},
+  rubberBand{nullptr}
 {
   initUi(parent);
   setWidgets();
@@ -143,10 +144,53 @@ void ImageFrame::zoomOut(){
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent* event) {
+  origin = event->pos();
+  if(!rubberBand){
+    rubberBand = new QRubberBand{QRubberBand::Rectangle, this};
+  }
+  rubberBand->setGeometry(QRect(origin, QSize{}));
+  rubberBand->show();
+
   if(event->buttons() & Qt::LeftButton){
     zoomIn();
   }else if(event->buttons() & Qt::RightButton){
     zoomOut();
+  }
+}
+
+void ImageFrame::mouseMoveEvent(QMouseEvent *event){
+    rubberBand->setGeometry(QRect(origin, event->pos()).normalized());
+}
+
+void ImageFrame::mouseReleaseEvent(QMouseEvent *event){
+    rubberBand->hide();
+    auto dest = event->pos();
+
+    if(origin.x() > dest.x() && origin.y() > dest.y()){
+      auto temp = dest;
+      dest = origin;
+      origin = temp;
+    }
+
+    QPair<QPoint, QPoint> box{origin, dest};
+    inSelection(box);
+}
+
+void ImageFrame::inSelection(QPair<QPoint, QPoint> boundingBox){
+  auto a = boundingBox.first;
+  auto b = boundingBox.second;
+
+  for(auto& obj : textObjects){
+    auto tl = obj->topLeft;
+    auto br = obj->bottomRight;
+
+    bool xOverlap = !((br.x() < a.x()) || (tl.x() > b.x()));
+    bool yOverlap = !((br.y() < a.y()) || (tl.y() > b.y()));
+
+    // in selection
+    if(xOverlap && yOverlap){
+      obj->hide();
+    }
   }
 }
 

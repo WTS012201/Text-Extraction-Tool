@@ -8,6 +8,7 @@
 #include "options.h"
 #include "content.h"
 
+#include <QRubberBand>
 #include <QStack>
 #include <QWidget>
 #include <QLabel>
@@ -16,16 +17,11 @@
 #include <QLayout>
 #include <QMouseEvent>
 #include <QLineEdit>
-#include <QProgressBar>
-#include <QThread>
-#include <chrono>
-#include <thread>
 #include <QVector>
 #include <QPair>
 #include <QPoint>
 #include <QFuture>
 #include <QtConcurrent/QtConcurrent>
-#include <QThreadPool>
 #include <QGraphicsTextItem>
 
 class ImageFrame : public QGraphicsView
@@ -59,6 +55,8 @@ signals:
 
 private:
   QString filepath, rawText;
+  QRubberBand* rubberBand;
+  QPoint origin;
   QGraphicsScene* scene;
   QWidget* parent;
   cv::Mat display;
@@ -74,8 +72,10 @@ private:
 
   QVector<ImageTextObject*> textObjects;
 
-  void connections();
   void mousePressEvent(QMouseEvent * event) override;
+  void mouseReleaseEvent(QMouseEvent *event) override;
+  void mouseMoveEvent(QMouseEvent *event) override;
+  void connections();
   void initUi(QWidget* parent);
   void zoomIn();
   void zoomOut();
@@ -86,6 +86,8 @@ private:
   cv::Mat* buildImageMatrix();
   QString collect(cv::Mat& matrix);
   cv::Mat QImageToMat(QImage);
+
+  void inSelection(QPair<QPoint, QPoint>);
 };
 
 #endif // IMAGEFRAME_H

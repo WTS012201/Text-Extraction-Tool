@@ -166,13 +166,24 @@ void ImageFrame::mouseReleaseEvent(QMouseEvent *event){
     rubberBand->hide();
     auto dest = event->pos();
 
-    if(origin.x() > dest.x() && origin.y() > dest.y()){
-      auto temp = dest;
-      dest = origin;
-      origin = temp;
+    QPoint tl, br;
+    if(origin.x() < dest.x()){
+      tl.setX(origin.x());
+      br.setX(dest.x());
+    }else{
+      tl.setX(dest.x());
+      br.setX(origin.x());
     }
 
-    QPair<QPoint, QPoint> box{origin, dest};
+    if(origin.y() < dest.y()){
+      tl.setY(origin.y());
+      br.setY(dest.y());
+    }else{
+      tl.setY(dest.y());
+      br.setY(origin.y());
+    }
+
+    QPair<QPoint, QPoint> box{tl, br};
     inSelection(box);
 }
 

@@ -6,7 +6,6 @@
 #include "ui_mainwindow.h"
 #include "imagetextobject.h"
 #include "options.h"
-#include "content.h"
 
 #include <QRubberBand>
 #include <QStack>
@@ -64,14 +63,12 @@ private:
   ImageTextObject* selection;
   Ui::MainWindow* ui;
   QStack<cv::Mat> undo, redo;
-  QHash<ImageTextObject*, Content*> contentMap;
+  QVector<ImageTextObject*> textObjects;
 
   cv::Mat* matrix;
 
   double scalar;
   double scaleFactor;
-
-//  QVector<ImageTextObject*> textObjects;
 
   void mousePressEvent(QMouseEvent * event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;

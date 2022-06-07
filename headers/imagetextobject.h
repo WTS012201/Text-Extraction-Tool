@@ -48,6 +48,7 @@ signals:
 public:
   int fontSize;
   bool isSelected, isChanged;
+  cv::Mat* mat;
   explicit ImageTextObject
   (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);
   ~ImageTextObject();
@@ -86,7 +87,6 @@ private:
   QString text;
 
   cv::Scalar bgIntensity;
-  cv::Mat& mat;
 
   QPoint findTopLeftCorner();
   QPoint findBottomRightCorner();

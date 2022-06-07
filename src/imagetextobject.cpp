@@ -4,7 +4,7 @@
 ImageTextObject::ImageTextObject(
     QWidget *parent, cv::Mat* __mat) :
   QWidget(parent), isSelected{false},
-  isChanged{false}, ui(new Ui::ImageTextObject), mat{*__mat}
+  isChanged{false}, ui(new Ui::ImageTextObject), mat{__mat}
 {
   ui->setupUi(this);
 }
@@ -14,7 +14,7 @@ ImageTextObject::ImageTextObject(
     Ui::MainWindow* __ui, cv::Mat* __mat):
   QWidget(parent), fontSize{old.fontSize},
   mUi{__ui}, ui(new Ui::ImageTextObject),
-  mat{*__mat}
+  mat{__mat}
 {
   ui->setupUi(this);
   setText(old.getText());
@@ -154,14 +154,14 @@ void ImageTextObject::scaleAndPosition(float scalar){
 
 void ImageTextObject::showCVImage(){
   cv::namedWindow("image");
-  cv::imshow("image", mat);
+  cv::imshow("image", *mat);
   cv::waitKey();
 }
 
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
 
-  if(!(mat.type() & CV_8UC3)){
+  if(!(mat->type() & CV_8UC3)){
     qDebug() << "Image must have 3 channels";
     return;
   }
@@ -170,15 +170,15 @@ void ImageTextObject::determineBgColor(){
   QHash<QcvScalar, int> scalars;
 
   (left > 0) ? left -= 1 : left;
-  (right < mat.cols - 1) ? right += 1 : right;
+  (right < mat->cols - 1) ? right += 1 : right;
 
   (top > 0) ? top -= 1 : top;
-  (bottom < mat.rows - 1) ? bottom += 1 : bottom;
+  (bottom < mat->rows - 1) ? bottom += 1 : bottom;
 
   // Top / Bottom
   for(auto i = left; i <= right; i++){
     QcvScalar key = QcvScalar{
-        mat.at<cv::Vec3b>(cv::Point{i, top})
+        mat->at<cv::Vec3b>(cv::Point{i, top})
     };
     if(!scalars.contains(key)){
       scalars[key] = 1;
@@ -187,7 +187,7 @@ void ImageTextObject::determineBgColor(){
     }
 
     key = QcvScalar{
-        mat.at<cv::Vec3b>(cv::Point{i, bottom})
+        mat->at<cv::Vec3b>(cv::Point{i, bottom})
     };
     if(!scalars.contains(key)){
       scalars[key] = 1;
@@ -199,7 +199,7 @@ void ImageTextObject::determineBgColor(){
 //   Right / Left
   for(auto i = top; i <= bottom; i++){
     auto key = QcvScalar{
-        mat.at<cv::Vec3b>(cv::Point{left, i})
+        mat->at<cv::Vec3b>(cv::Point{left, i})
     };
     if(!scalars.contains(key)){
       scalars[key] = 1;
@@ -208,7 +208,7 @@ void ImageTextObject::determineBgColor(){
     }
 
     key = QcvScalar{
-        mat.at<cv::Vec3b>(cv::Point{right, i})
+        mat->at<cv::Vec3b>(cv::Point{right, i})
     };
     if(!scalars.contains(key)){
       scalars[key] = 1;
@@ -239,14 +239,14 @@ void ImageTextObject::fillBackground(){
   bg.val[2] = bgIntensity.val[2];
 
   (left > 0) ? left -= 1 : left;
-  (right < mat.cols - 1) ? right += 1 : right;
+  (right < mat->cols - 1) ? right += 1 : right;
 
   (top > 0) ? top -= 1 : top;
-  (bottom < mat.rows - 1) ? bottom += 1 : bottom;
+  (bottom < mat->rows - 1) ? bottom += 1 : bottom;
 
   for(auto i = top; i <= bottom; i++){
     for(auto j = left; j <= right; j++){
-      auto& scalarRef = mat.at<cv::Vec3b>(cv::Point{j,i});
+      auto& scalarRef = mat->at<cv::Vec3b>(cv::Point{j,i});
       scalarRef = bg;
     }
   }

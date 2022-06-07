@@ -20,6 +20,10 @@ ImageFrame::~ImageFrame(){
   }
 }
 
+void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
+  mode = __mode;
+}
+
 void ImageFrame::setOptions(Options* options){
   setMode(options->getPartialSelection());
 }
@@ -105,6 +109,7 @@ void ImageFrame::changeText(){
         CV_8UC3, (void*)img->constBits(),
         (size_t)img->bytesPerLine()
   };
+  selection->mat = matrix;
   delete img;
 
   changeImage();
@@ -116,7 +121,7 @@ void ImageFrame::connections(){
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 
-  connect(ui->removeSelection, &QPushButton::pressed, this, [&](){
+  connect(ui->removeSelection, &QPushButton::pressed, this, [=](...){
     for(auto& obj : textObjects){
       if(obj->isSelected){
         obj->deselect();
@@ -294,6 +299,31 @@ void ImageFrame::extract(){
   showAll();
 }
 
+void ImageFrame::populateTextObjects(){
+  QVector<ImageTextObject*> tempObjects;
+
+  for(auto obj : textObjects){
+    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, matrix};
+    temp->hide();
+
+    tempObjects.push_back(temp);
+
+    connect(temp, &ImageTextObject::selection, this, [&](...){
+      selection = qobject_cast<ImageTextObject*>(sender());
+      for(auto& tempObj : textObjects){
+        if(tempObj == selection){
+          continue;
+        }
+        tempObj->deselect();
+      }
+    });
+
+    delete obj;
+  }
+
+  textObjects = tempObjects;
+}
+
 QString ImageFrame::collect(
     cv::Mat& matrix
     ){
@@ -336,35 +366,6 @@ QString ImageFrame::collect(
   api->End();
   delete api;
   return text;
-}
-
-void ImageFrame::populateTextObjects(){
-  QVector<ImageTextObject*> tempObjects;
-
-  for(auto obj : textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, matrix};
-    temp->hide();
-
-    tempObjects.push_back(temp);
-
-    connect(temp, &ImageTextObject::selection, this, [&](){
-      selection = qobject_cast<ImageTextObject*>(sender());
-      for(auto& tempObj : textObjects){
-        if(tempObj == selection){
-          continue;
-        }
-        tempObj->deselect();
-      }
-    });
-
-    delete obj;
-  }
-
-  textObjects = tempObjects;
-}
-
-void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
-  mode = __mode;
 }
 
 void ImageFrame::undoAction(){

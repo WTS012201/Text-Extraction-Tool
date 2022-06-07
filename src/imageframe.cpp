@@ -36,7 +36,7 @@ void ImageFrame::changeZoom(){
   }
 }
 
-void ImageFrame::changeImage(){
+void ImageFrame::changeImage(QImage* img){
   matrix->copyTo(display);
   cv::resize(
         display, display,
@@ -44,14 +44,18 @@ void ImageFrame::changeImage(){
         scalar, scalar,
         cv::INTER_CUBIC
         );
-  QImage img{
-    (uchar*)display.data,
+
+  if(!img){
+    img = new QImage{
+        (uchar*)display.data,
         display.cols,
         display.rows,
         (int)display.step,
         QImage::Format_BGR888
-  };
-  auto imagePixmap = QPixmap::fromImage(img);
+    };
+  }
+
+  auto imagePixmap = QPixmap::fromImage(*img);
 
   scene->addPixmap(imagePixmap);
   scene->setSceneRect(imagePixmap.rect());
@@ -60,6 +64,7 @@ void ImageFrame::changeImage(){
 
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
+  delete img;
 }
 
 void ImageFrame::changeText(){
@@ -72,8 +77,36 @@ void ImageFrame::changeText(){
   matrix->copyTo(old);
   undo.push(old);
 
-  selection->fillText();
+  selection->fillBackground();
   matrix->copyTo(display);
+  QImage* img = new QImage{
+      (uchar*)display.data,
+      display.cols,
+      display.rows,
+      (int)display.step,
+      QImage::Format_BGR888
+  };
+  QPainter p;
+  if(!p.begin(img)){
+    qDebug() << "error with painter";
+    return;
+  }
+  p.setPen(QPen{Qt::black});
+  p.setFont(QFont{"Times", ui->fontSizeInput->text().toInt()}); //QFont::Bold
+  p.drawText(selection->topLeft.x(),
+             selection->bottomRight.y(),
+             ui->textEdit->toPlainText()
+             );
+  p.end();
+
+  delete matrix;
+  matrix = new cv::Mat{
+        img->height(), img->width(),
+        CV_8UC3, (void*)img->constBits(),
+        (size_t)img->bytesPerLine()
+  };
+  delete img;
+
   changeImage();
 }
 
@@ -275,11 +308,13 @@ QString ImageFrame::collect(
   tesseract::ResultIterator* ri = api->GetIterator();
 
   typedef QPair<QPoint, QPoint> Space;
-  QVector<QPair<QString, Space*>> partials;
+  bool a1, a2, a3, a4, a5, a6;
+  int a7, a8;
   int x1, y1, x2, y2;
 
   if (ri != 0) {
     do {
+      ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
       QString word = ri->GetUTF8Text(mode);
       ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
@@ -291,15 +326,11 @@ QString ImageFrame::collect(
         continue;
       }
 
-      partials.push_back(QPair<QString, Space*>{word, new Space{p1, p2}});
+      ImageTextObject* textObject = new ImageTextObject{nullptr};
+      textObject->setText(word);
+      textObject->addLineSpace(new Space{p1, p2});
+      textObjects.push_back(textObject);
     } while (ri->Next(mode));
-  }
-
-  for(auto& partial : partials){
-    ImageTextObject* textObject = new ImageTextObject{nullptr};
-    textObject->setText(partial.first);
-    textObject->addLineSpace(partial.second);
-    textObjects.push_back(textObject);
   }
 
   api->End();
@@ -341,9 +372,12 @@ void ImageFrame::undoAction(){
     return;
   }
 
-  auto old = undo.pop();
-  redo.push(*matrix);
-  *matrix = old;
+  cv::Mat curr;
+  matrix->copyTo(curr);
+  redo.push(curr);
+
+  auto prev = undo.pop();
+  *matrix = prev;
   changeImage();
 }
 
@@ -352,8 +386,11 @@ void ImageFrame::redoAction(){
     return;
   }
 
-  auto old = redo.pop();
-  undo.push(*matrix);
-  *matrix = old;
+  cv::Mat curr;
+  matrix->copyTo(curr);
+  undo.push(curr);
+
+  auto prev = redo.pop();
+  *matrix = prev;
   changeImage();
 }

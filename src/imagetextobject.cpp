@@ -12,8 +12,9 @@ ImageTextObject::ImageTextObject(
 ImageTextObject::ImageTextObject(
     QWidget *parent, ImageTextObject& old,
     Ui::MainWindow* __ui, cv::Mat* __mat):
-  QWidget(parent), mUi{__ui},
-  ui(new Ui::ImageTextObject), mat{*__mat}
+  QWidget(parent), fontSize{old.fontSize},
+  mUi{__ui}, ui(new Ui::ImageTextObject),
+  mat{*__mat}
 {
   ui->setupUi(this);
   setText(old.getText());
@@ -228,7 +229,7 @@ void ImageTextObject::determineBgColor(){
 }
 
 
-void ImageTextObject::fillText(){
+void ImageTextObject::fillBackground(){
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   cv::Vec3b bg;

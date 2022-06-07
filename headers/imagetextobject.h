@@ -46,6 +46,7 @@ signals:
   void selection();
 
 public:
+  int fontSize;
   bool isSelected, isChanged;
   explicit ImageTextObject
   (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);
@@ -69,7 +70,7 @@ public:
   void setImage(cv::Mat* __image);
   void showCVImage();
   void setFilepath(QString __filepath);
-  void fillText();
+  void fillBackground();
 
   void selectHighlight();
   void highlight();
@@ -83,7 +84,7 @@ private:
   Ui::ImageTextObject *ui;
   QString filepath;
   QString text;
-//  QTextEdit* textEdit;
+
   cv::Scalar bgIntensity;
   cv::Mat& mat;
 

@@ -80,7 +80,7 @@ private:
   void showAll();
   void setOptions(Options* options);
   void populateTextObjects();
-  void changeImage();
+  void changeImage(QImage* img = nullptr);
   cv::Mat* buildImageMatrix();
   QString collect(cv::Mat& matrix);
   cv::Mat QImageToMat(QImage);

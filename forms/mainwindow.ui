@@ -1138,7 +1138,7 @@ QProgressBar::chunk
                          </size>
                         </property>
                         <property name="text">
-                         <string>Highlight All: Off</string>
+                         <string>Add Selection</string>
                         </property>
                        </widget>
                       </item>

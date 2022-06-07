@@ -1,9 +1,9 @@
 ﻿#include "../headers/imageframe.h"
 
 ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
-  scene{new QGraphicsScene(this)}, mode{tesseract::RIL_PARA},
-  selection{nullptr}, ui{__ui}, scalar{1.0}, scaleFactor{0.1},
-  rubberBand{nullptr}
+  rubberBand{nullptr}, scene{new QGraphicsScene(this)},
+  mode{tesseract::RIL_PARA}, selection{nullptr}, ui{__ui}, scalar{1.0},
+  scaleFactor{0.1}
 {
   initUi(parent);
   setWidgets();
@@ -15,7 +15,8 @@ ImageFrame::~ImageFrame(){
   delete scene;
   delete matrix;
 
-  for(auto& obj : textObjects){
+  for(auto& obj : contentMap.keys()){
+    delete contentMap[obj];
     delete obj;
   }
   if(ui->content->layout() != nullptr){
@@ -38,7 +39,7 @@ void ImageFrame::changeZoom(){
   scalar = (scalar > 10.0) ? 10.0 : scalar;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : textObjects){
+  for(auto& obj : contentMap.keys()){
     obj->scaleAndPosition(scalar);
   }
 }
@@ -59,7 +60,7 @@ void ImageFrame::changeImage(){
         QImage::Format_BGR888
   };
   auto imagePixmap = QPixmap::fromImage(img);
-  // zooming uses image, fix this
+
   scene->addPixmap(imagePixmap);
   scene->setSceneRect(imagePixmap.rect());
   scene->update();
@@ -87,7 +88,7 @@ void ImageFrame::changeText(){
 void ImageFrame::connections(){
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
-  connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::showHighlights);
+  connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 }
 
@@ -95,17 +96,17 @@ void ImageFrame::setRawText(){
   populateTextObjects();
 }
 
-void ImageFrame::showHighlights(){
-  QString text = ui->highlightAll->text();
-  bool on = (text == "Highlight All: On");
-  text = on ? "Highlight All: Off" : "Highlight All: On";
-  ui->highlightAll->setText(text);
-
-  for(const auto& obj : textObjects){
-    obj->highlightAll(!on);
-//    on ? obj->hide() : obj->show();
+void ImageFrame::highlightSelection(){
+  for(auto& obj : contentMap.keys()){
+    if(obj->isSelected){
+      obj->isChanged = true;
+      obj->deselect();
+      contentMap[obj]->show();
+    }
   }
 }
+
+
 void ImageFrame::setWidgets(){
   ui->zoomFactor->hide();
   ui->zoomLabel->hide();
@@ -121,30 +122,39 @@ void ImageFrame::initUi(QWidget* parent){
 }
 
 void ImageFrame::zoomIn(){
-  if(!keysPressed[Qt::Key_Control]){
+  if(!keysPressed[Qt::SHIFT]){
     return;
   }
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : textObjects){
+  for(auto& obj : contentMap.keys()){
     obj->scaleAndPosition(scalar);
   }
 }
 
 void ImageFrame::zoomOut(){
-  if(!keysPressed[Qt::Key_Control]){
+  if(!keysPressed[Qt::SHIFT]){
     return;
   }
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : textObjects){
+  for(auto& obj : contentMap.keys()){
     obj->scaleAndPosition(scalar);
   }
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent* event) {
+  if(!keysPressed[Qt::Key_Control]){
+    for(auto& obj : contentMap.keys()){
+      obj->deselect();
+      if(!obj->isChanged){
+        contentMap[obj]->hide();
+        obj->hide();
+      }
+    }
+  }
   origin = event->pos();
   if(!rubberBand){
     rubberBand = new QRubberBand{QRubberBand::Rectangle, this};
@@ -164,42 +174,41 @@ void ImageFrame::mouseMoveEvent(QMouseEvent *event){
 }
 
 void ImageFrame::mouseReleaseEvent(QMouseEvent *event){
-    rubberBand->hide();
-    auto dest = event->pos();
+  rubberBand->hide();
+  auto dest = event->pos();
 
-    QPoint tl, br;
-    if(origin.x() < dest.x()){
-      tl.setX(origin.x());
-      br.setX(dest.x());
-    }else{
-      tl.setX(dest.x());
-      br.setX(origin.x());
-    }
+  QPoint tl, br;
+  if(origin.x() < dest.x()){
+    tl.setX(origin.x());
+    br.setX(dest.x());
+  }else{
+    tl.setX(dest.x());
+    br.setX(origin.x());
+  }
 
-    if(origin.y() < dest.y()){
-      tl.setY(origin.y());
-      br.setY(dest.y());
-    }else{
-      tl.setY(dest.y());
-      br.setY(origin.y());
-    }
+  if(origin.y() < dest.y()){
+    tl.setY(origin.y());
+    br.setY(dest.y());
+  }else{
+    tl.setY(dest.y());
+    br.setY(origin.y());
+  }
 
-    QPair<QPoint, QPoint> box{tl, br};
-    inSelection(box);
+  QPair<QPoint, QPoint> box{tl, br};
+  inSelection(box);
 }
 
 void ImageFrame::inSelection(QPair<QPoint, QPoint> boundingBox){
   auto a = boundingBox.first;
   auto b = boundingBox.second;
 
-  for(auto& obj : textObjects){
+  for(auto& obj : contentMap.keys()){
     auto tl = obj->topLeft;
     auto br = obj->bottomRight;
 
     bool xOverlap = !((br.x() < a.x()) || (tl.x() > b.x()));
     bool yOverlap = !((br.y() < a.y()) || (tl.y() > b.y()));
 
-    // in selection
     if(xOverlap && yOverlap){
       obj->selectHighlight();
     }
@@ -241,8 +250,6 @@ void ImageFrame::extract(){
     qDebug() << "empty matrix";
     return;
   }  
-
-  // transform matrix for better output here
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
@@ -301,7 +308,8 @@ QString ImageFrame::collect(
     ImageTextObject* textObject = new ImageTextObject{nullptr};
     textObject->setText(partial.first);
     textObject->addLineSpace(partial.second);
-    textObjects.push_back(textObject);
+//    textObjects.push_back(textObject);
+    contentMap[textObject];
   }
 
   api->End();
@@ -310,13 +318,12 @@ QString ImageFrame::collect(
 }
 
 void ImageFrame::populateTextObjects(){
-  QVector<ImageTextObject*> tempObjects;
+  QHash<ImageTextObject*, Content*> tempMap;
   auto layout = qobject_cast<QVBoxLayout*>(ui->content->layout());
 
-  for(auto& obj : textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, matrix};
-    tempObjects.push_back(temp);
-    temp->show();
+  for(auto key : contentMap.keys()){
+    ImageTextObject* temp = new ImageTextObject{this, *key, ui, matrix};
+    temp->hide();
 
     Content* content = new Content{};
     content->setTextObject(temp);
@@ -325,15 +332,27 @@ void ImageFrame::populateTextObjects(){
     contentLabel->setText(temp->getText());
     contentLabel->setStyleSheet("border: 1px solid black");
     layout->insertWidget(layout->count() - 1, content);
+    content->hide();
+
+    tempMap[temp] = content;
 
     connect(temp, &ImageTextObject::selection, this, [&](){
       selection = qobject_cast<ImageTextObject*>(sender());
+      for(auto& obj : contentMap.keys()){
+        if(obj == selection){
+          continue;
+        }
+        if(!obj->isChanged){
+          contentMap[obj]->hide();
+        }
+        obj->deselect();
+      }
     });
 
-    delete obj;
+    delete key;
   }
 
-  textObjects = tempObjects;
+  contentMap = tempMap;
 }
 
 void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){

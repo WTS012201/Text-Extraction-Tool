@@ -46,6 +46,7 @@ signals:
   void selection();
 
 public:
+  bool isSelected, isChanged;
   explicit ImageTextObject
   (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);
   ~ImageTextObject();
@@ -69,9 +70,10 @@ public:
   void showCVImage();
   void setFilepath(QString __filepath);
   void fillText();
+
   void selectHighlight();
   void highlight();
-  void highlightAll(bool all);
+  void deselect();
 
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;

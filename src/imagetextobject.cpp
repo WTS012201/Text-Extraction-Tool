@@ -3,8 +3,8 @@
 
 ImageTextObject::ImageTextObject(
     QWidget *parent, cv::Mat* __mat) :
-  QWidget(parent), ui(new Ui::ImageTextObject),
-  mat{*__mat}
+  QWidget(parent), isSelected{false},
+  isChanged{false}, ui(new Ui::ImageTextObject), mat{*__mat}
 {
   ui->setupUi(this);
 }
@@ -22,7 +22,6 @@ ImageTextObject::ImageTextObject(
   highlightSpaces();
   initSizeAndPos();
   determineBgColor();
-//  fillText();
 }
 
 void ImageTextObject::setFilepath(QString __filepath){
@@ -116,15 +115,18 @@ void ImageTextObject::highlightSpaces(){
     }
 
     highlight->setCursor(Qt::CursorShape::PointingHandCursor);
-    highlight->setMinimumSize(QSize{size.x(), size.y()});
+    highlight->setMinimumSize(QSize{size.x() - 1, size.y() - 1});
     highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
     highlight->hide();
 
     QObject::connect(
           highlight, &QPushButton::clicked,
           this, [=](){
-              mUi->textEdit->setText(text);
-              emit selection();
+              if(isChanged){
+                mUi->textEdit->setText(text);
+                highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
+                emit selection();
+              }
             }
           );
     highlights[space] = highlight;
@@ -157,7 +159,7 @@ void ImageTextObject::showCVImage(){
 
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
-  // adjust method for this later
+
   if(!(mat.type() & CV_8UC3)){
     qDebug() << "Image must have 3 channels";
     return;
@@ -247,17 +249,6 @@ void ImageTextObject::fillText(){
       scalarRef = bg;
     }
   }
-//  showCVImage();
-}
-
-void ImageTextObject::highlightAll(bool all){
-  for(auto& highlight : highlights.values()){
-    if(all){
-      highlight->show();
-    }else {
-      highlight->hide();
-    }
-  }
 }
 
 void ImageTextObject::highlight(){
@@ -268,10 +259,19 @@ void ImageTextObject::highlight(){
 
 void ImageTextObject::selectHighlight(){
   for(auto& highlight : highlights.values()){
-    if(highlight->isHidden()){
+      isSelected = true;
       highlight->show();
-    }else {
+      this->show();
       highlight->setStyleSheet("background:  rgba(37,122,253,100);");
+  }
+}
+
+void ImageTextObject::deselect(){
+  for(auto& highlight : highlights.values()){
+    highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+    if(isChanged){
+      continue;
     }
+    highlight->hide();
   }
 }

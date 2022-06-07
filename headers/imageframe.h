@@ -47,7 +47,7 @@ public:
 private slots:
   void changeZoom();
   void setRawText();
-  void showHighlights();
+  void highlightSelection();
   void changeText();
 
 signals:
@@ -64,13 +64,14 @@ private:
   ImageTextObject* selection;
   Ui::MainWindow* ui;
   QStack<cv::Mat> undo, redo;
+  QHash<ImageTextObject*, Content*> contentMap;
 
   cv::Mat* matrix;
 
   double scalar;
   double scaleFactor;
 
-  QVector<ImageTextObject*> textObjects;
+//  QVector<ImageTextObject*> textObjects;
 
   void mousePressEvent(QMouseEvent * event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;

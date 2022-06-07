@@ -118,14 +118,14 @@ void MainWindow::on_actionRedo_2_triggered(){
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
     iFrame->keysPressed[event->key()] = true;
-    if(event->key() & Qt::Key_Control){
+    if(event->key() & Qt::SHIFT){
       this->setCursor(Qt::CursorShape::PointingHandCursor);
     }
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event){
     iFrame->keysPressed[event->key()] = false;
-    if(event->key() & Qt::Key_Control){
+    if(event->key() & Qt::SHIFT){
       this->setCursor(Qt::CursorShape::ArrowCursor);
     }
 }

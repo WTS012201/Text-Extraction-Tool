@@ -122,9 +122,10 @@ void ImageTextObject::highlightSpaces(){
 
     QObject::connect(
           highlight, &QPushButton::clicked,
-          this, [=](){
+          this, [=](...){
               if(isChanged){
                 mUi->textEdit->setText(text);
+                mUi->fontSizeInput->setText(QString::number(fontSize));
                 highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
                 emit selection();
               }

@@ -96,7 +96,8 @@ void ImageFrame::changeText(){
     return;
   }
   p.setPen(QPen{Qt::black});
-  p.setFont(QFont{"Times", ui->fontSizeInput->text().toInt()}); //QFont::Bold
+  selection->fontSize = ui->fontSizeInput->text().toInt();
+  p.setFont(QFont{"Times", selection->fontSize}); //QFont::Bold
   p.drawText(selection->topLeft.x(),
              selection->bottomRight.y(),
              ui->textEdit->toPlainText()
@@ -359,6 +360,7 @@ QString ImageFrame::collect(
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
       textObject->addLineSpace(new Space{p1, p2});
+      textObject->fontSize = a7;
       textObjects.push_back(textObject);
     } while (ri->Next(mode));
   }

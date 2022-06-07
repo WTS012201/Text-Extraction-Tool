@@ -82,6 +82,16 @@ void ImageFrame::connections(){
   connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
+
+  connect(ui->removeSelection, &QPushButton::pressed, this, [&](){
+    for(auto& obj : textObjects){
+      if(obj->isSelected){
+        obj->deselect();
+        obj->hide();
+        obj->isChanged = false;
+      }
+    }
+  });
 }
 
 void ImageFrame::setRawText(){
@@ -267,15 +277,6 @@ QString ImageFrame::collect(
   typedef QPair<QPoint, QPoint> Space;
   QVector<QPair<QString, Space*>> partials;
   int x1, y1, x2, y2;
-
-  bool a1, a2, a3, a4, a5, a6;
-  int a7, a8;
-  ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
-
-  QFont font = ui->textEdit->font();
-  font.setPointSize(a7);
-  ui->textEdit->setFont(font);
-  ui->fontSizeInput->setText(QString::number(a7));
 
   if (ri != 0) {
     do {

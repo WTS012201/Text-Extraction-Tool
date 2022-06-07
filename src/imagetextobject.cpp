@@ -274,4 +274,5 @@ void ImageTextObject::deselect(){
     }
     highlight->hide();
   }
+  isSelected = false;
 }

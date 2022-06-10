@@ -4,7 +4,7 @@
 ImageTextObject::ImageTextObject(
     QWidget *parent, cv::Mat* __mat) :
   QWidget(parent), isSelected{false},
-  isChanged{false}, ui(new Ui::ImageTextObject), mat{__mat}
+  isChanged{false}, mat{__mat}, ui(new Ui::ImageTextObject)
 {
   ui->setupUi(this);
 }
@@ -13,8 +13,8 @@ ImageTextObject::ImageTextObject(
     QWidget *parent, ImageTextObject& old,
     Ui::MainWindow* __ui, cv::Mat* __mat):
   QWidget(parent), fontSize{old.fontSize},
-  mUi{__ui}, ui(new Ui::ImageTextObject),
-  mat{__mat}
+  mat{__mat}, mUi{__ui},
+  ui(new Ui::ImageTextObject)
 {
   ui->setupUi(this);
   setText(old.getText());

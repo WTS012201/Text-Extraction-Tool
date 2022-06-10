@@ -83,6 +83,7 @@ void ImageFrame::changeText(){
 
   selection->fillBackground();
   matrix->copyTo(display);
+
   QImage* img = new QImage{
       (uchar*)display.data,
       display.cols,
@@ -90,16 +91,21 @@ void ImageFrame::changeText(){
       (int)display.step,
       QImage::Format_BGR888
   };
+
   QPainter p;
   if(!p.begin(img)){
     qDebug() << "error with painter";
     return;
   }
+
   p.setPen(QPen{Qt::black});
-  selection->fontSize = ui->fontSizeInput->text().toInt();
+
+  int fontSize = ui->fontSizeInput->text().toInt();
+  selection->fontSize = fontSize;
+
   p.setFont(QFont{"Times", selection->fontSize}); //QFont::Bold
   p.drawText(selection->topLeft.x(),
-             selection->bottomRight.y(),
+             selection->topLeft.y() + 24,
              ui->textEdit->toPlainText()
              );
   p.end();

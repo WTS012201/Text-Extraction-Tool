@@ -97,17 +97,27 @@ void ImageFrame::changeText(){
     qDebug() << "error with painter";
     return;
   }
-
-  p.setPen(QPen{Qt::black});
-
   int fontSize = ui->fontSizeInput->text().toInt();
-  selection->fontSize = fontSize;
+  QString label = ui->textEdit->toPlainText();
+  p.setFont(QFont{"Times", fontSize}); //QFont::Bold
 
-  p.setFont(QFont{"Times", selection->fontSize}); //QFont::Bold
-  p.drawText(selection->topLeft.x(),
-             selection->topLeft.y() + 24,
-             ui->textEdit->toPlainText()
-             );
+  if(label.isEmpty()) return;
+  QFontMetrics fm{p.font()};
+  float x = fm.horizontalAdvance(label);
+  float y = fm.height();
+
+  QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
+  QRect rect{selection->topLeft, wh};
+  QRect oldRect{selection->topLeft, selection->bottomRight};
+
+  selection->bottomRight = wh;
+  float newWidth = rect.width()*1.0/oldRect.width();
+  float newHeight = rect.height()*1.0/oldRect.height();
+  selection->scaleAndPosition(newWidth, newHeight);
+
+  p.save();
+  p.drawText(rect, label, Qt::AlignTop | Qt::AlignLeft);
+  p.restore();
   p.end();
 
   delete matrix;
@@ -345,13 +355,13 @@ QString ImageFrame::collect(
   tesseract::ResultIterator* ri = api->GetIterator();
 
   typedef QPair<QPoint, QPoint> Space;
-  bool a1, a2, a3, a4, a5, a6;
-  int a7, a8;
+//  bool a1, a2, a3, a4, a5, a6;
+//  int a7, a8;
   int x1, y1, x2, y2;
 
   if (ri != 0) {
     do {
-      ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
+//      ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
       QString word = ri->GetUTF8Text(mode);
       ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
@@ -366,7 +376,6 @@ QString ImageFrame::collect(
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
       textObject->addLineSpace(new Space{p1, p2});
-      textObject->fontSize = a7;
       textObjects.push_back(textObject);
     } while (ri->Next(mode));
   }

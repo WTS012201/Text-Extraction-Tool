@@ -46,7 +46,6 @@ signals:
   void selection();
 
 public:
-  int fontSize;
   bool isSelected, isChanged;
   cv::Mat* mat;
   explicit ImageTextObject
@@ -72,7 +71,7 @@ public:
   void showCVImage();
   void setFilepath(QString __filepath);
   void fillBackground();
-
+  void scaleAndPosition(float x, float y);
   void selectHighlight();
   void highlight();
   void deselect();

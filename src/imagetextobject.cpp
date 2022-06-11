@@ -12,7 +12,7 @@ ImageTextObject::ImageTextObject(
 ImageTextObject::ImageTextObject(
     QWidget *parent, ImageTextObject& old,
     Ui::MainWindow* __ui, cv::Mat* __mat):
-  QWidget(parent), fontSize{old.fontSize},
+  QWidget(parent),
   mat{__mat}, mUi{__ui},
   ui(new Ui::ImageTextObject)
 {
@@ -124,8 +124,10 @@ void ImageTextObject::highlightSpaces(){
           highlight, &QPushButton::clicked,
           this, [=](...){
               if(isChanged){
+                int fsEstimate = bottomRight.y() - topLeft.y();
+
+                mUi->fontSizeInput->setText(QString::number(fsEstimate));
                 mUi->textEdit->setText(text);
-                mUi->fontSizeInput->setText(QString::number(fontSize));
                 highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
                 emit selection();
               }
@@ -151,6 +153,21 @@ void ImageTextObject::scaleAndPosition(float scalar){
   this->adjustSize();
   ui->frame->adjustSize();
   this->move(tempTL);
+}
+
+void ImageTextObject::scaleAndPosition(float sx, float sy){
+  for(auto& space : lineSpace){
+    QPushButton* highlight = highlights[space];
+    int sizeX = sx*(space->second.x() - space->first.x());
+    int sizeY = sy*(space->second.y() - space->first.y());
+    highlight->setMinimumSize(QSize{sizeX, sizeY});
+  }
+  auto size = bottomRight - topLeft;
+
+  this->setFixedSize(QSize{size.x(), size.y()});
+  ui->frame->setFixedSize(QSize{size.x(), size.y()});
+  this->adjustSize();
+  ui->frame->adjustSize();
 }
 
 void ImageTextObject::showCVImage(){

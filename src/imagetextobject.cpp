@@ -56,7 +56,6 @@ QVector<QPair<QPoint, QPoint>*> ImageTextObject::getLineSpaces(){
   return lineSpace;
 }
 
-
 QPoint ImageTextObject::findTopLeftCorner(){
   QPoint minPoint = lineSpace.first()->first;
 
@@ -276,11 +275,19 @@ void ImageTextObject::highlight(){
   }
 }
 
+void ImageTextObject::showHighlights(){
+  this->show();
+  for(auto& highlight : highlights.values()){
+      highlight->show();
+      highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  }
+}
+
 void ImageTextObject::selectHighlight(){
+  this->show();
   for(auto& highlight : highlights.values()){
       isSelected = true;
       highlight->show();
-      this->show();
       highlight->setStyleSheet("background:  rgba(37,122,253,100);");
   }
 }

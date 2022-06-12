@@ -75,7 +75,7 @@ public:
   void selectHighlight();
   void highlight();
   void deselect();
-
+  void showHighlights();
 private:
   QVector<QPair<QPoint, QPoint>*> lineSpace;
   QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;

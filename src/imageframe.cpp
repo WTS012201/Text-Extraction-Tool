@@ -13,10 +13,9 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 }
 
 ImageFrame::~ImageFrame(){
-  for(auto& obj : state->textObjects){
+  for(auto& obj : textObjects){
     delete obj;
   }
-  delete state->matrix;
   delete state;
   delete scene;
 }
@@ -36,13 +35,13 @@ void ImageFrame::changeZoom(){
   scalar = (scalar > 10.0) ? 10.0 : scalar;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : state->textObjects){
+  for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
 
 void ImageFrame::changeImage(QImage* img){
-  state->matrix->copyTo(display);
+  state->matrix.copyTo(display);
   cv::resize(
         display, display,
         cv::Size{},
@@ -79,14 +78,14 @@ void ImageFrame::changeText(){
   }
 
   State* oldState = new State;
-  oldState->matrix= new cv::Mat{};
-
-  oldState->textObjects = state->textObjects;
-  state->matrix->copyTo(*oldState->matrix);
+  oldState->changed = new ImageTextObject{this, *selection, ui, &state->matrix};
+  oldState->changed->hide();
+  state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
+  textObjects.push_back(oldState->changed);
 
   selection->fillBackground();
-  state->matrix->copyTo(display);
+  state->matrix.copyTo(display);
   QImage* img = new QImage{
       (uchar*)display.data,
       display.cols,
@@ -123,16 +122,16 @@ void ImageFrame::changeText(){
   p.restore();
   p.end();
 
-  delete state->matrix;
-  state->matrix = new cv::Mat{
+  state->matrix = cv::Mat{
         img->height(), img->width(),
         CV_8UC3, (void*)img->constBits(),
         (size_t)img->bytesPerLine()
   };
-  selection->mat = state->matrix;
+  selection->mat = &state->matrix;
   delete img;
 
   changeImage();
+  state->changed = selection;
 }
 
 void ImageFrame::connections(){
@@ -142,7 +141,7 @@ void ImageFrame::connections(){
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 
   connect(ui->removeSelection, &QPushButton::pressed, this, [=](...){
-    for(auto& obj : state->textObjects){
+    for(auto& obj : textObjects){
       if(obj->isSelected){
         obj->deselect();
         obj->hide();
@@ -157,7 +156,7 @@ void ImageFrame::setRawText(){
 }
 
 void ImageFrame::highlightSelection(){
-  for(auto& obj : state->textObjects){
+  for(auto& obj : textObjects){
     if(obj->isSelected){
       obj->isChanged = true;
       obj->deselect();
@@ -187,7 +186,7 @@ void ImageFrame::zoomIn(){
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : state->textObjects){
+  for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
@@ -199,14 +198,14 @@ void ImageFrame::zoomOut(){
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : state->textObjects){
+  for(auto& obj : textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent* event) {
   if(!keysPressed[Qt::Key_Control]){
-    for(auto& obj : state->textObjects){
+    for(auto& obj : textObjects){
       obj->deselect();
       if(!obj->isChanged){
         obj->hide();
@@ -260,7 +259,10 @@ void ImageFrame::inSelection(QPair<QPoint, QPoint> boundingBox){
   auto a = boundingBox.first;
   auto b = boundingBox.second;
 
-  for(auto& obj : state->textObjects){
+  for(auto& obj : textObjects){
+    if(!obj->isEnabled()){
+      continue;
+    }
     auto tl = obj->topLeft;
     auto br = obj->bottomRight;
 
@@ -298,13 +300,13 @@ void ImageFrame::showAll(){
 
 void ImageFrame::extract(){
   try{
-    state->matrix = new cv::Mat{cv::imread(filepath.toStdString(), cv::IMREAD_COLOR)};
+    state->matrix = cv::Mat{cv::imread(filepath.toStdString(), cv::IMREAD_COLOR)};
   }catch(...){
     qDebug() << "error reading image";
     return;
   }
 
-  if(state->matrix->empty()){
+  if(state->matrix.empty()){
     qDebug() << "empty matrix";
     return;
   }  
@@ -312,8 +314,8 @@ void ImageFrame::extract(){
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
       rawText = collect(matrix);
-  }, *state->matrix).then([&](){
-    state->matrix->copyTo(display);
+  }, state->matrix).then([&](){
+    state->matrix.copyTo(display);
     emit rawTextChanged();
   });
   showAll();
@@ -322,15 +324,15 @@ void ImageFrame::extract(){
 void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
-  for(auto obj : state->textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, state->matrix};
+  for(auto obj : textObjects){
+    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, &state->matrix};
     temp->hide();
 
     tempObjects.push_back(temp);
 
     connect(temp, &ImageTextObject::selection, this, [&](...){
       selection = qobject_cast<ImageTextObject*>(sender());
-      for(auto& tempObj : state->textObjects){
+      for(auto& tempObj : textObjects){
         if(tempObj == selection){
           continue;
         }
@@ -341,7 +343,7 @@ void ImageFrame::populateTextObjects(){
     delete obj;
   }
 
-  state->textObjects = tempObjects;
+  textObjects = tempObjects;
 }
 
 QString ImageFrame::collect(
@@ -358,13 +360,10 @@ QString ImageFrame::collect(
   tesseract::ResultIterator* ri = api->GetIterator();
 
   typedef QPair<QPoint, QPoint> Space;
-//  bool a1, a2, a3, a4, a5, a6;
-//  int a7, a8;
   int x1, y1, x2, y2;
 
   if (ri != 0) {
     do {
-//      ri->WordFontAttributes(&a1,&a2,&a3,&a4,&a5,&a6,&a7,&a8);
       QString word = ri->GetUTF8Text(mode);
       ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
@@ -379,7 +378,7 @@ QString ImageFrame::collect(
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
       textObject->addLineSpace(new Space{p1, p2});
-      state->textObjects.push_back(textObject);
+      textObjects.push_back(textObject);
     } while (ri->Next(mode));
   }
 
@@ -394,13 +393,17 @@ void ImageFrame::undoAction(){
   }
 
   State* currState = new State;
-  currState->matrix = new cv::Mat{};
-  currState->textObjects = state->textObjects;
-  state->matrix->copyTo(*currState->matrix);
+  state->matrix.copyTo(currState->matrix);
+  currState->changed = state->changed;
+  state->changed->setDisabled(true);
+  state->changed->hide();
   redo.push(currState);
 
-  auto prevState = undo.pop();
-  state = prevState;
+  state = undo.pop();
+  state->changed->showHighlights();
+  state->changed->setDisabled(false);
+  state->changed->isChanged = true;
+  state->changed->deselect();
   changeImage();
 }
 
@@ -410,12 +413,17 @@ void ImageFrame::redoAction(){
   }
 
   State* currState = new State;
-  currState->matrix = new cv::Mat{};
-  currState->textObjects = state->textObjects;
-  state->matrix->copyTo(*currState->matrix);
+  state->matrix.copyTo(currState->matrix);
+  currState->changed = state->changed;
+  state->changed->setDisabled(true);
+  state->changed->hide();
   undo.push(currState);
 
-  auto prevState = redo.pop();
-  state = prevState;
+  state = redo.pop();
+  state->changed->showHighlights();
+  state->changed->setDisabled(false);
+  state->changed->isChanged = true;
+  state->changed->deselect();
   changeImage();
 }
+

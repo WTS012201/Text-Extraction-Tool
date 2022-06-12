@@ -62,10 +62,11 @@ private:
   tesseract::PageIteratorLevel mode;
   ImageTextObject* selection;
   Ui::MainWindow* ui;
+  QVector<ImageTextObject*> textObjects;
 
   typedef struct {
-    QVector<ImageTextObject*> textObjects;
-    cv::Mat* matrix;
+    ImageTextObject* changed;
+    cv::Mat matrix;
   } State;
   QStack<State*> undo, redo;
   State* state;

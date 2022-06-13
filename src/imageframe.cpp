@@ -14,6 +14,12 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 }
 
 ImageFrame::~ImageFrame(){
+  for(auto& state : undo){
+    delete state;
+  }
+  for(auto& state : redo){
+    delete state;
+  }
   for(auto& obj : state->textObjects){
     delete obj;
   }
@@ -409,9 +415,10 @@ void ImageFrame::undoAction(){
       cv::Mat{}
   };
   state->matrix.copyTo(currState->matrix);
-  redo.push(currState);
 
+  redo.push(currState);
   state = undo.pop();
+
   for(auto& obj : state->textObjects){
     obj->show();
     obj->setDisabled(false);
@@ -432,14 +439,10 @@ void ImageFrame::redoAction(){
     obj->hide();
     obj->setDisabled(true);
   }
-  State* currState = new State{
-      state->textObjects,
-      cv::Mat{}
-  };
-  state->matrix.copyTo(currState->matrix);
-  undo.push(currState);
 
+  undo.push(state);
   state = redo.pop();
+
   for(auto& obj : state->textObjects){
     obj->show();
     obj->setDisabled(false);

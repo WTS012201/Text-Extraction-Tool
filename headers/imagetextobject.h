@@ -58,12 +58,10 @@ public:
                   );
 
   QPoint topLeft, bottomRight;
+  QPair<QPoint, QPoint> lineSpace;
 
   void setText(QString __text);
   QString getText();
-  void addLineSpace(QPair<QPoint, QPoint>*);
-  QVector<QPair<QPoint, QPoint>*> getLineSpaces();
-  void setLineSpaces(QVector<QPair<QPoint, QPoint>*> spaces);
   void initSizeAndPos();
   void highlightSpaces();
   void scaleAndPosition(float scalar);
@@ -77,8 +75,7 @@ public:
   void deselect();
   void showHighlights();
 private:
-  QVector<QPair<QPoint, QPoint>*> lineSpace;
-  QHash<QPair<QPoint, QPoint>*, QPushButton*> highlights;
+  QPushButton* highlightButton;
   Ui::MainWindow* mUi;
 
   Ui::ImageTextObject *ui;
@@ -87,8 +84,6 @@ private:
 
   cv::Scalar bgIntensity;
 
-  QPoint findTopLeftCorner();
-  QPoint findBottomRightCorner();
   cv::Mat QImageToMat();
   void determineBgColor();
 };

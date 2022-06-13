@@ -14,7 +14,7 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 }
 
 ImageFrame::~ImageFrame(){
-  for(auto& obj : textObjects){
+  for(auto& obj : state->textObjects){
     delete obj;
   }
   delete state;
@@ -36,7 +36,7 @@ void ImageFrame::changeZoom(){
   scalar = (scalar > 10.0) ? 10.0 : scalar;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : textObjects){
+  for(auto& obj : state->textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
@@ -77,17 +77,21 @@ void ImageFrame::changeText(){
     qDebug() << "No selection";
     return;
   }
+  QVector<ImageTextObject*> oldObjs = state->textObjects;
+  state->textObjects.remove(state->textObjects.indexOf(selection));
+  selection->hide();
+  selection->setDisabled(true);
+  selection = new ImageTextObject{this, *selection, ui, &state->matrix};
+  state->textObjects.push_back(selection);
 
-  // old state: state of selected textobject and image before change, put on stack
-  State* oldState = new State;
-  oldState->changed = new ImageTextObject{this, *selection, ui, &state->matrix};
-  oldState->changed->hide();
+  State* oldState = new State{
+      oldObjs,
+      cv::Mat{}
+  };
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
-  textObjects.push_back(oldState->changed);
 
   selection->fillBackground();
-  oldState->changed->fillBackground();
   state->matrix.copyTo(display);
   QImage* img = new QImage{
       (uchar*)display.data,
@@ -103,10 +107,10 @@ void ImageFrame::changeText(){
   }
   int fontSize = ui->fontSizeInput->text().toInt();
   QString label = ui->textEdit->toPlainText();
+  selection->setText(label);
   QFont font{"Times", fontSize};
   p.setFont(font);
 
-  if(label.isEmpty()) return;
   QFontMetrics fm{p.font()};
   float x = fm.horizontalAdvance(label);
   float y = fm.height();
@@ -131,9 +135,9 @@ void ImageFrame::changeText(){
         CV_8UC3, (void*)img->constBits(),
         (size_t)img->bytesPerLine()
   };
+  selection->isChanged = true;
+  selection->showHighlights();
   selection->mat = &state->matrix;
-  state->changed = selection;
-  changes[oldState->changed] = selection;
   delete img;
 
   changeImage();
@@ -146,7 +150,7 @@ void ImageFrame::connections(){
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 
   connect(ui->removeSelection, &QPushButton::pressed, this, [=](...){
-    for(auto& obj : textObjects){
+    for(auto& obj : state->textObjects){
       if(obj->isSelected){
         obj->deselect();
         obj->hide();
@@ -161,7 +165,7 @@ void ImageFrame::setRawText(){
 }
 
 void ImageFrame::highlightSelection(){
-  for(auto& obj : textObjects){
+  for(auto& obj : state->textObjects){
     if(obj->isSelected){
       obj->isChanged = true;
       obj->deselect();
@@ -191,7 +195,7 @@ void ImageFrame::zoomIn(){
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : textObjects){
+  for(auto& obj : state->textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
@@ -203,14 +207,14 @@ void ImageFrame::zoomOut(){
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for(auto& obj : textObjects){
+  for(auto& obj : state->textObjects){
     obj->scaleAndPosition(scalar);
   }
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent* event) {
   if(!keysPressed[Qt::Key_Control]){
-    for(auto& obj : textObjects){
+    for(auto& obj : state->textObjects){
       obj->deselect();
       if(!obj->isChanged){
         obj->hide();
@@ -264,7 +268,7 @@ void ImageFrame::inSelection(QPair<QPoint, QPoint> boundingBox){
   auto a = boundingBox.first;
   auto b = boundingBox.second;
 
-  for(auto& obj : textObjects){
+  for(auto& obj : state->textObjects){
     if(!obj->isEnabled()){
       continue;
     }
@@ -329,7 +333,7 @@ void ImageFrame::extract(){
 void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
-  for(auto obj : textObjects){
+  for(auto obj : state->textObjects){
     ImageTextObject* temp = new ImageTextObject{this, *obj, ui, &state->matrix};
     temp->hide();
 
@@ -337,7 +341,7 @@ void ImageFrame::populateTextObjects(){
 
     connect(temp, &ImageTextObject::selection, this, [&](...){
       selection = qobject_cast<ImageTextObject*>(sender());
-      for(auto& tempObj : textObjects){
+      for(auto& tempObj : state->textObjects){
         if(tempObj == selection){
           continue;
         }
@@ -348,7 +352,7 @@ void ImageFrame::populateTextObjects(){
     delete obj;
   }
 
-  textObjects = tempObjects;
+  state->textObjects = tempObjects;
 }
 
 QString ImageFrame::collect(
@@ -364,7 +368,6 @@ QString ImageFrame::collect(
   QString text = QString{api->GetUTF8Text()};
   tesseract::ResultIterator* ri = api->GetIterator();
 
-  typedef QPair<QPoint, QPoint> Space;
   int x1, y1, x2, y2;
 
   if (ri != 0) {
@@ -382,8 +385,8 @@ QString ImageFrame::collect(
 
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
-      textObject->addLineSpace(new Space{p1, p2});
-      textObjects.push_back(textObject);
+      textObject->lineSpace = QPair<QPoint, QPoint>{p1, p2};
+      state->textObjects.push_back(textObject);
     } while (ri->Next(mode));
   }
 
@@ -397,24 +400,26 @@ void ImageFrame::undoAction(){
     return;
   }
 
-  // hide last change and put on redo stack
-  State* currState = new State;
+  for(auto& obj : state->textObjects){
+    obj->hide();
+    obj->setDisabled(true);
+  }
+  State* currState = new State{
+      state->textObjects,
+      cv::Mat{}
+  };
   state->matrix.copyTo(currState->matrix);
-  currState->changed = state->changed;
   redo.push(currState);
 
-  // take prev state and show
   state = undo.pop();
-  if(!changes.contains(state->changed)){
-    return;
+  for(auto& obj : state->textObjects){
+    obj->show();
+    obj->setDisabled(false);
   }
 
-  changes[state->changed]->hide();
-  changes[state->changed]->setDisabled(true);
-  state->changed->showHighlights();
-  state->changed->setDisabled(false);
-  state->changed->isChanged = true;
-  state->changed->deselect();
+  selection = state->textObjects.last();
+  selection->showHighlights();
+
   changeImage();
 }
 
@@ -423,22 +428,24 @@ void ImageFrame::redoAction(){
     return;
   }
 
-  State* currState = new State;
+  for(auto& obj : state->textObjects){
+    obj->hide();
+    obj->setDisabled(true);
+  }
+  State* currState = new State{
+      state->textObjects,
+      cv::Mat{}
+  };
   state->matrix.copyTo(currState->matrix);
-  currState->changed = state->changed;
-  state->changed->setDisabled(true);
-  state->changed->hide();
   undo.push(currState);
 
-  if(changes.contains(state->changed)){
-    changes[state->changed]->setDisabled(false);
-    changes[state->changed]->show();
-  }
   state = redo.pop();
+  for(auto& obj : state->textObjects){
+    obj->show();
+    obj->setDisabled(false);
+  }
 
-  state->changed->showHighlights();
-  state->changed->setDisabled(false);
-  state->changed->isChanged = true;
-  state->changed->deselect();
+  selection = state->textObjects.last();
+  selection->showHighlights();
   changeImage();
 }

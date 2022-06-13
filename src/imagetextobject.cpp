@@ -16,12 +16,14 @@ ImageTextObject::ImageTextObject(
   mat{__mat}, mUi{__ui},
   ui(new Ui::ImageTextObject)
 {
+  topLeft=  old.lineSpace.first;
+  bottomRight = old.lineSpace.second;
+  lineSpace = old.lineSpace;
   ui->setupUi(this);
   setText(old.getText());
 
-  setLineSpaces(old.getLineSpaces());
-  highlightSpaces();
   initSizeAndPos();
+  highlightSpaces();
   determineBgColor();
 }
 
@@ -42,53 +44,9 @@ ImageTextObject::~ImageTextObject()
   delete ui;
 }
 
-void ImageTextObject::addLineSpace
-(QPair<QPoint, QPoint>* space){
-  lineSpace.push_back(space);
-}
 
-void ImageTextObject::setLineSpaces(
-    QVector<QPair<QPoint, QPoint>*> spaces){
-  lineSpace = spaces;
-}
-
-QVector<QPair<QPoint, QPoint>*> ImageTextObject::getLineSpaces(){
-  return lineSpace;
-}
-
-QPoint ImageTextObject::findTopLeftCorner(){
-  QPoint minPoint = lineSpace.first()->first;
-
-  for(auto& p : lineSpace){
-    if(p->first.x() < minPoint.x()){
-      minPoint.setX(p->first.x());
-    }
-    if(p->first.y() < minPoint.y()){
-      minPoint.setY(p->first.y());
-    }
-  }
-
-  return minPoint;
-}
-
-QPoint ImageTextObject::findBottomRightCorner(){
-  QPoint maxPoint = lineSpace.first()->first;
-
-  for(auto& p : lineSpace){
-    if(p->second.x() > maxPoint.x()){
-      maxPoint.setX(p->second.x());
-    }
-    if(p->second.y() > maxPoint.y()){
-      maxPoint.setY(p->second.y());
-    }
-  }
-
-  return maxPoint;
-}
 
 void ImageTextObject::initSizeAndPos(){
-  topLeft = findTopLeftCorner();
-  bottomRight = findBottomRightCorner();
   auto size = bottomRight - topLeft;
 
   if(size.x() < 0 || size.y() < 0){
@@ -104,20 +62,14 @@ void ImageTextObject::initSizeAndPos(){
 }
 
 void ImageTextObject::highlightSpaces(){
-  for(auto space : lineSpace){
-    auto highlight = new QPushButton{ui->frame};
-    auto size = space->second - space->first;
-
-    if(size.x() < 0 || size.y() < 0){
-      qDebug() << "failed to establish size";
-      delete highlight;
-      continue;
-    }
+    QPushButton* highlight = new QPushButton{ui->frame};
+    auto size = lineSpace.second - lineSpace.first;
 
     highlight->setCursor(Qt::CursorShape::PointingHandCursor);
     highlight->setMinimumSize(QSize{size.x() - 1, size.y() - 1});
     highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
-    highlight->hide();
+    highlight->show();
+//    highlight->hide();
 
     QObject::connect(
           highlight, &QPushButton::clicked,
@@ -132,35 +84,35 @@ void ImageTextObject::highlightSpaces(){
               }
             }
           );
-    highlights[space] = highlight;
-  }
+    highlightButton = highlight;
 }
 
 void ImageTextObject::scaleAndPosition(float scalar){
-  for(auto& space : lineSpace){
-    QPushButton* highlight = highlights[space];
-    auto size = scalar*(space->second - space->first);
-    highlight->setMinimumSize(QSize{size.x(), size.y()});
-  }
+  auto size = scalar*(lineSpace.second - lineSpace.first);
+  highlightButton->setMinimumSize(QSize{size.x(), size.y()});
   auto tempBR = bottomRight * scalar;
   auto tempTL = topLeft * scalar;
 
-  auto size = tempBR - tempTL;
+  topLeft = tempTL;
+  bottomRight = tempBR;
+  lineSpace = QPair<QPoint, QPoint>(topLeft, bottomRight);
 
-  this->setFixedSize(QSize{size.x(), size.y()});
-  ui->frame->setFixedSize(QSize{size.x(), size.y()});
+  auto boxSize = tempBR - tempTL;
+
+  this->setFixedSize(QSize{boxSize.x(), boxSize.y()});
+  ui->frame->setFixedSize(QSize{boxSize.x(), boxSize.y()});
   this->adjustSize();
   ui->frame->adjustSize();
   this->move(tempTL);
 }
 
 void ImageTextObject::scaleAndPosition(float sx, float sy){
-  for(auto& space : lineSpace){
-    QPushButton* highlight = highlights[space];
-    int sizeX = sx*(space->second.x() - space->first.x());
-    int sizeY = sy*(space->second.y() - space->first.y());
-    highlight->setMinimumSize(QSize{sizeX, sizeY});
-  }
+  int sizeX = sx*(lineSpace.second.x() - lineSpace.first.x());
+  int sizeY = sy*(lineSpace.second.y() - lineSpace.first.y());
+  highlightButton->setMinimumSize(QSize{sizeX, sizeY});
+
+  bottomRight = topLeft + QPoint{sizeX, sizeY};
+  lineSpace = QPair<QPoint, QPoint>(topLeft, bottomRight);
   auto size = bottomRight - topLeft;
 
   this->setFixedSize(QSize{size.x(), size.y()});
@@ -245,7 +197,6 @@ void ImageTextObject::determineBgColor(){
   bgIntensity = intensity;
 }
 
-
 void ImageTextObject::fillBackground(){
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
@@ -270,35 +221,28 @@ void ImageTextObject::fillBackground(){
 }
 
 void ImageTextObject::highlight(){
-  for(auto& highlight : highlights.values()){
-    highlight->isHidden() ? highlight->show() : highlight->hide();
-  }
+    highlightButton->isHidden() ? highlightButton->show() : highlightButton->hide();
 }
 
 void ImageTextObject::showHighlights(){
   this->show();
-  for(auto& highlight : highlights.values()){
-      highlight->show();
-      highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
-  }
+  highlightButton->show();
+  highlightButton->setStyleSheet("background:  rgba(255, 243, 0, 100);");
 }
 
 void ImageTextObject::selectHighlight(){
   this->show();
-  for(auto& highlight : highlights.values()){
-      isSelected = true;
-      highlight->show();
-      highlight->setStyleSheet("background:  rgba(37,122,253,100);");
-  }
+  isSelected = true;
+  highlightButton->show();
+  highlightButton->setStyleSheet("background:  rgba(37,122,253,100);");
+
 }
 
 void ImageTextObject::deselect(){
-  for(auto& highlight : highlights.values()){
-    highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
-    if(isChanged){
-      continue;
-    }
-    highlight->hide();
+  highlightButton->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  if(isChanged){
+    return;
   }
+  highlightButton->hide();
   isSelected = false;
 }

@@ -68,6 +68,7 @@ private:
     ImageTextObject* changed;
     cv::Mat matrix;
   } State;
+  QHash<ImageTextObject*, ImageTextObject*> changes;
   QStack<State*> undo, redo;
   State* state;
 

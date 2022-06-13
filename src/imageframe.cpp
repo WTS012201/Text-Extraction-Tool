@@ -1,4 +1,5 @@
-﻿#include "../headers/imageframe.h"
+﻿
+#include "../headers/imageframe.h"
 
 ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   rubberBand{nullptr}, scene{new QGraphicsScene(this)},
@@ -77,6 +78,7 @@ void ImageFrame::changeText(){
     return;
   }
 
+  // old state: state of selected textobject and image before change, put on stack
   State* oldState = new State;
   oldState->changed = new ImageTextObject{this, *selection, ui, &state->matrix};
   oldState->changed->hide();
@@ -122,16 +124,18 @@ void ImageFrame::changeText(){
   p.restore();
   p.end();
 
+  // update state for changes
   state->matrix = cv::Mat{
         img->height(), img->width(),
         CV_8UC3, (void*)img->constBits(),
         (size_t)img->bytesPerLine()
   };
   selection->mat = &state->matrix;
+  state->changed = selection;
+  changes[oldState->changed] = selection;
   delete img;
 
   changeImage();
-  state->changed = selection;
 }
 
 void ImageFrame::connections(){
@@ -309,7 +313,7 @@ void ImageFrame::extract(){
   if(state->matrix.empty()){
     qDebug() << "empty matrix";
     return;
-  }  
+  }
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
@@ -392,14 +396,20 @@ void ImageFrame::undoAction(){
     return;
   }
 
+  // hide last change and put on redo stack
   State* currState = new State;
   state->matrix.copyTo(currState->matrix);
   currState->changed = state->changed;
-  state->changed->setDisabled(true);
-  state->changed->hide();
+//  state->changed->setDisabled(true);
+//  state->changed->hide();
   redo.push(currState);
 
+  // take prev state and show
   state = undo.pop();
+  changes[state->changed]->hide();
+  changes[state->changed]->setDisabled(true);
+
+
   state->changed->showHighlights();
   state->changed->setDisabled(false);
   state->changed->isChanged = true;
@@ -419,11 +429,13 @@ void ImageFrame::redoAction(){
   state->changed->hide();
   undo.push(currState);
 
+  changes[state->changed]->setDisabled(false);
+  changes[state->changed]->show();
   state = redo.pop();
+
   state->changed->showHighlights();
   state->changed->setDisabled(false);
   state->changed->isChanged = true;
   state->changed->deselect();
   changeImage();
 }
-

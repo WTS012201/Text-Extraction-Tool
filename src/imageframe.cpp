@@ -87,6 +87,7 @@ void ImageFrame::changeText(){
   textObjects.push_back(oldState->changed);
 
   selection->fillBackground();
+  oldState->changed->fillBackground();
   state->matrix.copyTo(display);
   QImage* img = new QImage{
       (uchar*)display.data,
@@ -409,7 +410,6 @@ void ImageFrame::undoAction(){
   changes[state->changed]->hide();
   changes[state->changed]->setDisabled(true);
 
-
   state->changed->showHighlights();
   state->changed->setDisabled(false);
   state->changed->isChanged = true;
@@ -429,8 +429,10 @@ void ImageFrame::redoAction(){
   state->changed->hide();
   undo.push(currState);
 
-  changes[state->changed]->setDisabled(false);
-  changes[state->changed]->show();
+  if(changes.contains(state->changed)){
+    changes[state->changed]->setDisabled(false);
+    changes[state->changed]->show();
+  }
   state = redo.pop();
 
   state->changed->showHighlights();

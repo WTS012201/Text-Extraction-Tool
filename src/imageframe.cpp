@@ -401,15 +401,16 @@ void ImageFrame::undoAction(){
   State* currState = new State;
   state->matrix.copyTo(currState->matrix);
   currState->changed = state->changed;
-//  state->changed->setDisabled(true);
-//  state->changed->hide();
   redo.push(currState);
 
   // take prev state and show
   state = undo.pop();
+  if(!changes.contains(state->changed)){
+    return;
+  }
+
   changes[state->changed]->hide();
   changes[state->changed]->setDisabled(true);
-
   state->changed->showHighlights();
   state->changed->setDisabled(false);
   state->changed->isChanged = true;

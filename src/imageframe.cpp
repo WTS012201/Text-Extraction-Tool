@@ -4,8 +4,7 @@
 ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   rubberBand{nullptr}, scene{new QGraphicsScene(this)},
   mode{tesseract::RIL_PARA}, selection{nullptr}, ui{__ui}, state{new State},
-  scalar{1.0},
-  scaleFactor{0.1}
+  scalar{1.0}, scaleFactor{0.1}, middleDown{false}
 {
   initUi(parent);
   setWidgets();
@@ -14,13 +13,13 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 }
 
 ImageFrame::~ImageFrame(){
-  for(auto& state : undo){
+  for(const auto& state : undo){
     delete state;
   }
-  for(auto& state : redo){
+  for(const auto& state : redo){
     delete state;
   }
-  for(auto& obj : state->textObjects){
+  for(const auto& obj : state->textObjects){
     delete obj;
   }
   delete state;
@@ -195,9 +194,6 @@ void ImageFrame::initUi(QWidget* parent){
 }
 
 void ImageFrame::zoomIn(){
-  if(!keysPressed[Qt::SHIFT]){
-    return;
-  }
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
@@ -207,9 +203,6 @@ void ImageFrame::zoomIn(){
 }
 
 void ImageFrame::zoomOut(){
-  if(!keysPressed[Qt::SHIFT]){
-    return;
-  }
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
@@ -233,16 +226,20 @@ void ImageFrame::mousePressEvent(QMouseEvent* event) {
   }
   rubberBand->setGeometry(QRect{origin, QSize{}});
   rubberBand->show();
+}
 
-//  if(event->buttons() & Qt::LeftButton){
-//    zoomIn();
-//  }else if(event->buttons() & Qt::RightButton){
-//    zoomOut();
-//  }
+void ImageFrame::wheelEvent(QWheelEvent* event){
+  if(event->angleDelta().y() > 0 && (event->buttons() & Qt::MiddleButton))
+    zoomIn();
+  else if(event->angleDelta().y() < 0 && (event->buttons() & Qt::MiddleButton))
+    zoomOut();
+  else{
+    QGraphicsView::wheelEvent(event);
+  }
 }
 
 void ImageFrame::mouseMoveEvent(QMouseEvent *event){
-    rubberBand->setGeometry(QRect(origin, event->pos()).normalized());
+    rubberBand->setGeometry(QRect{origin, event->pos()}.normalized());
 }
 
 void ImageFrame::mouseReleaseEvent(QMouseEvent *event){
@@ -429,7 +426,6 @@ void ImageFrame::undoAction(){
 
   selection = state->textObjects.last();
   selection->showHighlights();
-
   changeImage();
 }
 

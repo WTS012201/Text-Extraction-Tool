@@ -72,13 +72,14 @@ void MainWindow::on_actionOptions_triggered()
 }
 
 void MainWindow::connections(){
+  save = new QShortcut{QKeySequence("Ctrl+S"), this};
   undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
   redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(
         ui->fontSizeInput,
-        &QLineEdit::returnPressed,
+        &QLineEdit::textChanged,
         this,
         &MainWindow::fontSizeChanged
         );

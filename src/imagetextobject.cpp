@@ -55,7 +55,6 @@ void ImageTextObject::highlightSpaces(){
     highlight->setMinimumSize(QSize{size.x() - 1, size.y() - 1});
     highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
     highlight->show();
-//    highlight->hide();
 
     QObject::connect(
           highlight, &QPushButton::clicked,
@@ -108,9 +107,6 @@ void ImageTextObject::scaleAndPosition(double sx, double sy){
   int sizeX = sx*(lineSpace.second.x() - lineSpace.first.x());
   int sizeY = sy*(lineSpace.second.y() - lineSpace.first.y());
   highlightButton->setMinimumSize(QSize{sizeX, sizeY});
-
-  qDebug() << topLeft;
-  qDebug() << bottomRight;
 
   auto tempBR = topLeft + QPoint{sizeX, sizeY};
   lineSpace = QPair<QPoint, QPoint>(topLeft, tempBR);

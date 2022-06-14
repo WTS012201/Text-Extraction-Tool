@@ -7,6 +7,7 @@
 #include "imagetextobject.h"
 #include "options.h"
 
+#include <QScrollBar>
 #include <QRubberBand>
 #include <QStack>
 #include <QWidget>
@@ -72,10 +73,12 @@ private:
 
   double scalar;
   double scaleFactor;
+  bool middleDown;
 
   void mousePressEvent(QMouseEvent * event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
+  void wheelEvent(QWheelEvent* event) override;
   void connections();
   void initUi(QWidget* parent);
   void zoomIn();

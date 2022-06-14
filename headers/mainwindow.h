@@ -32,7 +32,7 @@ private slots:
 private:
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
-  QShortcut *undo, *redo, *ctrl;
+  QShortcut *undo, *redo, *ctrl, *save;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
   Options* options;

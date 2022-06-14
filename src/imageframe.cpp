@@ -36,7 +36,7 @@ void ImageFrame::setOptions(Options* options){
 }
 
 void ImageFrame::changeZoom(){
-  float val = (ui->zoomFactor->text()).toFloat();
+  double val = (ui->zoomFactor->text()).toDouble();
 
   scalar = (val < 0.1) ? 0.1 : val;
   scalar = (scalar > 10.0) ? 10.0 : scalar;
@@ -118,16 +118,16 @@ void ImageFrame::changeText(){
   p.setFont(font);
 
   QFontMetrics fm{p.font()};
-  float x = fm.horizontalAdvance(label);
-  float y = fm.height();
+  double x = fm.horizontalAdvance(label);
+  double y = fm.height();
 
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
   QRect rect{selection->topLeft, wh};
   QRect oldRect{selection->topLeft, selection->bottomRight};
 
   selection->bottomRight = wh;
-  float newWidth = rect.width()*1.0/oldRect.width();
-  float newHeight = rect.height()*1.0/oldRect.height();
+  double newWidth = rect.width()*1.0/oldRect.width();
+  double newHeight = rect.height()*1.0/oldRect.height();
   selection->scaleAndPosition(newWidth, newHeight);
 
   p.save();
@@ -234,11 +234,11 @@ void ImageFrame::mousePressEvent(QMouseEvent* event) {
   rubberBand->setGeometry(QRect{origin, QSize{}});
   rubberBand->show();
 
-  if(event->buttons() & Qt::LeftButton){
-    zoomIn();
-  }else if(event->buttons() & Qt::RightButton){
-    zoomOut();
-  }
+//  if(event->buttons() & Qt::LeftButton){
+//    zoomIn();
+//  }else if(event->buttons() & Qt::RightButton){
+//    zoomOut();
+//  }
 }
 
 void ImageFrame::mouseMoveEvent(QMouseEvent *event){
@@ -392,6 +392,8 @@ QString ImageFrame::collect(
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
       textObject->lineSpace = QPair<QPoint, QPoint>{p1, p2};
+      textObject->topLeft = p1;
+      textObject->bottomRight = p2;
       state->textObjects.push_back(textObject);
     } while (ri->Next(mode));
   }
@@ -420,6 +422,7 @@ void ImageFrame::undoAction(){
   state = undo.pop();
 
   for(auto& obj : state->textObjects){
+    obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
   }
@@ -444,6 +447,7 @@ void ImageFrame::redoAction(){
   state = redo.pop();
 
   for(auto& obj : state->textObjects){
+    obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
   }

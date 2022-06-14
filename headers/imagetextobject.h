@@ -64,12 +64,12 @@ public:
   QString getText();
   void initSizeAndPos();
   void highlightSpaces();
-  void scaleAndPosition(float scalar);
+  void scaleAndPosition(double scalar);
   void setImage(cv::Mat* __image);
   void showCVImage();
   void setFilepath(QString __filepath);
   void fillBackground();
-  void scaleAndPosition(float x, float y);
+  void scaleAndPosition(double x, double y);
   void selectHighlight();
   void highlight();
   void deselect();

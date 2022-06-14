@@ -16,8 +16,8 @@ ImageTextObject::ImageTextObject(
   mat{__mat}, mUi{__ui},
   ui(new Ui::ImageTextObject)
 {
-  topLeft=  old.lineSpace.first;
-  bottomRight = old.lineSpace.second;
+  topLeft = old.topLeft;
+  bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
   ui->setupUi(this);
   setText(old.getText());
@@ -46,20 +46,6 @@ ImageTextObject::~ImageTextObject()
 
 
 
-void ImageTextObject::initSizeAndPos(){
-  auto size = bottomRight - topLeft;
-
-  if(size.x() < 0 || size.y() < 0){
-    qDebug() << "failed to establish size";
-    return;
-  }
-
-  this->setFixedSize(QSize{size.x(), size.y()});
-  ui->frame->setFixedSize(QSize{size.x(), size.y()});
-  this->adjustSize();
-  ui->frame->adjustSize();
-  this->move(topLeft);
-}
 
 void ImageTextObject::highlightSpaces(){
     QPushButton* highlight = new QPushButton{ui->frame};
@@ -87,16 +73,28 @@ void ImageTextObject::highlightSpaces(){
     highlightButton = highlight;
 }
 
-void ImageTextObject::scaleAndPosition(float scalar){
+void ImageTextObject::initSizeAndPos(){
+  auto size = bottomRight - topLeft;
+
+  if(size.x() < 0 || size.y() < 0){
+    qDebug() << "failed to establish size";
+    return;
+  }
+
+  this->setFixedSize(QSize{size.x(), size.y()});
+  ui->frame->setFixedSize(QSize{size.x(), size.y()});
+  this->adjustSize();
+  ui->frame->adjustSize();
+  this->move(topLeft);
+}
+
+void ImageTextObject::scaleAndPosition(double scalar){
   auto size = scalar*(lineSpace.second - lineSpace.first);
   highlightButton->setMinimumSize(QSize{size.x(), size.y()});
   auto tempBR = bottomRight * scalar;
   auto tempTL = topLeft * scalar;
 
-  topLeft = tempTL;
-  bottomRight = tempBR;
-  lineSpace = QPair<QPoint, QPoint>(topLeft, bottomRight);
-
+  lineSpace = QPair<QPoint, QPoint>(tempTL, tempBR);
   auto boxSize = tempBR - tempTL;
 
   this->setFixedSize(QSize{boxSize.x(), boxSize.y()});
@@ -106,19 +104,24 @@ void ImageTextObject::scaleAndPosition(float scalar){
   this->move(tempTL);
 }
 
-void ImageTextObject::scaleAndPosition(float sx, float sy){
+void ImageTextObject::scaleAndPosition(double sx, double sy){
   int sizeX = sx*(lineSpace.second.x() - lineSpace.first.x());
   int sizeY = sy*(lineSpace.second.y() - lineSpace.first.y());
   highlightButton->setMinimumSize(QSize{sizeX, sizeY});
 
-  bottomRight = topLeft + QPoint{sizeX, sizeY};
-  lineSpace = QPair<QPoint, QPoint>(topLeft, bottomRight);
-  auto size = bottomRight - topLeft;
+  qDebug() << topLeft;
+  qDebug() << bottomRight;
+
+  auto tempBR = topLeft + QPoint{sizeX, sizeY};
+  lineSpace = QPair<QPoint, QPoint>(topLeft, tempBR);
+  auto size = tempBR - topLeft;
 
   this->setFixedSize(QSize{size.x(), size.y()});
   ui->frame->setFixedSize(QSize{size.x(), size.y()});
   this->adjustSize();
   ui->frame->adjustSize();
+
+  this->move(topLeft*mUi->zoomFactor->text().toDouble());
 }
 
 void ImageTextObject::showCVImage(){

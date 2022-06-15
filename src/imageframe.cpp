@@ -121,16 +121,22 @@ void ImageFrame::changeText(){
   double y = fm.height();
 
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
-  QRect rect{selection->topLeft, wh};
   QRect oldRect{selection->topLeft, selection->bottomRight};
 
+  auto offset = wh.y() - selection->bottomRight.y();
+  selection->topLeft.setY(
+        selection->topLeft.y() - offset
+        );
   selection->bottomRight = wh;
+  selection->bottomRight.setY(selection->bottomRight.y() - offset);
+  QRect rect{selection->topLeft, selection->bottomRight};
+
   double newWidth = rect.width()*1.0/oldRect.width();
   double newHeight = rect.height()*1.0/oldRect.height();
   selection->scaleAndPosition(newWidth, newHeight);
 
   p.save();
-  p.drawText(rect, label, Qt::AlignTop | Qt::AlignLeft);
+  p.drawText(rect, label, Qt::AlignCenter | Qt::AlignLeft);
   p.restore();
   p.end();
 

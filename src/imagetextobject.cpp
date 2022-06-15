@@ -126,6 +126,7 @@ void ImageTextObject::showCVImage(){
   cv::waitKey();
 }
 
+// grabs most common border color
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
 

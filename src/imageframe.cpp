@@ -26,6 +26,10 @@ ImageFrame::~ImageFrame(){
   delete scene;
 }
 
+cv::Mat ImageFrame::getImageMatrix(){
+  return state->matrix;
+}
+
 void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
   mode = __mode;
 }

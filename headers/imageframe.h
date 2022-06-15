@@ -43,6 +43,7 @@ public:
   void setMode(tesseract::PageIteratorLevel __mode);
   void extract();
   void clear();
+  cv::Mat getImageMatrix();
 
 private slots:
   void changeZoom();

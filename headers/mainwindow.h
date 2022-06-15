@@ -22,6 +22,7 @@ public:
   ~MainWindow();
 
 private slots:
+  void on_actionSave_Image_triggered();
   void on_actionOpen_Image_triggered();
   void fontSelected();
   void fontSizeChanged();

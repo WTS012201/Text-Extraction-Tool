@@ -1283,6 +1283,8 @@ background:transparent;
      <string>File</string>
     </property>
     <addaction name="actionOpen_Image"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_Image"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
@@ -1332,6 +1334,11 @@ background:transparent;
   <action name="actionRedo_2">
    <property name="text">
     <string>Redo</string>
+   </property>
+  </action>
+  <action name="actionSave_Image">
+   <property name="text">
+    <string>Save Image</string>
    </property>
   </action>
  </widget>

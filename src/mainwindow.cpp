@@ -42,27 +42,6 @@ void MainWindow::loadData(){
   file.write(qrcFile.readAll());
 }
 
-void MainWindow::on_actionOpen_Image_triggered()
-{
-  QFileDialog dialog(this);
-  QStringList selection, filters{"*.png *.jpeg *.jpg"};
-
-  dialog.setNameFilters(filters);
-  dialog.setFileMode(QFileDialog::ExistingFile);
-  if (!dialog.exec()){
-      return;
-  }
-  selection = dialog.selectedFiles();
-
-  if(iFrame){
-    delete iFrame;
-  }
-  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-  ui->scrollHorizontalLayout->addWidget(iFrame);
-  iFrame->setImage(selection.first());
-}
-
-
 void MainWindow::on_actionOptions_triggered()
 {
 //  options->setView(0);
@@ -84,6 +63,9 @@ void MainWindow::connections(){
         &MainWindow::fontSizeChanged
         );
 
+  QObject::connect(save, &QShortcut::activated, this, [&](){
+    on_actionSave_Image_triggered();
+  });
   QObject::connect(undo, &QShortcut::activated, this, [&](){
     on_actionUndo_triggered();
   });
@@ -129,4 +111,31 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event){
     if(event->key() & Qt::SHIFT){
       this->setCursor(Qt::CursorShape::ArrowCursor);
     }
+}
+
+void MainWindow::on_actionOpen_Image_triggered()
+{
+  QFileDialog dialog(this);
+  QStringList selection, filters{"*.png *.jpeg *.jpg"};
+
+  dialog.setNameFilters(filters);
+  dialog.setFileMode(QFileDialog::ExistingFile);
+  if (!dialog.exec()){
+      return;
+  }
+  selection = dialog.selectedFiles();
+
+  if(iFrame){
+    delete iFrame;
+  }
+  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
+  ui->scrollHorizontalLayout->addWidget(iFrame);
+  iFrame->setImage(selection.first());
+}
+
+void MainWindow::on_actionSave_Image_triggered(){
+  auto saveFile = QFileDialog::getSaveFileName(0,"Save file",QDir::currentPath(),".png");
+//                                               ".png;;.jpeg;;.jpg");
+  cv::Mat image = iFrame->getImageMatrix();
+  cv::imwrite(saveFile.toStdString() + ".png", image);
 }

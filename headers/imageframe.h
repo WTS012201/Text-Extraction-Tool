@@ -41,8 +41,9 @@ public:
   void setImage(QString);
   void setWidgets();
   void setMode(tesseract::PageIteratorLevel __mode);
-  void extract();
+  void extract(cv::Mat* mat = nullptr);
   void clear();
+  void pasteImage(QImage* img);
   cv::Mat getImageMatrix();
 
 private slots:
@@ -76,6 +77,7 @@ private:
   double scaleFactor;
   bool middleDown;
 
+  cv::Mat QImageToMat(QImage image);
   void mousePressEvent(QMouseEvent * event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
@@ -88,10 +90,7 @@ private:
   void setOptions(Options* options);
   void populateTextObjects();
   void changeImage(QImage* img = nullptr);
-  cv::Mat* buildImageMatrix();
   QString collect(cv::Mat& matrix);
-  cv::Mat QImageToMat(QImage);
-
   void inSelection(QPair<QPoint, QPoint>);
 };
 

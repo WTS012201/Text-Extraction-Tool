@@ -11,7 +11,7 @@ MainWindow::MainWindow(QWidget *parent)
 
   iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
   ui->scrollHorizontalLayout->addWidget(iFrame);
-  iFrame->setImage("/home/will/screenshots/use_this.png");
+//  iFrame->setImage("/home/will/screenshots/use_this.png");
 }
 
 MainWindow::~MainWindow()
@@ -51,9 +51,12 @@ void MainWindow::on_actionOptions_triggered()
 }
 
 void MainWindow::connections(){
+  paste = new QShortcut{QKeySequence("Ctrl+V"), this};
+  open = new QShortcut{QKeySequence("Ctrl+O"), this};
   save = new QShortcut{QKeySequence("Ctrl+S"), this};
   undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
   redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+  clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(
@@ -63,6 +66,10 @@ void MainWindow::connections(){
         &MainWindow::fontSizeChanged
         );
 
+  QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
+  QObject::connect(open, &QShortcut::activated, this, [&](){
+    on_actionOpen_Image_triggered();
+  });
   QObject::connect(save, &QShortcut::activated, this, [&](){
     on_actionSave_Image_triggered();
   });
@@ -72,6 +79,18 @@ void MainWindow::connections(){
   QObject::connect(redo, &QShortcut::activated, this, [&](){
     on_actionRedo_2_triggered();
   });
+}
+
+void MainWindow::pastImage(){
+  const QMimeData *mimeData = clipboard->mimeData();
+
+  if (mimeData->hasImage()){
+    // Convert picture data to QImage
+    QImage img = qvariant_cast<QImage>(mimeData->imageData());
+    if(!img.isNull()){
+      iFrame->pasteImage(&img);
+    }
+  }
 }
 
 void MainWindow::fontSelected(){

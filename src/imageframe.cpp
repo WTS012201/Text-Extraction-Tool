@@ -50,6 +50,33 @@ void ImageFrame::changeZoom(){
   }
 }
 
+void ImageFrame::pasteImage(QImage* img){
+  scalar = 1.0;
+
+  auto imagePixmap = QPixmap::fromImage(*img);
+
+  scene->addPixmap(imagePixmap);
+  scene->setSceneRect(imagePixmap.rect());
+  scene->update();
+  this->setScene(scene);
+
+  this->setMinimumSize(imagePixmap.size());
+  this->setMaximumSize(imagePixmap.size());
+
+  QImage cpy = *img;
+  cpy.convertTo(QImage::Format_BGR888);
+  cv::Mat mat{
+        cpy.height(),
+        cpy.width(),
+        CV_8UC3,
+        cpy.bits()
+  };
+
+//  convert to cv mat and pass to extract
+  extract(&mat);
+  populateTextObjects();
+}
+
 void ImageFrame::changeImage(QImage* img){
   state->matrix.copyTo(display);
   cv::resize(
@@ -320,12 +347,18 @@ void ImageFrame::showAll(){
   this->show();
 }
 
-void ImageFrame::extract(){
-  try{
-    state->matrix = cv::Mat{cv::imread(filepath.toStdString(), cv::IMREAD_COLOR)};
-  }catch(...){
-    qDebug() << "error reading image";
-    return;
+void ImageFrame::extract(cv::Mat* mat){
+  if(mat){
+    mat->copyTo(state->matrix);
+  } else{
+    try{
+      state->matrix = cv::Mat{
+          cv::imread(filepath.toStdString(), cv::IMREAD_COLOR)
+      };
+    }catch(...){
+      qDebug() << "error reading image";
+      return;
+    }
   }
 
   if(state->matrix.empty()){
@@ -338,6 +371,7 @@ void ImageFrame::extract(){
       rawText = collect(matrix);
   }, state->matrix).then([&](){
     state->matrix.copyTo(display);
+    qDebug() << rawText;
     emit rawTextChanged();
   });
   showAll();

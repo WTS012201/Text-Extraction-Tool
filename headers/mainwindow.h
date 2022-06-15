@@ -8,6 +8,7 @@
 #include <QSplitter>
 #include <QTextEdit>
 #include <QShortcut>
+#include <QClipboard>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -29,14 +30,16 @@ private slots:
   void on_actionOptions_triggered();
   void on_actionUndo_triggered();
   void on_actionRedo_2_triggered();
-
+  void pastImage();
 private:
-  void keyReleaseEvent(QKeyEvent* event) override;
-  void keyPressEvent(QKeyEvent* event) override;
-  QShortcut *undo, *redo, *ctrl, *save;
+  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
+  QClipboard *clipboard;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
   Options* options;
+
+  void keyReleaseEvent(QKeyEvent* event) override;
+  void keyPressEvent(QKeyEvent* event) override;
   void initUi();
   void loadData();
   void connections();

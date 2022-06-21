@@ -1,10 +1,13 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+
+#include "colortray.h"
+#include "imageframe.h"
+
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QFile>
-#include "imageframe.h"
 #include <QSplitter>
 #include <QTextEdit>
 #include <QShortcut>
@@ -23,6 +26,7 @@ public:
   ~MainWindow();
 
 private slots:
+  void colorTray();
   void on_actionSave_Image_triggered();
   void on_actionOpen_Image_triggered();
   void fontSelected();
@@ -37,6 +41,7 @@ private:
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
   Options* options;
+  ColorTray* colorMenu;
 
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;

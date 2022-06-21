@@ -24,6 +24,7 @@ MainWindow::~MainWindow()
 void MainWindow::initUi(){
   ui->setupUi(this);
   options = new Options{this};
+  colorMenu = new ColorTray{this};
 }
 
 void MainWindow::loadData(){
@@ -66,6 +67,7 @@ void MainWindow::connections(){
         &MainWindow::fontSizeChanged
         );
 
+  QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
   QObject::connect(open, &QShortcut::activated, this, [&](){
     on_actionOpen_Image_triggered();
@@ -81,11 +83,16 @@ void MainWindow::connections(){
   });
 }
 
+void MainWindow::colorTray(){
+  colorMenu->setModal(true);
+  if(colorMenu->exec() == QDialog::DialogCode::Rejected)
+    return;
+}
+
 void MainWindow::pastImage(){
   const QMimeData *mimeData = clipboard->mimeData();
 
   if (mimeData->hasImage()){
-    // Convert picture data to QImage
     QImage img = qvariant_cast<QImage>(mimeData->imageData());
     if(!img.isNull()){
       iFrame->pasteImage(&img);

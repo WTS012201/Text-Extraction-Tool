@@ -371,7 +371,6 @@ void ImageFrame::extract(cv::Mat* mat){
       rawText = collect(matrix);
   }, state->matrix).then([&](){
     state->matrix.copyTo(display);
-    qDebug() << rawText;
     emit rawTextChanged();
   });
   showAll();
@@ -381,7 +380,9 @@ void ImageFrame::populateTextObjects(){
   QVector<ImageTextObject*> tempObjects;
 
   for(auto obj : state->textObjects){
-    ImageTextObject* temp = new ImageTextObject{this, *obj, ui, &state->matrix};
+    ImageTextObject* temp = new ImageTextObject{
+        this, *obj, ui, &state->matrix
+    };
     temp->hide();
 
     tempObjects.push_back(temp);

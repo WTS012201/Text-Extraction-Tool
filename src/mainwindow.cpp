@@ -85,8 +85,18 @@ void MainWindow::connections(){
 
 void MainWindow::colorTray(){
   colorMenu->setModal(true);
+  if(iFrame->selection){
+    colorMenu->setColor(iFrame->selection->fontIntensity);
+  }
   if(colorMenu->exec() == QDialog::DialogCode::Rejected)
     return;
+  cv::Scalar scalar{
+    (double)colorMenu->color.blue(),
+    (double)colorMenu->color.green(),
+    (double)colorMenu->color.red(),
+  };
+
+  iFrame->selection->fontIntensity = scalar;
 }
 
 void MainWindow::pastImage(){

@@ -47,6 +47,7 @@ signals:
 
 public:
   bool isSelected, isChanged;
+  cv::Scalar bgIntensity, fontIntensity;
   cv::Mat* mat;
   explicit ImageTextObject
   (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);
@@ -82,10 +83,9 @@ private:
   QString filepath;
   QString text;
 
-  cv::Scalar bgIntensity;
-
   cv::Mat QImageToMat();
   void determineBgColor();
+  void determineFontColor();
 };
 
 #endif // IMAGETEXTOBJECT_H

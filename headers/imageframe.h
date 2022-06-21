@@ -30,6 +30,7 @@ class ImageFrame : public QGraphicsView
 
 public:
   QHash<int, bool> keysPressed;
+  ImageTextObject* selection;
   ImageFrame(
       QWidget* parent = nullptr,
       Ui::MainWindow* ui = nullptr,
@@ -63,7 +64,6 @@ private:
   QWidget* parent;
   cv::Mat display;
   tesseract::PageIteratorLevel mode;
-  ImageTextObject* selection;
   Ui::MainWindow* ui;
 
   typedef struct {

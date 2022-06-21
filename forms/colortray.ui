@@ -21,7 +21,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QLabel" name="label_5">
+          <widget class="QLabel" name="labelRed">
            <property name="text">
             <string>R: 0</string>
            </property>
@@ -42,7 +42,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_2">
          <item>
-          <widget class="QLabel" name="label">
+          <widget class="QLabel" name="labelGreen">
            <property name="text">
             <string>G: 0</string>
            </property>
@@ -63,7 +63,7 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
          <item>
-          <widget class="QLabel" name="label_4">
+          <widget class="QLabel" name="labelBlue">
            <property name="text">
             <string>B: 0</string>
            </property>

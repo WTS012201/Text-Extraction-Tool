@@ -25,6 +25,7 @@ ImageTextObject::ImageTextObject(
   initSizeAndPos();
   highlightSpaces();
   determineBgColor();
+  determineFontColor();
 }
 
 void ImageTextObject::setFilepath(QString __filepath){
@@ -127,6 +128,41 @@ void ImageTextObject::showCVImage(){
 }
 
 // grabs most common border color
+
+void ImageTextObject::determineFontColor(){
+  cv::Scalar intensity;
+
+  if(!(mat->type() & CV_8UC3)){
+    qDebug() << "Image must have 3 channels";
+    return;
+  }
+  auto left{topLeft.x()}, top{topLeft.y()};
+  auto right{bottomRight.x()}, bottom{bottomRight.y()};
+  QHash<QcvScalar, int> scalars;
+  int max = 0;
+
+  for(auto i = left; i <= right; i++){
+    for(auto j = top; j <= bottom; j++){
+      QcvScalar key = QcvScalar{
+          mat->at<cv::Vec3b>(cv::Point{i, j})
+      };
+      if(key == bgIntensity){
+        continue;
+      }
+      if(!scalars.contains(key)){
+        scalars[key] = 1;
+      } else{
+        ++scalars[key];
+      }
+      if(max < scalars[key]){
+        max = scalars[key];
+        intensity = key;
+      }
+    }
+  }
+  fontIntensity = intensity;
+}
+
 void ImageTextObject::determineBgColor(){
   cv::Scalar intensity;
 

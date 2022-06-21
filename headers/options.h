@@ -2,7 +2,6 @@
 #define OPTIONS_H
 
 #include <QDialog>
-
 #include "tesseract/baseapi.h"
 
 namespace Ui {

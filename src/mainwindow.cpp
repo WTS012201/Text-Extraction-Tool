@@ -90,12 +90,12 @@ void MainWindow::colorTray(){
   }
   if(colorMenu->exec() == QDialog::DialogCode::Rejected)
     return;
+
   cv::Scalar scalar{
     (double)colorMenu->color.blue(),
     (double)colorMenu->color.green(),
     (double)colorMenu->color.red(),
   };
-
   iFrame->selection->fontIntensity = scalar;
 }
 

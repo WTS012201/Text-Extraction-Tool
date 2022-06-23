@@ -113,6 +113,12 @@ void ImageFrame::changeText(){
     qDebug() << "No selection";
     return;
   }
+  const cv::Scalar colorSelection = selection->fontIntensity;
+  QColor color{
+    (int)selection->fontIntensity[2],
+    (int)selection->fontIntensity[1],
+    (int)selection->fontIntensity[0],
+  };
   QVector<ImageTextObject*> oldObjs = state->textObjects;
   state->textObjects.remove(state->textObjects.indexOf(selection));
   selection->hide();
@@ -167,6 +173,7 @@ void ImageFrame::changeText(){
   selection->scaleAndPosition(newWidth, newHeight);
 
   p.save();
+  p.setPen(color);
   p.drawText(rect, label, Qt::AlignCenter | Qt::AlignLeft);
   p.restore();
   p.end();
@@ -180,6 +187,7 @@ void ImageFrame::changeText(){
   selection->isChanged = true;
   selection->showHighlights();
   selection->mat = &state->matrix;
+  selection->fontIntensity = colorSelection;
   delete img;
 
   changeImage();

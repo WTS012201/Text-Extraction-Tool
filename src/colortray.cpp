@@ -29,6 +29,7 @@ void ColorTray::connections(){
     color.setBlue(slider->value());
     changeBgColor();
   });
+
   color.setRed(ui->colorRed->value());
   color.setGreen(ui->colorGreen->value());
   color.setBlue(ui->colorBlue->value());

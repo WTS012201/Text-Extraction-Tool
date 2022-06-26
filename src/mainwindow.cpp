@@ -71,15 +71,19 @@ void MainWindow::connections(){
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
   QObject::connect(open, &QShortcut::activated, this, [&](){
     on_actionOpen_Image_triggered();
+    iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(save, &QShortcut::activated, this, [&](){
     on_actionSave_Image_triggered();
+    iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(undo, &QShortcut::activated, this, [&](){
     on_actionUndo_triggered();
+    iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(redo, &QShortcut::activated, this, [&](){
     on_actionRedo_2_triggered();
+    iFrame->keysPressed[Qt::Key_Control] = false;
   });
 }
 

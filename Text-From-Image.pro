@@ -20,6 +20,7 @@ SOURCES = \
     ./src/imagetextobject.cpp \
     ./src/options.cpp \
     ./src/colortray.cpp \
+    ./src/tabscroll.cpp
 
 HEADERS = \
     ./headers/mainwindow.h \
@@ -27,12 +28,14 @@ HEADERS = \
     ./headers/imagetextobject.h \
     ./headers/options.h \
     ./headers/colortray.h \
+    ./headers/tabscroll.h
 
 FORMS = \
     ./forms/mainwindow.ui \
     ./forms/imagetextobject.ui \
     ./forms/options.ui \
     ./forms/colortray.ui \
+    ./forms/tabscroll.ui
 
 RESOURCES += \
     ./res/res.qrc \

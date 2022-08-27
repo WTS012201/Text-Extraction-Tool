@@ -199,7 +199,7 @@ void ImageFrame::connections(){
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 
-  connect(ui->removeSelection, &QPushButton::pressed, this, [=](...){
+  connect(ui->removeSelection, &QPushButton::pressed, this, [=](){
     for(auto& obj : state->textObjects){
       if(obj->isSelected){
         obj->deselect();
@@ -345,6 +345,10 @@ void ImageFrame::setImage(QString imageName){
 
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
+
+//  parent->setMinimumSize(imagePixmap.size());
+//  parent->setMaximumSize(imagePixmap.size());
+
   extract();
   populateTextObjects();
 }
@@ -395,7 +399,7 @@ void ImageFrame::populateTextObjects(){
 
     tempObjects.push_back(temp);
 
-    connect(temp, &ImageTextObject::selection, this, [&](...){
+    connect(temp, &ImageTextObject::selection, this, [&](){
       selection = qobject_cast<ImageTextObject*>(sender());
       for(auto& tempObj : state->textObjects){
         if(tempObj == selection){

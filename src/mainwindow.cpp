@@ -1,5 +1,6 @@
 ﻿#include "../headers/mainwindow.h"
 #include "ui_mainwindow.h"
+#include "ui_tabscroll.h"
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), iFrame{nullptr}
@@ -8,10 +9,6 @@ MainWindow::MainWindow(QWidget *parent)
   loadData();
   initUi();
   connections();
-
-  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-  ui->scrollHorizontalLayout->addWidget(iFrame);
-//  iFrame->setImage("/home/will/screenshots/use_this.png");
 }
 
 MainWindow::~MainWindow()
@@ -60,12 +57,12 @@ void MainWindow::connections(){
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
-  QObject::connect(
-        ui->fontSizeInput,
-        &QLineEdit::textChanged,
-        this,
-        &MainWindow::fontSizeChanged
-        );
+  QObject::connect(ui->tabWidget, &QTabWidget::currentChanged, this, [&](int){
+    auto tab = qobject_cast<TabScroll*>(ui->tabWidget->currentWidget());
+    iFrame = tab->iFrame;
+  });
+  QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
+                   this, &MainWindow::fontSizeChanged);
 
   QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
@@ -165,12 +162,24 @@ void MainWindow::on_actionOpen_Image_triggered()
   }
   selection = dialog.selectedFiles();
 
-  if(iFrame){
-    delete iFrame;
+  TabScroll* tab = new TabScroll{ui->tabWidget};
+  auto tabUi = tab->getUi();
+
+  QString fName = selection.first();
+  if(fName.contains('/')){
+    fName = fName.remove(0, fName.lastIndexOf('/') + 1);
   }
-  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-  ui->scrollHorizontalLayout->addWidget(iFrame);
+
+  if(fName.contains('\\')){
+    fName = fName.remove(0, fName.lastIndexOf('\\') + 1);
+  }
+
+  ui->tabWidget->addTab(tab, fName);
+
+  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
+  tabUi->scrollHorizontalLayout->addWidget(iFrame);
   iFrame->setImage(selection.first());
+  tab->iFrame = iFrame;
 }
 
 void MainWindow::on_actionSave_Image_triggered(){

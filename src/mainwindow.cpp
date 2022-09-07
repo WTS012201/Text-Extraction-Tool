@@ -9,6 +9,12 @@ MainWindow::MainWindow(QWidget *parent)
   loadData();
   initUi();
   connections();
+
+  TabScroll* tab = new TabScroll{ui->tabWidget};
+  auto tabUi = tab->getUi();
+
+  ui->tabWidget->addTab(tab, "Untitled");
+  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
 }
 
 MainWindow::~MainWindow()
@@ -101,6 +107,15 @@ void MainWindow::colorTray(){
 }
 
 void MainWindow::pastImage(){
+
+//  if(!iFrame){
+//    TabScroll* tab = new TabScroll{ui->tabWidget};
+//    auto tabUi = tab->getUi();
+
+//    ui->tabWidget->addTab(tab, "Untitled");
+//    iFrame = new ImageFrame{tabUi->scrollAreaWidgetContents, ui, options};
+//  }
+
   const QMimeData *mimeData = clipboard->mimeData();
 
   if (mimeData->hasImage()){

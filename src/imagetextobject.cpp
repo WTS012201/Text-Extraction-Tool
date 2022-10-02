@@ -45,9 +45,6 @@ ImageTextObject::~ImageTextObject()
   delete ui;
 }
 
-
-
-
 void ImageTextObject::highlightSpaces(){
     QPushButton* highlight = new QPushButton{ui->frame};
     auto size = lineSpace.second - lineSpace.first;

@@ -91,7 +91,7 @@ private:
   void populateTextObjects();
   void changeImage(QImage* img = nullptr);
   QString collect(cv::Mat& matrix);
-  void inSelection(QPair<QPoint, QPoint>);
+  void inliers(QPair<QPoint, QPoint>);
 };
 
 #endif // IMAGEFRAME_H

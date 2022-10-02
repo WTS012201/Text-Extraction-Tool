@@ -32,6 +32,7 @@ HEADERS = \
 
 FORMS = \
     ./forms/mainwindow.ui \
+    #./forms/_mainwindow.ui \
     ./forms/imagetextobject.ui \
     ./forms/options.ui \
     ./forms/colortray.ui \

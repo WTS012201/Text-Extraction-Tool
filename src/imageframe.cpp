@@ -362,10 +362,10 @@ void ImageFrame::mouseReleaseEvent(QMouseEvent *event){
   }
 
   QPair<QPoint, QPoint> box{tl / scalar, br / scalar};
-  inSelection(box);
+  inliers(box);
 }
 
-void ImageFrame::inSelection(QPair<QPoint, QPoint> boundingBox){
+void ImageFrame::inliers(QPair<QPoint, QPoint> boundingBox){
   auto a = boundingBox.first;
   auto b = boundingBox.second;
 

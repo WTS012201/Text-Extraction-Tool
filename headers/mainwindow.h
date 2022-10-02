@@ -29,7 +29,7 @@ public:
 private slots:
   void colorTray();
   void on_actionSave_Image_triggered();
-  void on_actionOpen_Image_triggered();
+  void on_actionOpen_Image_triggered(bool file = false);
   void fontSelected();
   void fontSizeChanged();
   void on_actionOptions_triggered();

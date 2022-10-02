@@ -10,11 +10,15 @@ MainWindow::MainWindow(QWidget *parent)
   initUi();
   connections();
 
-  TabScroll* tab = new TabScroll{ui->tabWidget};
-  auto tabUi = tab->getUi();
+  on_actionOpen_Image_triggered(true);
+//  TabScroll* tab = new TabScroll{ui->tab};
+//  auto tabUi = tab->getUi();
 
-  ui->tabWidget->addTab(tab, "Untitled");
-  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
+//  ui->tab->addTab(tab, "Untitled");
+//  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
+//  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
+//  ui->scrollHorizontalLayout->addWidget(iFrame);
+//  iFrame->setImage("/home/will/screenshots/use_this.png");
 }
 
 MainWindow::~MainWindow()
@@ -63,8 +67,8 @@ void MainWindow::connections(){
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
-  QObject::connect(ui->tabWidget, &QTabWidget::currentChanged, this, [&](int){
-    auto tab = qobject_cast<TabScroll*>(ui->tabWidget->currentWidget());
+  QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int){
+    auto tab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
     iFrame = tab->iFrame;
   });
   QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
@@ -165,36 +169,47 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event){
     }
 }
 
-void MainWindow::on_actionOpen_Image_triggered()
-{
-  QFileDialog dialog(this);
+void MainWindow::on_actionOpen_Image_triggered(bool file){
   QStringList selection, filters{"*.png *.jpeg *.jpg"};
+  QString fName = "Untitled";
 
-  dialog.setNameFilters(filters);
-  dialog.setFileMode(QFileDialog::ExistingFile);
-  if (!dialog.exec()){
-      return;
+  if(!file){
+    QFileDialog dialog(this);
+    dialog.setNameFilters(filters);
+    dialog.setFileMode(QFileDialog::ExistingFile);
+    if (!dialog.exec()){
+        return;
+    }
+    selection = dialog.selectedFiles();
+
+
+    fName = selection.first();
+    if(fName.contains('/')){
+      fName = fName.remove(0, fName.lastIndexOf('/') + 1);
+    }
+
+    if(fName.contains('\\')){
+      fName = fName.remove(0, fName.lastIndexOf('\\') + 1);
+    }
   }
-  selection = dialog.selectedFiles();
 
-  TabScroll* tab = new TabScroll{ui->tabWidget};
-  auto tabUi = tab->getUi();
 
-  QString fName = selection.first();
-  if(fName.contains('/')){
-    fName = fName.remove(0, fName.lastIndexOf('/') + 1);
-  }
+//  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
+//  ui->scrollHorizontalLayout->addWidget(iFrame);
+//  iFrame->setImage(selection.first());
+  TabScroll* tabScroll = new TabScroll{ui->tab};
+  auto tabUi = tabScroll->getUi();
+//  auto scrollArea = tabScroll->getUi()->scrollArea;
 
-  if(fName.contains('\\')){
-    fName = fName.remove(0, fName.lastIndexOf('\\') + 1);
-  }
+  ui->tab->addTab(tabScroll, fName);
 
-  ui->tabWidget->addTab(tab, fName);
 
   iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
-  iFrame->setImage(selection.first());
-  tab->iFrame = iFrame;
+  if(!file){
+    iFrame->setImage(selection.first());
+  }
+  tabScroll->iFrame = iFrame;
 }
 
 void MainWindow::on_actionSave_Image_triggered(){

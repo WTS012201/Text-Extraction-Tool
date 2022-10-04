@@ -3,22 +3,14 @@
 #include "ui_tabscroll.h"
 
 MainWindow::MainWindow(QWidget *parent)
-  : QMainWindow(parent), iFrame{nullptr}
-  , ui(new Ui::MainWindow)
+  : QMainWindow(parent), iFrame{nullptr}, ui(new Ui::MainWindow)
+  , currTab{nullptr}
 {
   loadData();
   initUi();
   connections();
 
   on_actionOpen_Image_triggered(true);
-//  TabScroll* tab = new TabScroll{ui->tab};
-//  auto tabUi = tab->getUi();
-
-//  ui->tab->addTab(tab, "Untitled");
-//  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
-//  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-//  ui->scrollHorizontalLayout->addWidget(iFrame);
-//  iFrame->setImage("/home/will/screenshots/use_this.png");
 }
 
 MainWindow::~MainWindow()
@@ -68,8 +60,11 @@ void MainWindow::connections(){
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int){
-    auto tab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
-    iFrame = tab->iFrame;
+    if(currTab)
+      currTab->setDisabled(true);
+    currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
+    currTab->setEnabled(true);
+    iFrame = currTab->iFrame;
   });
   QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
                    this, &MainWindow::fontSizeChanged);
@@ -111,15 +106,6 @@ void MainWindow::colorTray(){
 }
 
 void MainWindow::pastImage(){
-
-//  if(!iFrame){
-//    TabScroll* tab = new TabScroll{ui->tabWidget};
-//    auto tabUi = tab->getUi();
-
-//    ui->tabWidget->addTab(tab, "Untitled");
-//    iFrame = new ImageFrame{tabUi->scrollAreaWidgetContents, ui, options};
-//  }
-
   const QMimeData *mimeData = clipboard->mimeData();
 
   if (mimeData->hasImage()){
@@ -193,13 +179,8 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
     }
   }
 
-
-//  iFrame = new ImageFrame(ui->scrollAreaWidgetContents, ui, options);
-//  ui->scrollHorizontalLayout->addWidget(iFrame);
-//  iFrame->setImage(selection.first());
   TabScroll* tabScroll = new TabScroll{ui->tab};
   auto tabUi = tabScroll->getUi();
-//  auto scrollArea = tabScroll->getUi()->scrollArea;
 
   ui->tab->addTab(tabScroll, fName);
 
@@ -208,6 +189,8 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
   if(!file){
     iFrame->setImage(selection.first());
+  } else{
+    iFrame->getState() = new ImageFrame::State;
   }
   tabScroll->iFrame = iFrame;
 }

@@ -47,6 +47,12 @@ public:
   void pasteImage(QImage* img);
   cv::Mat getImageMatrix();
 
+  typedef struct State{
+    QVector<ImageTextObject*> textObjects;
+    cv::Mat matrix;
+  } State;
+  State*& getState(); // return ref to state pointer
+
 private slots:
   void changeZoom();
   void setRawText();
@@ -66,10 +72,6 @@ private:
   tesseract::PageIteratorLevel mode;
   Ui::MainWindow* ui;
 
-  typedef struct {
-    QVector<ImageTextObject*> textObjects;
-    cv::Mat matrix;
-  } State;
   QStack<State*> undo, redo;
   State* state;
 

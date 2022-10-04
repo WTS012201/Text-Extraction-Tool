@@ -97,7 +97,7 @@ inline cv::Mat QImageToCvMat(const QImage &inImage, bool inCloneImageData = true
 
     // 8-bit, 1 channel
   case QImage::Format_Indexed8:{
-    cv::Mat  mat( inImage.height(), inImage.width(),
+    cv::Mat mat( inImage.height(), inImage.width(),
                   CV_8UC1,
                   const_cast<uchar*>(inImage.bits()),
                   static_cast<size_t>(inImage.bytesPerLine())
@@ -115,6 +115,23 @@ inline cv::Mat QImageToCvMat(const QImage &inImage, bool inCloneImageData = true
 
 
 void ImageFrame::pasteImage(QImage* img){
+  for(auto& obj : state->textObjects){
+    obj->hide();
+    obj->setDisabled(true);
+  }
+
+  State* oldState = new State{
+      state->textObjects,
+      cv::Mat{}
+  };
+
+  state->matrix.copyTo(oldState->matrix);
+  undo.push(oldState); // scene dims
+  state->textObjects.erase(
+        state->textObjects.constBegin(), state->textObjects.constEnd()
+  );
+
+
   scalar = 1.0;
   auto imagePixmap = QPixmap::fromImage(*img);
 
@@ -131,13 +148,21 @@ void ImageFrame::pasteImage(QImage* img){
 }
 
 void ImageFrame::changeImage(QImage* img){
-  state->matrix.copyTo(display);
-  cv::resize(
-        display, display,
-        cv::Size{},
-        scalar, scalar,
-        cv::INTER_CUBIC
-        );
+  try{
+    state->matrix.copyTo(display);
+    cv::resize(
+          display, display,
+          cv::Size{},
+          scalar, scalar,
+          cv::INTER_CUBIC
+          );
+  }catch(cv::Exception& e){
+    // if no image in first state, have to do this
+    delete scene;
+    scene = new QGraphicsScene(this);
+    return;
+  }
+
 
   if(!img){
     img = new QImage{
@@ -514,15 +539,16 @@ void ImageFrame::undoAction(){
   if(undo.empty()){
     return;
   }
-
   for(auto& obj : state->textObjects){
     obj->hide();
     obj->setDisabled(true);
   }
+
   State* currState = new State{
       state->textObjects,
       cv::Mat{}
   };
+
   state->matrix.copyTo(currState->matrix);
 
   redo.push(currState);
@@ -534,8 +560,10 @@ void ImageFrame::undoAction(){
     obj->setDisabled(false);
   }
 
-  selection = state->textObjects.last();
-  selection->showHighlights();
+  if(!state->textObjects.empty()){
+    selection = state->textObjects.last();
+    selection->showHighlights();
+  }
   changeImage();
 }
 
@@ -561,4 +589,8 @@ void ImageFrame::redoAction(){
   selection = state->textObjects.last();
   selection->showHighlights();
   changeImage();
+}
+
+ImageFrame::State*& ImageFrame::getState(){
+  return state;
 }

@@ -43,6 +43,7 @@ private:
   Ui::MainWindow *ui;
   Options* options;
   ColorTray* colorMenu;
+  TabScroll* currTab;
 
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;

@@ -87,6 +87,16 @@ void MainWindow::connections(){
     on_actionRedo_2_triggered();
     iFrame->keysPressed[Qt::Key_Control] = false;
   });
+
+//  QObject::connect(
+//        ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
+//        ui->tab->tabBar()->removeTab(idx);
+//        delete iFrame;
+
+//        currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
+//        currTab->setEnabled(true);
+//        iFrame = currTab->iFrame;
+//  });
 }
 
 void MainWindow::colorTray(){
@@ -182,7 +192,7 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
   TabScroll* tabScroll = new TabScroll{ui->tab};
   auto tabUi = tabScroll->getUi();
 
-  ui->tab->addTab(tabScroll, fName);
+  auto idx = ui->tab->addTab(tabScroll, fName);
 
 
   iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
@@ -193,10 +203,12 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
     iFrame->getState() = new ImageFrame::State;
   }
   tabScroll->iFrame = iFrame;
+  ui->tab->setCurrentIndex(idx);
 }
 
 void MainWindow::on_actionSave_Image_triggered(){
-  auto saveFile = QFileDialog::getSaveFileName(0,"Save file",QDir::currentPath(),".png");
+  QString fName = ui->tab->tabText(ui->tab->currentIndex());
+  auto saveFile = QFileDialog::getSaveFileName(0,"Save file", fName,".png");
 //                                               ".png;;.jpeg;;.jpg");
   cv::Mat image = iFrame->getImageMatrix();
   cv::imwrite(saveFile.toStdString() + ".png", image);

@@ -48,8 +48,7 @@ void MainWindow::loadData(){
 void MainWindow::on_actionOptions_triggered(){
 //  options->setView(0);
   options->setModal(true);
-  if(options->exec() == QDialog::DialogCode::Rejected)
-    return;
+  if(options->exec() == QDialog::DialogCode::Rejected) return;
 }
 
 void MainWindow::connections(){
@@ -62,9 +61,8 @@ void MainWindow::connections(){
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx){
-    if(idx < 1 || !currTab || deleting){
-      return;
-    }
+    if(idx < 1 || !currTab || deleting) return;
+
     currTab->setDisabled(true);
     currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
     currTab->setEnabled(true);
@@ -99,8 +97,7 @@ void MainWindow::connections(){
 
   QObject::connect(
   ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
-    if(!iFrame)
-      return;
+    if(!iFrame) return;
 
     deleting = true;
     ui->tab->tabBar()->removeTab(idx);
@@ -108,34 +105,30 @@ void MainWindow::connections(){
       delete currTab;
       currTab = nullptr;
       deleting = false;
-    } else{
-      return;
-    }
+    } else return;
 
-    if(ui->tab->count() > 1){
+    if(ui->tab->count() > 0){
       currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
     } else{
-      currTab = nullptr;
+     currTab = nullptr;
     }
 
   });
 }
 
 void MainWindow::colorTray(){
-  if(!iFrame)
-    return;
+  if(!iFrame) return;
 
   colorMenu->setModal(true);
   if(iFrame->selection){
     colorMenu->setColor(iFrame->selection->fontIntensity);
   }
-  if(colorMenu->exec() == QDialog::DialogCode::Rejected)
-    return;
+  if(colorMenu->exec() == QDialog::DialogCode::Rejected) return;
 
   cv::Scalar scalar{
-    (double)colorMenu->color.blue(),
-    (double)colorMenu->color.green(),
-    (double)colorMenu->color.red(),
+    static_cast<double>(colorMenu->color.blue()),
+    static_cast<double>(colorMenu->color.green()),
+    static_cast<double>(colorMenu->color.red()),
   };
 
   iFrame->selection->fontIntensity = scalar;
@@ -155,16 +148,14 @@ void MainWindow::pastImage(){
 }
 
 void MainWindow::fontSelected(){
-  if(!iFrame)
-    return;
+  if(!iFrame) return;
 
   QString text = ui->fontBox->currentText();
   ui->textEdit->setFont(QFont{text, ui->textEdit->font().pointSize()});
 }
 
 void MainWindow::fontSizeChanged(){
-  if(!iFrame)
-    return;
+  if(!iFrame) return;
 
   QFont font = ui->textEdit->font();
   font.setPointSize(ui->fontSizeInput->text().toInt());
@@ -180,8 +171,7 @@ void MainWindow::on_actionRedo_2_triggered(){
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
-  if(!iFrame)
-    return;
+  if(!iFrame) return;
 
   iFrame->keysPressed[event->key()] = true;
   if(event->key() & Qt::SHIFT){
@@ -190,8 +180,7 @@ void MainWindow::keyPressEvent(QKeyEvent* event){
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event){
-  if(!iFrame)
-    return;
+  if(!iFrame) return;
 
   iFrame->keysPressed[event->key()] = false;
   if(event->key() & Qt::SHIFT){
@@ -207,9 +196,8 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
     QFileDialog dialog(this);
     dialog.setNameFilters(filters);
     dialog.setFileMode(QFileDialog::ExistingFile);
-    if (!dialog.exec()){
-        return;
-    }
+    if (!dialog.exec()) return;
+
     selection = dialog.selectedFiles();
 
     fName = selection.first();
@@ -240,6 +228,7 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
 }
 
 void MainWindow::on_actionSave_Image_triggered(){
+  if(!iFrame || ui->tab->count() == 0) return;
   QString fName = ui->tab->tabText(ui->tab->currentIndex());
   auto saveFile = QFileDialog::getSaveFileName(0,"Save file", fName, ".png");
 //                                               ".png;;.jpeg;;.jpg");

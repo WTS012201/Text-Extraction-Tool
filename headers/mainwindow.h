@@ -44,6 +44,7 @@ private:
   Options* options;
   ColorTray* colorMenu;
   TabScroll* currTab;
+  bool deleting;
 
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;

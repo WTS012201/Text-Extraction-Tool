@@ -2,10 +2,12 @@
 #include "ui_mainwindow.h"
 #include "ui_tabscroll.h"
 
-// IFRAME BUGGED ON TABS
+// paste wont work on fresh start
+// first tab deletion weird behavior
 
 MainWindow::MainWindow(QWidget *parent)
-  : QMainWindow(parent), iFrame{nullptr}, ui(new Ui::MainWindow)
+  : QMainWindow(parent), iFrame{nullptr},
+    deleting{false}, ui(new Ui::MainWindow)
   , currTab{nullptr}
 {
   loadData();
@@ -60,11 +62,9 @@ void MainWindow::connections(){
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx){
-    // idx is the idx that is changed to
-    if(idx < 1 || !currTab){
+    if(idx < 1 || !currTab || deleting){
       return;
     }
-    // if change is switching/deleting tab disable curr and switch to new
     currTab->setDisabled(true);
     currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
     currTab->setEnabled(true);
@@ -101,10 +101,23 @@ void MainWindow::connections(){
   ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
     if(!iFrame)
       return;
-    // will emit change signal
+
+    deleting = true;
     ui->tab->tabBar()->removeTab(idx);
-    delete currTab;
-    currTab = nullptr;
+    if(currTab){
+      delete currTab;
+      currTab = nullptr;
+      deleting = false;
+    } else{
+      return;
+    }
+
+    if(ui->tab->count() > 1){
+      currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
+    } else{
+      currTab = nullptr;
+    }
+
   });
 }
 

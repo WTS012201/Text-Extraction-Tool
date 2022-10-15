@@ -13,17 +13,18 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
 }
 
 ImageFrame::~ImageFrame(){
+  for(const auto& obj : state->textObjects){
+    delete obj;
+  }
   for(const auto& state : undo){
     delete state;
   }
   for(const auto& state : redo){
     delete state;
   }
-  for(const auto& obj : state->textObjects){
-    delete obj;
-  }
-  delete state;
+//  delete state;
   delete scene;
+  delete rubberBand;
 }
 
 cv::Mat ImageFrame::getImageMatrix(){

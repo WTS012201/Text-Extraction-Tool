@@ -8,8 +8,7 @@ TabScroll::TabScroll(QWidget *parent, ImageFrame* __iFrame) :
   ui->setupUi(this);
 }
 
-TabScroll::~TabScroll()
-{
+TabScroll::~TabScroll(){
   delete ui;
   delete iFrame;
 }

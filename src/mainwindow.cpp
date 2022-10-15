@@ -2,6 +2,8 @@
 #include "ui_mainwindow.h"
 #include "ui_tabscroll.h"
 
+// IFRAME BUGGED ON TABS
+
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), iFrame{nullptr}, ui(new Ui::MainWindow)
   , currTab{nullptr}
@@ -10,11 +12,10 @@ MainWindow::MainWindow(QWidget *parent)
   initUi();
   connections();
 
-  on_actionOpen_Image_triggered(true);
+//  on_actionOpen_Image_triggered(true);
 }
 
-MainWindow::~MainWindow()
-{
+MainWindow::~MainWindow(){
   delete ui;
   delete undo;
   delete redo;
@@ -42,8 +43,7 @@ void MainWindow::loadData(){
   file.write(qrcFile.readAll());
 }
 
-void MainWindow::on_actionOptions_triggered()
-{
+void MainWindow::on_actionOptions_triggered(){
 //  options->setView(0);
   options->setModal(true);
   if(options->exec() == QDialog::DialogCode::Rejected)
@@ -59,9 +59,13 @@ void MainWindow::connections(){
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
-  QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int){
-    if(currTab)
-      currTab->setDisabled(true);
+  QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx){
+    // idx is the idx that is changed to
+    if(idx < 1 || !currTab){
+      return;
+    }
+    // if change is switching/deleting tab disable curr and switch to new
+    currTab->setDisabled(true);
     currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
     currTab->setEnabled(true);
     iFrame = currTab->iFrame;
@@ -70,36 +74,44 @@ void MainWindow::connections(){
                    this, &MainWindow::fontSizeChanged);
 
   QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
+  // PASTE DOESNT ACTIVATE IF NO TAB
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
   QObject::connect(open, &QShortcut::activated, this, [&](){
     on_actionOpen_Image_triggered();
-    iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame)
+      iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(save, &QShortcut::activated, this, [&](){
     on_actionSave_Image_triggered();
-    iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame)
+      iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(undo, &QShortcut::activated, this, [&](){
     on_actionUndo_triggered();
-    iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame)
+      iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(redo, &QShortcut::activated, this, [&](){
     on_actionRedo_2_triggered();
-    iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame)
+      iFrame->keysPressed[Qt::Key_Control] = false;
   });
 
-//  QObject::connect(
-//        ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
-//        ui->tab->tabBar()->removeTab(idx);
-//        delete iFrame;
-
-//        currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
-//        currTab->setEnabled(true);
-//        iFrame = currTab->iFrame;
-//  });
+  QObject::connect(
+  ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
+    if(!iFrame)
+      return;
+    // will emit change signal
+    ui->tab->tabBar()->removeTab(idx);
+    delete currTab;
+    currTab = nullptr;
+  });
 }
 
 void MainWindow::colorTray(){
+  if(!iFrame)
+    return;
+
   colorMenu->setModal(true);
   if(iFrame->selection){
     colorMenu->setColor(iFrame->selection->fontIntensity);
@@ -112,13 +124,16 @@ void MainWindow::colorTray(){
     (double)colorMenu->color.green(),
     (double)colorMenu->color.red(),
   };
+
   iFrame->selection->fontIntensity = scalar;
 }
 
 void MainWindow::pastImage(){
+  if(!iFrame)
+    on_actionOpen_Image_triggered(true);
   const QMimeData *mimeData = clipboard->mimeData();
 
-  if (mimeData->hasImage()){
+  if(mimeData->hasImage()){
     QImage img = qvariant_cast<QImage>(mimeData->imageData());
     if(!img.isNull()){
       iFrame->pasteImage(&img);
@@ -127,42 +142,48 @@ void MainWindow::pastImage(){
 }
 
 void MainWindow::fontSelected(){
+  if(!iFrame)
+    return;
+
   QString text = ui->fontBox->currentText();
   ui->textEdit->setFont(QFont{text, ui->textEdit->font().pointSize()});
 }
 
 void MainWindow::fontSizeChanged(){
+  if(!iFrame)
+    return;
+
   QFont font = ui->textEdit->font();
   font.setPointSize(ui->fontSizeInput->text().toInt());
   ui->textEdit->setFont(font);
 }
 
 void MainWindow::on_actionUndo_triggered(){
-  if(!iFrame){
-    return;
-  }
   iFrame->undoAction();
 }
 
 void MainWindow::on_actionRedo_2_triggered(){
-  if(!iFrame){
-    return;
-  }
   iFrame->redoAction();
 }
 
 void MainWindow::keyPressEvent(QKeyEvent* event){
-    iFrame->keysPressed[event->key()] = true;
-    if(event->key() & Qt::SHIFT){
-      this->setCursor(Qt::CursorShape::PointingHandCursor);
-    }
+  if(!iFrame)
+    return;
+
+  iFrame->keysPressed[event->key()] = true;
+  if(event->key() & Qt::SHIFT){
+    this->setCursor(Qt::CursorShape::PointingHandCursor);
+  }
 }
 
 void MainWindow::keyReleaseEvent(QKeyEvent* event){
-    iFrame->keysPressed[event->key()] = false;
-    if(event->key() & Qt::SHIFT){
-      this->setCursor(Qt::CursorShape::ArrowCursor);
-    }
+  if(!iFrame)
+    return;
+
+  iFrame->keysPressed[event->key()] = false;
+  if(event->key() & Qt::SHIFT){
+    this->setCursor(Qt::CursorShape::ArrowCursor);
+  }
 }
 
 void MainWindow::on_actionOpen_Image_triggered(bool file){
@@ -178,7 +199,6 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
     }
     selection = dialog.selectedFiles();
 
-
     fName = selection.first();
     if(fName.contains('/')){
       fName = fName.remove(0, fName.lastIndexOf('/') + 1);
@@ -191,9 +211,7 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
 
   TabScroll* tabScroll = new TabScroll{ui->tab};
   auto tabUi = tabScroll->getUi();
-
-  auto idx = ui->tab->addTab(tabScroll, fName);
-
+  ui->tab->addTab(tabScroll, fName);
 
   iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
@@ -203,12 +221,14 @@ void MainWindow::on_actionOpen_Image_triggered(bool file){
     iFrame->getState() = new ImageFrame::State;
   }
   tabScroll->iFrame = iFrame;
-  ui->tab->setCurrentIndex(idx);
+  currTab = tabScroll;
+  // emits change
+  ui->tab->setCurrentWidget(tabScroll);
 }
 
 void MainWindow::on_actionSave_Image_triggered(){
   QString fName = ui->tab->tabText(ui->tab->currentIndex());
-  auto saveFile = QFileDialog::getSaveFileName(0,"Save file", fName,".png");
+  auto saveFile = QFileDialog::getSaveFileName(0,"Save file", fName, ".png");
 //                                               ".png;;.jpeg;;.jpg");
   cv::Mat image = iFrame->getImageMatrix();
   cv::imwrite(saveFile.toStdString() + ".png", image);

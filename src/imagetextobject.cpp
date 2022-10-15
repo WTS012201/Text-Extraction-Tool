@@ -3,9 +3,8 @@
 
 ImageTextObject::ImageTextObject(
     QWidget *parent, cv::Mat* __mat) :
-  QWidget(parent), isSelected{false},
-  isChanged{false}, mat{__mat}, ui(new Ui::ImageTextObject)
-{
+  QWidget(parent), isSelected{false}, highlightButton{nullptr},
+  isChanged{false}, mat{__mat}, ui(new Ui::ImageTextObject){
   ui->setupUi(this);
 }
 
@@ -40,9 +39,9 @@ QString ImageTextObject::getText(){
   return text;
 }
 
-ImageTextObject::~ImageTextObject()
-{
+ImageTextObject::~ImageTextObject(){
   delete ui;
+  delete highlightButton;
 }
 
 void ImageTextObject::highlightSpaces(){

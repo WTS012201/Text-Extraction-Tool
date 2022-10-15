@@ -63,15 +63,16 @@ void MainWindow::connections(){
     if(idx == -1 || !currTab || deleting) return;
 
     currTab->setDisabled(true);
+    iFrame->setDisabled(true);
     currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
     currTab->setEnabled(true);
     iFrame = currTab->iFrame;
+    iFrame->setEnabled(true);
   });
   QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
                    this, &MainWindow::fontSizeChanged);
 
   QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
-  // PASTE DOESNT ACTIVATE IF NO TAB
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
   QObject::connect(open, &QShortcut::activated, this, [&](){
     on_actionOpen_Image_triggered();
@@ -107,8 +108,21 @@ void MainWindow::connections(){
     } else{
      currTab = nullptr;
     }
-
   });
+}
+
+
+void MainWindow::pastImage(){
+  if(!iFrame)
+    on_actionOpen_Image_triggered(true);
+  const QMimeData *mimeData = clipboard->mimeData();
+
+  if(mimeData->hasImage()){
+    QImage img = qvariant_cast<QImage>(mimeData->imageData());
+    if(!img.isNull()){
+      iFrame->pasteImage(&img);
+    }
+  }
 }
 
 void MainWindow::colorTray(){
@@ -128,20 +142,6 @@ void MainWindow::colorTray(){
 
   iFrame->selection->fontIntensity = scalar;
 }
-
-void MainWindow::pastImage(){
-  if(!iFrame)
-    on_actionOpen_Image_triggered(true);
-  const QMimeData *mimeData = clipboard->mimeData();
-
-  if(mimeData->hasImage()){
-    QImage img = qvariant_cast<QImage>(mimeData->imageData());
-    if(!img.isNull()){
-      iFrame->pasteImage(&img);
-    }
-  }
-}
-
 void MainWindow::fontSelected(){
   if(!iFrame) return;
 

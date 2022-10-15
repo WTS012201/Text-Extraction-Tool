@@ -40,6 +40,8 @@ void ImageFrame::setOptions(Options* options){
 }
 
 void ImageFrame::changeZoom(){
+  if(!this->isEnabled()) return;
+
   double val = (ui->zoomFactor->text()).toDouble();
 
   scalar = (val < 0.1) ? 0.1 : val;
@@ -188,6 +190,8 @@ void ImageFrame::changeImage(QImage* img){
 }
 
 void ImageFrame::changeText(){
+  if(!this->isEnabled()) return;
+
   if(!selection){
     qDebug() << "No selection";
     return;
@@ -290,10 +294,13 @@ void ImageFrame::connections(){
 }
 
 void ImageFrame::setRawText(){
+  if(!this->isEnabled()) return;
   populateTextObjects();
 }
 
 void ImageFrame::highlightSelection(){
+  if(!this->isEnabled()) return;
+
   for(auto& obj : state->textObjects){
     if(obj->isSelected){
       obj->isChanged = true;

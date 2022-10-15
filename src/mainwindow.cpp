@@ -2,8 +2,7 @@
 #include "ui_mainwindow.h"
 #include "ui_tabscroll.h"
 
-// paste wont work on fresh start
-// first tab deletion weird behavior
+// weird behavior on save, sometimes crashes
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), iFrame{nullptr},
@@ -61,7 +60,7 @@ void MainWindow::connections(){
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx){
-    if(idx < 1 || !currTab || deleting) return;
+    if(idx == -1 || !currTab || deleting) return;
 
     currTab->setDisabled(true);
     currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
@@ -76,23 +75,19 @@ void MainWindow::connections(){
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
   QObject::connect(open, &QShortcut::activated, this, [&](){
     on_actionOpen_Image_triggered();
-    if(iFrame)
-      iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(save, &QShortcut::activated, this, [&](){
     on_actionSave_Image_triggered();
-    if(iFrame)
-      iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(undo, &QShortcut::activated, this, [&](){
     on_actionUndo_triggered();
-    if(iFrame)
-      iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
   QObject::connect(redo, &QShortcut::activated, this, [&](){
     on_actionRedo_2_triggered();
-    if(iFrame)
-      iFrame->keysPressed[Qt::Key_Control] = false;
+    if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
 
   QObject::connect(
@@ -101,10 +96,10 @@ void MainWindow::connections(){
 
     deleting = true;
     ui->tab->tabBar()->removeTab(idx);
+    deleting = false;
     if(currTab){
       delete currTab;
       currTab = nullptr;
-      deleting = false;
     } else return;
 
     if(ui->tab->count() > 0){

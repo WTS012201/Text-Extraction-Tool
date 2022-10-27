@@ -29,7 +29,7 @@ public:
 private slots:
   void colorTray();
   void on_actionSave_Image_triggered();
-  void on_actionOpen_Image_triggered(bool file = false);
+  void on_actionOpen_Image_triggered(bool paste=false);
   void fontSelected();
   void fontSizeChanged();
   void on_actionOptions_triggered();
@@ -44,10 +44,10 @@ private:
   Options* options;
   ColorTray* colorMenu;
   TabScroll* currTab;
-  bool deleting;
 
   void keyReleaseEvent(QKeyEvent* event) override;
   void keyPressEvent(QKeyEvent* event) override;
+  void loadImage(QString fileName);
   void initUi();
   void loadData();
   void connections();

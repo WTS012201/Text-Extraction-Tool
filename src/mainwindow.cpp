@@ -6,7 +6,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
   : QMainWindow(parent), iFrame{nullptr},
-    deleting{false}, ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow)
   , currTab{nullptr}
 {
   loadData();
@@ -60,7 +60,7 @@ void MainWindow::connections(){
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx){
-    if(idx == -1 || !currTab || deleting) return;
+    if(idx == -1 || !currTab) return;
 
     currTab->setDisabled(true);
     iFrame->setDisabled(true);
@@ -74,41 +74,29 @@ void MainWindow::connections(){
 
   QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
-  QObject::connect(open, &QShortcut::activated, this, [&](){
+  QObject::connect(open, &QShortcut::activated, this, [&]{
     on_actionOpen_Image_triggered();
     if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
-  QObject::connect(save, &QShortcut::activated, this, [&](){
+  QObject::connect(save, &QShortcut::activated, this, [&]{
     on_actionSave_Image_triggered();
     if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
-  QObject::connect(undo, &QShortcut::activated, this, [&](){
+  QObject::connect(undo, &QShortcut::activated, this, [&]{
     on_actionUndo_triggered();
     if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
-  QObject::connect(redo, &QShortcut::activated, this, [&](){
+  QObject::connect(redo, &QShortcut::activated, this, [&]{
     on_actionRedo_2_triggered();
     if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
 
   QObject::connect(
-  ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
-    if(!iFrame) return;
-
-    deleting = true;
-    ui->tab->tabBar()->removeTab(idx);
-    deleting = false;
-    if(currTab){
-      delete currTab;
-      currTab = nullptr;
-    } else return;
-
-    if(ui->tab->count() > 0){
-      currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
-    } else{
-     currTab = nullptr;
-    }
-  });
+        ui->tab->tabBar(),
+        &QTabBar::tabCloseRequested,
+        ui->tab->tabBar(),
+        &QTabBar::removeTab
+  );
 }
 
 
@@ -183,39 +171,53 @@ void MainWindow::keyReleaseEvent(QKeyEvent* event){
   }
 }
 
-void MainWindow::on_actionOpen_Image_triggered(bool file){
+void MainWindow::on_actionOpen_Image_triggered(bool paste){
   QStringList selection, filters{"*.png *.jpeg *.jpg"};
-  QString fName = "Untitled";
 
-  if(!file){
+  if(!paste){
     QFileDialog dialog(this);
     dialog.setNameFilters(filters);
-    dialog.setFileMode(QFileDialog::ExistingFile);
+    dialog.setFileMode(QFileDialog::ExistingFiles);
     if (!dialog.exec()) return;
 
     selection = dialog.selectedFiles();
-
-    fName = selection.first();
-    if(fName.contains('/')){
-      fName = fName.remove(0, fName.lastIndexOf('/') + 1);
+    for(const auto& file : selection){
+      loadImage(file);
     }
 
-    if(fName.contains('\\')){
-      fName = fName.remove(0, fName.lastIndexOf('\\') + 1);
-    }
+    return;
   }
 
   TabScroll* tabScroll = new TabScroll{ui->tab};
   auto tabUi = tabScroll->getUi();
-  ui->tab->addTab(tabScroll, fName);
+  ui->tab->addTab(tabScroll, "Untitled");
 
   iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
-  if(!file){
-    iFrame->setImage(selection.first());
-  } else{
-    iFrame->getState() = new ImageFrame::State;
+  iFrame->getState() = new ImageFrame::State;
+  tabScroll->iFrame = iFrame;
+  currTab = tabScroll;
+  // emits change
+  ui->tab->setCurrentWidget(tabScroll);
+}
+
+void MainWindow::loadImage(QString fileName){
+  QString name = fileName;
+  if(name.contains('/')){
+    name = name.remove(0, name.lastIndexOf('/') + 1);
   }
+
+  if(name.contains('\\')){
+    name = name.remove(0, name.lastIndexOf('\\') + 1);
+  }
+
+  TabScroll* tabScroll = new TabScroll{ui->tab};
+  auto tabUi = tabScroll->getUi();
+  ui->tab->addTab(tabScroll, name);
+
+  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
+  tabUi->scrollHorizontalLayout->addWidget(iFrame);
+  iFrame->setImage(fileName);
   tabScroll->iFrame = iFrame;
   currTab = tabScroll;
   // emits change

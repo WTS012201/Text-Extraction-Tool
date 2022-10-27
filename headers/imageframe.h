@@ -51,7 +51,7 @@ public:
     QVector<ImageTextObject*> textObjects;
     cv::Mat matrix;
   } State;
-  State*& getState(); // return ref to state pointer
+  State*& getState();
 
 private slots:
   void changeZoom();

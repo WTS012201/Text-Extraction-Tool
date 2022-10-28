@@ -60,14 +60,15 @@ void MainWindow::connections(){
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx){
-    if(idx == -1 || !currTab) return;
-
-    currTab->setDisabled(true);
-    iFrame->setDisabled(true);
-    currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
-    currTab->setEnabled(true);
-    iFrame = currTab->iFrame;
-    iFrame->setEnabled(true);
+      if(idx == -1 || !currTab || deleting) return;
+      qDebug() << "START";
+      currTab->setDisabled(true);
+      iFrame->setDisabled(true);
+      currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
+      currTab->setEnabled(true);
+      iFrame = currTab->iFrame;
+      iFrame->setEnabled(true);
+      qDebug() << "END";
   });
   QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
                    this, &MainWindow::fontSizeChanged);
@@ -92,11 +93,26 @@ void MainWindow::connections(){
   });
 
   QObject::connect(
-        ui->tab->tabBar(),
-        &QTabBar::tabCloseRequested,
-        ui->tab->tabBar(),
-        &QTabBar::removeTab
-  );
+    ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
+      if(!iFrame) return;
+
+      deleting = true;
+      ui->tab->tabBar()->removeTab(idx);
+      deleting = false;
+      if(currTab){
+        delete currTab;
+        currTab = nullptr;
+      } else return;
+
+      if(ui->tab->count() > 0){
+        currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
+        currTab->setEnabled(true);
+        iFrame = currTab->iFrame;
+        iFrame->setEnabled(true);
+      } else{
+       currTab = nullptr;
+      }
+    });
 }
 
 

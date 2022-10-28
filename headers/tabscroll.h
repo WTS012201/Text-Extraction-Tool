@@ -18,6 +18,7 @@ public:
   ~TabScroll();
   Ui::TabScroll* getUi();
   ImageFrame* iFrame;
+
 private:
   Ui::TabScroll *ui;
 };

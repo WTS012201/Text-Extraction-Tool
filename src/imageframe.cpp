@@ -327,6 +327,7 @@ void ImageFrame::initUi(QWidget* parent){
 }
 
 void ImageFrame::zoomIn(){
+  qDebug() << "HERE";
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
@@ -336,6 +337,7 @@ void ImageFrame::zoomIn(){
 }
 
 void ImageFrame::zoomOut(){
+  qDebug() << "HERE";
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
@@ -433,9 +435,6 @@ void ImageFrame::setImage(QString imageName){
 
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
-
-//  parent->setMinimumSize(imagePixmap.size());
-//  parent->setMaximumSize(imagePixmap.size());
 
   extract();
   populateTextObjects();

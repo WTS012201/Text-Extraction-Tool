@@ -26,6 +26,9 @@ public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
 
+signals:
+  void switchConnections();
+
 private slots:
   void colorTray();
   void on_actionSave_Image_triggered();
@@ -36,8 +39,10 @@ private slots:
   void on_actionUndo_triggered();
   void on_actionRedo_2_triggered();
   void pastImage();
+
 private:
 //  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
+  QShortcut *zoomIn, *zoomOut;
   QClipboard *clipboard;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;

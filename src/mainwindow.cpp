@@ -44,7 +44,6 @@ void MainWindow::loadData(){
 }
 
 void MainWindow::on_actionOptions_triggered(){
-//  options->setView(0);
   options->setModal(true);
   if(options->exec() == QDialog::DialogCode::Rejected) return;
 }
@@ -55,8 +54,8 @@ void MainWindow::connections(){
   auto save = new QShortcut{QKeySequence("Ctrl+S"), this};
   auto undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
   auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
-//  auto zoomIn = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
-//  auto zoomout = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+  zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
+  zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
@@ -66,12 +65,26 @@ void MainWindow::connections(){
       currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
       currTab->setEnabled(true);
       iFrame = currTab->iFrame;
-  });
-  QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
-                   this, &MainWindow::fontSizeChanged);
 
-  QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
-  QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
+      emit switchConnections();
+  });
+  QObject::connect(
+    ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
+      if(!iFrame) return;
+      delete ui->tab->widget(idx);
+
+      if(ui->tab->count() > 0){
+        currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
+        currTab->setEnabled(true);
+        iFrame = currTab->iFrame;
+        iFrame->setEnabled(true);
+
+        emit switchConnections();
+      } else{
+        currTab = nullptr;
+        iFrame = nullptr;
+      }
+  });
   QObject::connect(open, &QShortcut::activated, this, [&]{
     on_actionOpen_Image_triggered();
     if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
@@ -88,22 +101,14 @@ void MainWindow::connections(){
     on_actionRedo_2_triggered();
     if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
   });
-
-  QObject::connect(
-    ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
-      if(!iFrame) return;
-      delete ui->tab->widget(idx);
-
-      if(ui->tab->count() > 0){
-        currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
-        currTab->setEnabled(true);
-        iFrame = currTab->iFrame;
-        iFrame->setEnabled(true);
-      } else{
-        currTab = nullptr;
-        iFrame = nullptr;
-      }
-    });
+  QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged,
+                   this, &MainWindow::fontSizeChanged);
+  QObject::connect(ui->color, &QPushButton::clicked, this, &MainWindow::colorTray);
+  QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
+  QObject::connect(this, &MainWindow::switchConnections, this, [&]{
+    QObject::connect(zoomIn, &QShortcut::activated, iFrame, &ImageFrame::zoomIn);
+    QObject::connect(zoomOut, &QShortcut::activated, iFrame, &ImageFrame::zoomOut);
+  });
 }
 
 
@@ -204,8 +209,9 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste){
   iFrame->getState() = new ImageFrame::State;
   tabScroll->iFrame = iFrame;
   currTab = tabScroll;
-  // emits change
   ui->tab->setCurrentWidget(tabScroll);
+
+  emit switchConnections();
 }
 
 void MainWindow::loadImage(QString fileName){
@@ -227,7 +233,6 @@ void MainWindow::loadImage(QString fileName){
   iFrame->setImage(fileName);
   tabScroll->iFrame = iFrame;
   currTab = tabScroll;
-  // emits change
   ui->tab->setCurrentWidget(tabScroll);
 }
 

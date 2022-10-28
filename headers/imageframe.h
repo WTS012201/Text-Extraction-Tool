@@ -7,6 +7,7 @@
 #include "imagetextobject.h"
 #include "options.h"
 
+
 #include <QScrollBar>
 #include <QRubberBand>
 #include <QStack>
@@ -53,6 +54,10 @@ public:
   } State;
   State*& getState();
 
+public slots:
+  void zoomIn();
+  void zoomOut();
+
 private slots:
   void changeZoom();
   void setRawText();
@@ -86,8 +91,6 @@ private:
   void wheelEvent(QWheelEvent* event) override;
   void connections();
   void initUi(QWidget* parent);
-  void zoomIn();
-  void zoomOut();
   void showAll();
   void setOptions(Options* options);
   void populateTextObjects();

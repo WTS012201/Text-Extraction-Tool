@@ -10,6 +10,8 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   setWidgets();
   connections();
   setOptions(options);
+
+  ui->zoomFactor->deselect();
 }
 
 ImageFrame::~ImageFrame(){

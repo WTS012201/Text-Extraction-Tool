@@ -37,7 +37,7 @@ private slots:
   void on_actionRedo_2_triggered();
   void pastImage();
 private:
-  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
+//  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
   QClipboard *clipboard;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;

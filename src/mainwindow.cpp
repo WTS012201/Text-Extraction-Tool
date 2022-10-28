@@ -13,13 +13,12 @@ MainWindow::MainWindow(QWidget *parent)
   initUi();
   connections();
 
-//  on_actionOpen_Image_triggered(true);
+  ui->zoomFactor->deselect();
+  this->setFocusPolicy(Qt::StrongFocus);
 }
 
 MainWindow::~MainWindow(){
   delete ui;
-  delete undo;
-  delete redo;
 }
 
 void MainWindow::initUi(){
@@ -51,11 +50,13 @@ void MainWindow::on_actionOptions_triggered(){
 }
 
 void MainWindow::connections(){
-  paste = new QShortcut{QKeySequence("Ctrl+V"), this};
-  open = new QShortcut{QKeySequence("Ctrl+O"), this};
-  save = new QShortcut{QKeySequence("Ctrl+S"), this};
-  undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
-  redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+  auto paste = new QShortcut{QKeySequence("Ctrl+V"), this};
+  auto open = new QShortcut{QKeySequence("Ctrl+O"), this};
+  auto save = new QShortcut{QKeySequence("Ctrl+S"), this};
+  auto undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
+  auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+//  auto zoomIn = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+//  auto zoomout = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
@@ -99,7 +100,8 @@ void MainWindow::connections(){
         iFrame = currTab->iFrame;
         iFrame->setEnabled(true);
       } else{
-       currTab = nullptr;
+        currTab = nullptr;
+        iFrame = nullptr;
       }
     });
 }
@@ -108,6 +110,7 @@ void MainWindow::connections(){
 void MainWindow::pastImage(){
   if(!iFrame)
     on_actionOpen_Image_triggered(true);
+
   const QMimeData *mimeData = clipboard->mimeData();
 
   if(mimeData->hasImage()){
@@ -189,7 +192,6 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste){
     for(const auto& file : selection){
       loadImage(file);
     }
-
     return;
   }
 

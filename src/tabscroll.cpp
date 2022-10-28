@@ -11,7 +11,6 @@ TabScroll::TabScroll(QWidget *parent, ImageFrame* __iFrame) :
 TabScroll::~TabScroll(){
   delete ui;
   delete iFrame;
-  qDebug() << "DELETE" << this;
 }
 
 Ui::TabScroll* TabScroll::getUi(){

@@ -7,7 +7,6 @@
 #include "imagetextobject.h"
 #include "options.h"
 
-
 #include <QScrollBar>
 #include <QRubberBand>
 #include <QStack>
@@ -53,6 +52,8 @@ public:
     cv::Mat matrix;
   } State;
   State*& getState();
+  double scalar;
+  double scaleFactor;
 
 public slots:
   void zoomIn();
@@ -60,12 +61,12 @@ public slots:
 
 private slots:
   void changeZoom();
-  void setRawText();
   void highlightSelection();
   void changeText();
 
 signals:
   void rawTextChanged();
+
 
 private:
   QString filepath, rawText;
@@ -76,13 +77,10 @@ private:
   cv::Mat display;
   tesseract::PageIteratorLevel mode;
   Ui::MainWindow* ui;
+  bool middleDown;
 
   QStack<State*> undo, redo;
   State* state;
-
-  double scalar;
-  double scaleFactor;
-  bool middleDown;
 
   cv::Mat QImageToMat(QImage image);
   void mousePressEvent(QMouseEvent * event) override;

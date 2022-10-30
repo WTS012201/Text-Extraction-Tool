@@ -1,5 +1,6 @@
 ﻿
 #include "../headers/imageframe.h"
+#include "../headers/tabscroll.h"
 
 ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   rubberBand{nullptr}, scene{new QGraphicsScene(this)},
@@ -14,7 +15,8 @@ ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
   ui->zoomFactor->deselect();
 }
 
-ImageFrame::~ImageFrame(){
+ImageFrame::~ImageFrame()
+{
   for(const auto& obj : state->textObjects){
     delete obj;
   }
@@ -280,7 +282,10 @@ void ImageFrame::changeText(){
 
 void ImageFrame::connections(){
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
-  connect(this, &ImageFrame::rawTextChanged, this, &ImageFrame::setRawText);
+  connect(this, &ImageFrame::rawTextChanged, this, [&]{
+    if(!this->isEnabled()) return;
+    populateTextObjects();
+  });
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
 
@@ -295,10 +300,6 @@ void ImageFrame::connections(){
   });
 }
 
-void ImageFrame::setRawText(){
-  if(!this->isEnabled()) return;
-  populateTextObjects();
-}
 
 void ImageFrame::highlightSelection(){
   if(!this->isEnabled()) return;
@@ -327,23 +328,45 @@ void ImageFrame::initUi(QWidget* parent){
 }
 
 void ImageFrame::zoomIn(){
-  qDebug() << "HERE";
+  if(!this->isEnabled()) return;
+//  auto relPos = this->mapFromGlobal(this->cursor().pos());
+  auto sa = qobject_cast<TabScroll*>(ui->tab->currentWidget())->getScrollArea();
+  auto hb = sa->horizontalScrollBar();
+  auto vb = sa->verticalScrollBar();
+
+  int prevH = hb->value() - hb->maximum();
+  int prevV = vb->value() - vb->maximum();
+
   (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
   for(auto& obj : state->textObjects){
     obj->scaleAndPosition(scalar);
   }
+
+  hb->setValue(prevH + hb->maximum());
+  vb->setValue(prevV + vb->maximum());
 }
 
 void ImageFrame::zoomOut(){
-  qDebug() << "HERE";
+  if(!this->isEnabled()) return;
+
+  auto sa = qobject_cast<TabScroll*>(ui->tab->currentWidget())->getScrollArea();
+  auto hb = sa->horizontalScrollBar();
+  auto vb = sa->verticalScrollBar();
+
+  int prevH = hb->value() - hb->maximum();
+  int prevV = vb->value() - vb->maximum();
+
   (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
   for(auto& obj : state->textObjects){
     obj->scaleAndPosition(scalar);
   }
+
+  hb->setValue(prevH + hb->maximum());
+  vb->setValue(prevV + vb->maximum());
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent* event) {
@@ -573,6 +596,7 @@ void ImageFrame::undoAction(){
     selection = state->textObjects.last();
     selection->showHighlights();
   }
+
   changeImage();
 }
 

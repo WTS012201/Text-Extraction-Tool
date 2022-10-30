@@ -56,6 +56,7 @@ void MainWindow::connections(){
   auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
   zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
   zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
+  // Add ctrl+F
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
@@ -71,7 +72,6 @@ void MainWindow::connections(){
   QObject::connect(
     ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
       if(!iFrame) return;
-      delete ui->tab->widget(idx);
 
       if(ui->tab->count() > 0){
         currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
@@ -108,6 +108,7 @@ void MainWindow::connections(){
   QObject::connect(this, &MainWindow::switchConnections, this, [&]{
     QObject::connect(zoomIn, &QShortcut::activated, iFrame, &ImageFrame::zoomIn);
     QObject::connect(zoomOut, &QShortcut::activated, iFrame, &ImageFrame::zoomOut);
+    ui->zoomFactor->setText(QString::number(iFrame->scalar));
   });
 }
 
@@ -143,6 +144,7 @@ void MainWindow::colorTray(){
 
   iFrame->selection->fontIntensity = scalar;
 }
+
 void MainWindow::fontSelected(){
   if(!iFrame) return;
 
@@ -197,6 +199,7 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste){
     for(const auto& file : selection){
       loadImage(file);
     }
+    emit switchConnections();
     return;
   }
 
@@ -234,6 +237,7 @@ void MainWindow::loadImage(QString fileName){
   tabScroll->iFrame = iFrame;
   currTab = tabScroll;
   ui->tab->setCurrentWidget(tabScroll);
+
 }
 
 void MainWindow::on_actionSave_Image_triggered(){

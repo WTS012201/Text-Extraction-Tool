@@ -13,6 +13,10 @@ TabScroll::~TabScroll(){
   delete iFrame;
 }
 
+QScrollArea* TabScroll::getScrollArea(){
+  return ui->scrollArea;
+}
+
 Ui::TabScroll* TabScroll::getUi(){
   return ui;
 }

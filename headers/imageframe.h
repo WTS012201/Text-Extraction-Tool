@@ -98,6 +98,7 @@ private:
   void showAll();
   void setOptions(Options* options);
   void populateTextObjects();
+  void findSubstrings();
   void changeImage(QImage* img = nullptr);
   QString collect(cv::Mat& matrix);
   void inliers(QPair<QPoint, QPoint>);

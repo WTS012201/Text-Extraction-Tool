@@ -1044,6 +1044,22 @@ QProgressBar::chunk
                   </widget>
                  </item>
                  <item>
+                  <widget class="QLabel" name="label">
+                   <property name="text">
+                    <string>Find:</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="find">
+                   <property name="styleSheet">
+                    <string notr="true">.QLineEdit{
+	background: rgba(255, 255, 255, 10)
+}</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <widget class="QPushButton" name="highlightAll">
                    <property name="minimumSize">
                     <size>

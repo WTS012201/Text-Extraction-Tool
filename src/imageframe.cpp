@@ -285,7 +285,6 @@ void ImageFrame::connections(){
   connect(spinner, &QMovie::frameChanged, this, [&]{
     ui->tab->setTabIcon(ui->tab->indexOf(tab), QIcon{spinner->currentPixmap()});
   });
-  connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(this, &ImageFrame::processing, this, [&]{
     isProcessing = !isProcessing;
 
@@ -293,12 +292,15 @@ void ImageFrame::connections(){
     if(!isProcessing){
       populateTextObjects();
       spinner->stop();
+      ui->tab->setTabIcon(ui->tab->indexOf(tab), QIcon{});
     } else{
       spinner->start();
     }
   });
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
+  connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
+  connect(ui->find, &QLineEdit::editingFinished, this, &ImageFrame::findSubstrings);
 
   connect(ui->removeSelection, &QPushButton::pressed, this, [&](){
     for(auto& obj : state->textObjects){
@@ -309,6 +311,23 @@ void ImageFrame::connections(){
       }
     }
   });
+}
+
+void ImageFrame::findSubstrings(){
+  QString query = ui->find->text();
+
+  if(query.isEmpty()){
+    return;
+  }
+
+  for(auto& obj : state->textObjects){
+    if(obj->getText().contains(query, Qt::CaseInsensitive)){
+      obj->setHighlightColor("background:  rgba(255, 0, 243, 100);");
+      obj->showHighlights();
+    } else{
+      obj->setHighlightColor("background:  rgba(255, 243, 0, 100);");
+    }
+  }
 }
 
 void ImageFrame::highlightSelection(){
@@ -579,7 +598,7 @@ QString ImageFrame::collect(
 }
 
 void ImageFrame::undoAction(){
-  if(undo.empty()){
+  if(undo.empty() || isProcessing){
     return;
   }
   for(auto& obj : state->textObjects){
@@ -612,7 +631,7 @@ void ImageFrame::undoAction(){
 }
 
 void ImageFrame::redoAction(){
-  if(redo.empty()){
+  if(redo.empty() || isProcessing){
     return;
   }
 

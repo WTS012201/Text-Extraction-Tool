@@ -75,6 +75,8 @@ public:
   void highlight();
   void deselect();
   void showHighlights();
+  void setHighlightColor(QString colorStyle);
+
 private:
   QPushButton* highlightButton;
   Ui::MainWindow* mUi;
@@ -82,6 +84,7 @@ private:
   Ui::ImageTextObject *ui;
   QString filepath;
   QString text;
+  QString colorStyle;
 
   cv::Mat QImageToMat();
   void determineBgColor();

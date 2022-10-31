@@ -4,7 +4,9 @@
 ImageTextObject::ImageTextObject(
     QWidget *parent, cv::Mat* __mat) :
   QWidget(parent), isSelected{false}, highlightButton{nullptr},
-  isChanged{false}, mat{__mat}, ui(new Ui::ImageTextObject){
+  isChanged{false}, mat{__mat}, ui(new Ui::ImageTextObject),
+  colorStyle{"background:  rgba(255, 243, 0, 100);"}
+{
   ui->setupUi(this);
 }
 
@@ -259,7 +261,11 @@ void ImageTextObject::highlight(){
 void ImageTextObject::showHighlights(){
   this->show();
   highlightButton->show();
-  highlightButton->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  highlightButton->setStyleSheet(colorStyle);
+}
+
+void ImageTextObject::setHighlightColor(QString __colorStyle){
+ colorStyle = __colorStyle;
 }
 
 void ImageTextObject::selectHighlight(){
@@ -267,7 +273,6 @@ void ImageTextObject::selectHighlight(){
   isSelected = true;
   highlightButton->show();
   highlightButton->setStyleSheet("background:  rgba(37,122,253,100);");
-
 }
 
 void ImageTextObject::deselect(){

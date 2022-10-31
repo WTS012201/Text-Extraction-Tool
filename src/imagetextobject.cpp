@@ -272,9 +272,9 @@ void ImageTextObject::selectHighlight(){
 
 void ImageTextObject::deselect(){
   highlightButton->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  isSelected = false;
   if(isChanged){
     return;
   }
   highlightButton->hide();
-  isSelected = false;
 }

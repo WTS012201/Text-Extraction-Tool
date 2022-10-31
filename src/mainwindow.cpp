@@ -110,10 +110,11 @@ void MainWindow::connections(){
     QObject::connect(zoomIn, &QShortcut::activated, iFrame, &ImageFrame::zoomIn);
     QObject::connect(zoomOut, &QShortcut::activated, iFrame, &ImageFrame::zoomOut);
     ui->zoomFactor->setText(QString::number(iFrame->scalar));
+    ui->textEdit->setText(iFrame->selection ? iFrame->selection->getText() : "");
   });
 }
 
-
+// fix textobjects issue on paste
 void MainWindow::pastImage(){
   if(!iFrame)
     on_actionOpen_Image_triggered(true);

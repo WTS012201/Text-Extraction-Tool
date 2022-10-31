@@ -7,6 +7,7 @@
 #include "imagetextobject.h"
 #include "options.h"
 
+#include <QMovie>
 #include <QScrollBar>
 #include <QRubberBand>
 #include <QStack>
@@ -33,6 +34,7 @@ public:
   ImageTextObject* selection;
   ImageFrame(
       QWidget* parent = nullptr,
+      QWidget* tab = nullptr,
       Ui::MainWindow* ui = nullptr,
       Options* options = nullptr
       );
@@ -52,6 +54,8 @@ public:
     cv::Mat matrix;
   } State;
   State*& getState();
+  QString rawText;
+  bool isProcessing;
   double scalar;
   double scaleFactor;
 
@@ -65,11 +69,11 @@ private slots:
   void changeText();
 
 signals:
-  void rawTextChanged();
+  void processing();
 
 
 private:
-  QString filepath, rawText;
+  QString filepath;
   QRubberBand* rubberBand;
   QPoint origin;
   QGraphicsScene* scene;
@@ -77,6 +81,8 @@ private:
   cv::Mat display;
   tesseract::PageIteratorLevel mode;
   Ui::MainWindow* ui;
+  QMovie *spinner;
+  QWidget* tab;
   bool middleDown;
 
   QStack<State*> undo, redo;

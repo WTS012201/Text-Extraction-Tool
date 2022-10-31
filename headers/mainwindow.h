@@ -13,6 +13,7 @@
 #include <QTextEdit>
 #include <QShortcut>
 #include <QClipboard>
+#include <QMovie>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow;}

@@ -71,7 +71,8 @@ void MainWindow::connections(){
   });
   QObject::connect(
     ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx){
-      if(!iFrame) return;
+      if(!iFrame || iFrame->isProcessing) return; // to prevent closing on concurrent
+      delete ui->tab->widget(idx);
 
       if(ui->tab->count() > 0){
         currTab = qobject_cast<TabScroll*>(ui->tab->currentWidget());
@@ -207,7 +208,7 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste){
   auto tabUi = tabScroll->getUi();
   ui->tab->addTab(tabScroll, "Untitled");
 
-  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
+  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, tabScroll, ui, options);
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
   iFrame->getState() = new ImageFrame::State;
   tabScroll->iFrame = iFrame;
@@ -231,13 +232,12 @@ void MainWindow::loadImage(QString fileName){
   auto tabUi = tabScroll->getUi();
   ui->tab->addTab(tabScroll, name);
 
-  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, ui, options);
+  iFrame = new ImageFrame(tabUi->scrollAreaWidgetContents, tabScroll, ui, options);
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
   iFrame->setImage(fileName);
   tabScroll->iFrame = iFrame;
   currTab = tabScroll;
   ui->tab->setCurrentWidget(tabScroll);
-
 }
 
 void MainWindow::on_actionSave_Image_triggered(){

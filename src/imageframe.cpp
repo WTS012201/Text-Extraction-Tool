@@ -2,10 +2,11 @@
 #include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
 
-ImageFrame::ImageFrame(QWidget* parent, Ui::MainWindow* __ui, Options* options):
-  rubberBand{nullptr}, scene{new QGraphicsScene(this)},
-  mode{tesseract::RIL_PARA}, selection{nullptr}, ui{__ui}, state{new State},
-  scalar{1.0}, scaleFactor{0.1}, middleDown{false}
+ImageFrame::ImageFrame(
+  QWidget* parent, QWidget* __tab, Ui::MainWindow* __ui, Options* options):
+  selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
+  scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, scene{new QGraphicsScene(this)},
+  mode{tesseract::RIL_PARA}, ui{__ui}, middleDown{false}, state{new State}
 {
   initUi(parent);
   setWidgets();
@@ -281,10 +282,20 @@ void ImageFrame::changeText(){
 }
 
 void ImageFrame::connections(){
+  connect(spinner, &QMovie::frameChanged, this, [&]{
+    ui->tab->setTabIcon(ui->tab->indexOf(tab), QIcon{spinner->currentPixmap()});
+  });
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
-  connect(this, &ImageFrame::rawTextChanged, this, [&]{
+  connect(this, &ImageFrame::processing, this, [&]{
+    isProcessing = !isProcessing;
+
     if(!this->isEnabled()) return;
-    populateTextObjects();
+    if(!isProcessing){
+      populateTextObjects();
+      spinner->stop();
+    } else{
+      spinner->start();
+    }
   });
   connect(ui->highlightAll, &QPushButton::pressed, this, &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
@@ -312,7 +323,6 @@ void ImageFrame::highlightSelection(){
   }
 }
 
-
 void ImageFrame::setWidgets(){
   ui->zoomFactor->hide();
   ui->zoomLabel->hide();
@@ -320,6 +330,7 @@ void ImageFrame::setWidgets(){
 
 void ImageFrame::initUi(QWidget* parent){
   parent->setContentsMargins(0,0,0,0);
+  spinner = new QMovie(":/img/spinner.gif");
 
   this->setParent(parent);
   this->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
@@ -490,10 +501,11 @@ void ImageFrame::extract(cv::Mat* mat){
 
   QFuture<void> future = QtConcurrent::run(
   [&](cv::Mat matrix) mutable -> void{
+      emit processing();
       rawText = collect(matrix);
   }, state->matrix).then([&](){
     state->matrix.copyTo(display);
-    emit rawTextChanged();
+    emit processing();
   });
   showAll();
 }

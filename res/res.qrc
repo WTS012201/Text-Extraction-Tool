@@ -5,6 +5,7 @@
     <qresource prefix="/img">
         <file>test.jpg</file>
         <file>galaxy.jpg</file>
+        <file>spinner.gif</file>
     </qresource>
     <qresource prefix="/other">
         <file>eng.traineddata</file>

@@ -13,15 +13,32 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,5">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,0,5">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
         <widget class="QPushButton" name="pushButton">
          <property name="text">
-          <string>PushButton</string>
+          <string>Settings</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_2">
+         <property name="text">
+          <string>Help</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="pushButton_3">
+         <property name="text">
+          <string>Shortcuts</string>
          </property>
         </widget>
        </item>
@@ -41,7 +58,17 @@
       </layout>
      </item>
      <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QStackedWidget" name="stackedWidget">
+       <property name="currentIndex">
+        <number>2</number>
+       </property>
        <widget class="QWidget" name="page">
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
@@ -51,7 +78,7 @@
              <item>
               <widget class="QLabel" name="label">
                <property name="text">
-                <string>Highlight partial type: </string>
+                <string>Highlight type: </string>
                </property>
               </widget>
              </item>
@@ -116,7 +143,111 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="page_2"/>
+       <widget class="QWidget" name="page_3">
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_7"/>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="page_2">
+        <layout class="QVBoxLayout" name="verticalLayout_3">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_2">
+           <item>
+            <widget class="QLabel" name="label_2">
+             <property name="font">
+              <font>
+               <pointsize>14</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Keyboard Shortcuts</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QListWidget" name="listWidget">
+             <property name="font">
+              <font>
+               <pointsize>12</pointsize>
+              </font>
+             </property>
+             <property name="alternatingRowColors">
+              <bool>true</bool>
+             </property>
+             <property name="spacing">
+              <number>0</number>
+             </property>
+             <property name="modelColumn">
+              <number>0</number>
+             </property>
+             <item>
+              <property name="text">
+               <string>Save Current Page (Ctrl + S)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Open New Page (Ctrl + O)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Undo Last Change (Ctrl + Z)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Redo Last Change (Ctrl + Shift + Z)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Zoom In (Ctrl + =)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Zoom Out (Ctrl + -)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Paste Image From Clipboard (Ctrl + V)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Find Word/Phrase (Ctrl + F)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Add Text Group From Selection (Ctrl + A)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Remove Text Group From Selection (Ctrl + R)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Group (Ctrl + G)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Ungroup (Ctrl Shift + G)</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </item>
     </layout>

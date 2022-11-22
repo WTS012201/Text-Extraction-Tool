@@ -54,9 +54,11 @@ void MainWindow::connections(){
   auto save = new QShortcut{QKeySequence("Ctrl+S"), this};
   auto undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
   auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+  auto find = new QShortcut{QKeySequence("Ctrl+F"), this};
+  auto add = new QShortcut{QKeySequence("Ctrl+A"), this};
+  auto remove = new QShortcut{QKeySequence("Ctrl+R"), this};
   zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
   zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
-  // Add ctrl+F
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
@@ -85,6 +87,22 @@ void MainWindow::connections(){
         currTab = nullptr;
         iFrame = nullptr;
       }
+  });
+  QObject::connect(find, &QShortcut::activated, this, [&]{
+    ui->find->setFocus();
+    if(iFrame) iFrame->keysPressed[Qt::Key_Control] = false;
+  });
+  QObject::connect(add, &QShortcut::activated, this, [&]{
+    if(iFrame){
+      iFrame->keysPressed[Qt::Key_Control] = false;
+      iFrame->highlightSelection();
+    }
+  });
+  QObject::connect(remove, &QShortcut::activated, this, [&]{
+    if(iFrame){
+      iFrame->keysPressed[Qt::Key_Control] = false;
+      iFrame->removeSelection();
+    }
   });
   QObject::connect(open, &QShortcut::activated, this, [&]{
     on_actionOpen_Image_triggered();

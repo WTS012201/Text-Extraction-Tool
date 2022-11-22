@@ -301,8 +301,10 @@ void ImageFrame::connections(){
   connect(ui->changeButton, &QPushButton::pressed, this, &ImageFrame::changeText);
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this, &ImageFrame::changeZoom);
   connect(ui->find, &QLineEdit::editingFinished, this, &ImageFrame::findSubstrings);
+  connect(ui->removeSelection, &QPushButton::pressed, this, &ImageFrame::removeSelection);
+}
 
-  connect(ui->removeSelection, &QPushButton::pressed, this, [&](){
+void ImageFrame::removeSelection(){
     for(auto& obj : state->textObjects){
       if(obj->isSelected){
         obj->deselect();
@@ -310,7 +312,6 @@ void ImageFrame::connections(){
         obj->isChanged = false;
       }
     }
-  });
 }
 
 void ImageFrame::findSubstrings(){

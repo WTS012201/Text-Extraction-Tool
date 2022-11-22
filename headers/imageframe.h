@@ -62,10 +62,11 @@ public:
 public slots:
   void zoomIn();
   void zoomOut();
+  void highlightSelection();
+  void removeSelection();
 
 private slots:
   void changeZoom();
-  void highlightSelection();
   void changeText();
 
 signals:

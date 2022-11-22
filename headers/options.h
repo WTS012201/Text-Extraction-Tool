@@ -16,6 +16,13 @@ public:
   explicit Options(QWidget *parent = nullptr);
   ~Options();
   tesseract::PageIteratorLevel getPartialSelection();
+private slots:
+  void on_pushButton_3_clicked();
+
+  void on_pushButton_clicked();
+
+  void on_pushButton_2_clicked();
+
 private:
   Ui::Options *ui;
 };

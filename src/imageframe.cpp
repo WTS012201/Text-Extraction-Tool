@@ -577,12 +577,12 @@ QString ImageFrame::collect(
       ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
 
-      while(word.endsWith('\n') || word.endsWith(' ')){
-        word = word.remove(word.length() - 1, word.length());
-      }
-      if(word.isEmpty()){
-        continue;
-      }
+//      while(word.endsWith('\n') || word.endsWith(' ')){
+//        word = word.remove(word.length() - 1, word.length());
+//      }
+//      if(word.isEmpty()){
+//        continue;
+//      }
 
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
@@ -667,24 +667,34 @@ void ImageFrame::groupSelections(){
   if(state->textObjects.isEmpty()) return;
 
   QString contiguousStr{""};
-  QPoint newTL{-1, -1};
-  QPoint newBR{-1, -1};
+  QPoint newTL{-1, -1}, newBR{-1, -1};
   QVector<ImageTextObject*> oldObjs = state->textObjects;
 
   State* oldState = new State{oldObjs, cv::Mat{}};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
+  ImageTextObject* textObject = new ImageTextObject{nullptr};
   QVector<ImageTextObject*> newTextObjects;
-  for(const auto& obj : state->textObjects){
+
+  int start = -1;
+  for(auto i = 0; i < state->textObjects.size(); i++){
+    auto& obj = state->textObjects[i];
 
     if(obj->isSelected){
+      if(start == -1)
+        start = i;
+
       if(newTL == QPoint{-1, -1})
         newTL = obj->topLeft;
       if(newBR == QPoint{-1, -1})
         newBR = obj->bottomRight;
 
-      contiguousStr += obj->getText() + "\n";
+      QString word = obj->getText();
+      if(!word.endsWith('\n')){
+        word += " ";
+      }
+      contiguousStr += word;
 
       if(obj->topLeft.x() < newTL.x())
         newTL.setX(obj->topLeft.x());
@@ -701,19 +711,26 @@ void ImageFrame::groupSelections(){
       newTextObjects.append(obj);
     }
   }
-  state->textObjects = newTextObjects;
 
-  ImageTextObject* textObject = new ImageTextObject{nullptr};
   textObject->setText(contiguousStr);
   textObject->lineSpace = QPair<QPoint, QPoint>{newTL, newBR};
   textObject->topLeft = newTL;
   textObject->bottomRight = newBR;
+
   textObject = new ImageTextObject{
     this, *textObject, ui, &state->matrix
   };
-
   textObject->reset();
-
   textObject->selectHighlight();
-  state->textObjects.push_back(textObject);
+
+  // reindex after grouping
+  QVector<ImageTextObject*> final;
+  qDebug() << start;
+  for(auto i = 0; i < newTextObjects.size(); i++){
+    if(i == start)
+      final.append(textObject);
+    else
+      final.append(newTextObjects[i]);
+  }
+  state->textObjects = final;
 }

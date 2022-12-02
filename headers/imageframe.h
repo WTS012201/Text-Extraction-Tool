@@ -64,6 +64,7 @@ public slots:
   void zoomOut();
   void highlightSelection();
   void removeSelection();
+  void groupSelections();
 
 private slots:
   void changeZoom();

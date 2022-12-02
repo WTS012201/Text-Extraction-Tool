@@ -59,9 +59,10 @@ void ImageTextObject::highlightSpaces(){
           highlight, &QPushButton::clicked,
           this, [=](...){
               if(isChanged){
-                int fsEstimate = bottomRight.y() - topLeft.y();
+//                int fsEstimate = bottomRight.y() - topLeft.y();
 
-                mUi->fontSizeInput->setText(QString::number(fsEstimate));
+//                mUi->fontSizeInput->setText(QString::number(fsEstimate));
+                mUi->fontSizeInput->setText(QString::number(14));
                 mUi->textEdit->setText(text);
                 highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
                 emit selection();

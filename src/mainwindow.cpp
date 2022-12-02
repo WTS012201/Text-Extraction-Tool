@@ -57,6 +57,7 @@ void MainWindow::connections(){
   auto find = new QShortcut{QKeySequence("Ctrl+F"), this};
   auto add = new QShortcut{QKeySequence("Ctrl+A"), this};
   auto remove = new QShortcut{QKeySequence("Ctrl+R"), this};
+  auto group = new QShortcut{QKeySequence("Ctrl+G"), this};
   zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
   zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
   clipboard = QApplication::clipboard();
@@ -102,6 +103,12 @@ void MainWindow::connections(){
     if(iFrame){
       iFrame->keysPressed[Qt::Key_Control] = false;
       iFrame->removeSelection();
+    }
+  });
+  QObject::connect(group, &QShortcut::activated, this, [&]{
+    if(iFrame){
+      iFrame->keysPressed[Qt::Key_Control] = false;
+      iFrame->groupSelections();
     }
   });
   QObject::connect(open, &QShortcut::activated, this, [&]{

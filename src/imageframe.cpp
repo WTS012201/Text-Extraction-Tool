@@ -658,3 +658,58 @@ void ImageFrame::redoAction(){
 ImageFrame::State*& ImageFrame::getState(){
   return state;
 }
+
+void ImageFrame::groupSelections(){
+  if(!this->isEnabled()) return;
+  if(state->textObjects.isEmpty()) return;
+
+  QString contiguousStr{""};
+  QPoint newTL{-1, -1};
+  QPoint newBR{-1, -1};
+  QVector<ImageTextObject*> oldObjs = state->textObjects;
+
+  State* oldState = new State{oldObjs, cv::Mat{}};
+  state->matrix.copyTo(oldState->matrix);
+  undo.push(oldState);
+
+  QVector<ImageTextObject*> newTextObjects;
+  for(const auto& obj : state->textObjects){
+
+    if(obj->isSelected){
+      if(newTL == QPoint{-1, -1})
+        newTL = obj->topLeft;
+      if(newBR == QPoint{-1, -1})
+        newBR = obj->bottomRight;
+
+      contiguousStr += obj->getText() + "\n";
+
+      if(obj->topLeft.x() < newTL.x())
+        newTL.setX(obj->topLeft.x());
+      if(obj->topLeft.y() < newTL.y())
+        newTL.setY(obj->topLeft.y());
+
+      if(obj->bottomRight.x() > newBR.x())
+        newBR.setX(obj->bottomRight.x());
+      if(obj->bottomRight.y() > newBR.y())
+        newBR.setY(obj->bottomRight.y());
+      obj->deselect();
+    } else{
+      newTextObjects.append(obj);
+    }
+  }
+  state->textObjects = newTextObjects;
+
+  ImageTextObject* textObject = new ImageTextObject{nullptr};
+  textObject->setText(contiguousStr);
+  textObject->lineSpace = QPair<QPoint, QPoint>{newTL, newBR};
+  textObject->topLeft = newTL;
+  textObject->bottomRight = newBR;
+  textObject = new ImageTextObject{
+    this, *textObject, ui, &state->matrix
+  };
+
+//  textObject->isChanged = true;
+//  textObject->deselect();
+  textObject->selectHighlight();
+  state->textObjects.push_back(textObject);
+}

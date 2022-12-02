@@ -76,6 +76,7 @@ public:
   void deselect();
   void showHighlights();
   void setHighlightColor(QString colorStyle);
+  void reset();
 
 private:
   QPushButton* highlightButton;

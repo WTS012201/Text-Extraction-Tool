@@ -284,3 +284,9 @@ void ImageTextObject::deselect(){
   }
   highlightButton->hide();
 }
+
+void ImageTextObject::reset(){
+  deselect();
+  hide();
+  isChanged = false;
+}

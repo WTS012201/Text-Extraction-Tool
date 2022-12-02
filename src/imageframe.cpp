@@ -621,6 +621,8 @@ void ImageFrame::undoAction(){
     obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
+
+    obj->reset();
   }
 
   if(!state->textObjects.empty()){
@@ -648,6 +650,7 @@ void ImageFrame::redoAction(){
     obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
+    obj->reset();
   }
 
   selection = state->textObjects.last();
@@ -692,7 +695,8 @@ void ImageFrame::groupSelections(){
         newBR.setX(obj->bottomRight.x());
       if(obj->bottomRight.y() > newBR.y())
         newBR.setY(obj->bottomRight.y());
-      obj->deselect();
+
+      obj->reset();
     } else{
       newTextObjects.append(obj);
     }
@@ -708,8 +712,8 @@ void ImageFrame::groupSelections(){
     this, *textObject, ui, &state->matrix
   };
 
-//  textObject->isChanged = true;
-//  textObject->deselect();
+  textObject->reset();
+
   textObject->selectHighlight();
   state->textObjects.push_back(textObject);
 }

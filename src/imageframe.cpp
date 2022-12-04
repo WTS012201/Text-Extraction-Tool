@@ -1,5 +1,4 @@
-﻿
-#include "../headers/imageframe.h"
+﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
 
 ImageFrame::ImageFrame(
@@ -556,9 +555,7 @@ void ImageFrame::populateTextObjects(){
   state->textObjects = tempObjects;
 }
 
-QString ImageFrame::collect(
-    cv::Mat& matrix
-    ){
+QString ImageFrame::collect(cv::Mat& matrix){
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
   api->Init(nullptr, "eng", tesseract::OEM_DEFAULT);
@@ -723,10 +720,10 @@ void ImageFrame::groupSelections(){
   };
   textObject->reset();
   textObject->selectHighlight();
+  selection = textObject;
 
   // reindex after grouping
   QVector<ImageTextObject*> final;
-  qDebug() << start;
   for(auto i = 0; i < newTextObjects.size(); i++){
     if(i == start)
       final.append(textObject);

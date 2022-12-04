@@ -139,7 +139,6 @@ void MainWindow::connections(){
   });
 }
 
-// fix textobjects issue on paste
 void MainWindow::pastImage(){
   if(!iFrame)
     on_actionOpen_Image_triggered(true);
@@ -157,6 +156,7 @@ void MainWindow::pastImage(){
 void MainWindow::colorTray(){
   if(!iFrame) return;
   if(!iFrame->selection) return;
+  qDebug() << "HERE2";
 
   colorMenu->setModal(true);
   if(iFrame->selection){

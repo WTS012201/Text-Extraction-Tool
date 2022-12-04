@@ -19,14 +19,34 @@ void ColorTray::connections(){
     color.setRed(slider->value());
     changeBgColor();
   });
+
   QObject::connect(ui->colorGreen, &QSlider::actionTriggered, this, [&](){
     QSlider* slider = qobject_cast<QSlider*>(sender());
     color.setGreen(slider->value());
     changeBgColor();
   });
+
   QObject::connect(ui->colorBlue, &QSlider::actionTriggered, this, [&](){
     QSlider* slider = qobject_cast<QSlider*>(sender());
     color.setBlue(slider->value());
+    changeBgColor();
+  });
+
+  QObject::connect(ui->redEdit, &QLineEdit::textEdited, this, [&]{
+    color.setRed(ui->redEdit->text().toInt());
+    ui->colorRed->setValue(color.red());
+    changeBgColor();
+  });
+
+  QObject::connect(ui->blueEdit, &QLineEdit::textEdited, this, [&]{
+    color.setBlue(ui->blueEdit->text().toInt());
+    ui->colorBlue->setValue(color.blue());
+    changeBgColor();
+  });
+
+  QObject::connect(ui->greenEdit, &QLineEdit::textEdited, this, [&]{
+    color.setGreen(ui->greenEdit->text().toInt());
+    ui->colorGreen->setValue(color.green());
     changeBgColor();
   });
 
@@ -38,9 +58,9 @@ void ColorTray::connections(){
 }
 
 void ColorTray::changeBgColor(){
-  ui->labelRed->setText(QString::number(color.red()));
-  ui->labelGreen->setText(QString::number(color.green()));
-  ui->labelBlue->setText(QString::number(color.blue()));
+  ui->redEdit->setText(QString::number(color.red()));
+  ui->greenEdit->setText(QString::number(color.green()));
+  ui->blueEdit->setText(QString::number(color.blue()));
 
   QString style = "background-color: rgb(";
   style += QString::number(color.red()) + ',';

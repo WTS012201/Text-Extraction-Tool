@@ -17,11 +17,11 @@ Options::~Options()
 
 tesseract::PageIteratorLevel Options::getPartialSelection(){
   switch(ui->partialBox->currentIndex()){
-  case 0:
+  case 2:
     return tesseract::RIL_TEXTLINE;
   case 1:
     return tesseract::RIL_BLOCK;
-  case 2:
+  case 0:
     return tesseract::RIL_WORD;
   case 3:
     return tesseract::RIL_PARA;

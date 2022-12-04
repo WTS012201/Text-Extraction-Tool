@@ -6,7 +6,7 @@ ImageFrame::ImageFrame(
   QWidget* parent, QWidget* __tab, Ui::MainWindow* __ui, Options* options):
   selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
   scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, scene{new QGraphicsScene(this)},
-  mode{tesseract::RIL_PARA}, ui{__ui}, middleDown{false}, state{new State}
+  mode{options->getPartialSelection()}, ui{__ui}, middleDown{false}, state{new State}
 {
   initUi(parent);
   setWidgets();
@@ -571,6 +571,7 @@ QString ImageFrame::collect(
 
   int x1, y1, x2, y2;
 
+  qDebug() << mode;
   if (ri != 0) {
     do {
       QString word = ri->GetUTF8Text(mode);

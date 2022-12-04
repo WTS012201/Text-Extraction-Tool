@@ -19,13 +19,16 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="1,3,10">
          <item>
           <widget class="QLabel" name="labelRed">
            <property name="text">
-            <string>R: 0</string>
+            <string>R:</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="redEdit"/>
          </item>
          <item>
           <widget class="QSlider" name="colorRed">
@@ -40,13 +43,16 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,3,10">
          <item>
           <widget class="QLabel" name="labelGreen">
            <property name="text">
-            <string>G: 0</string>
+            <string>G:</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="greenEdit"/>
          </item>
          <item>
           <widget class="QSlider" name="colorGreen">
@@ -61,13 +67,16 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <layout class="QHBoxLayout" name="horizontalLayout_5" stretch="1,3,10">
          <item>
           <widget class="QLabel" name="labelBlue">
            <property name="text">
-            <string>B: 0</string>
+            <string>B:</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="blueEdit"/>
          </item>
          <item>
           <widget class="QSlider" name="colorBlue">

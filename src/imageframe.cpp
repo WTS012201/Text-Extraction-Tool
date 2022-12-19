@@ -575,13 +575,6 @@ QString ImageFrame::collect(cv::Mat& matrix){
       ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
 
-//      while(word.endsWith('\n') || word.endsWith(' ')){
-//        word = word.remove(word.length() - 1, word.length());
-//      }
-//      if(word.isEmpty()){
-//        continue;
-//      }
-
       ImageTextObject* textObject = new ImageTextObject{nullptr};
       textObject->setText(word);
       textObject->lineSpace = QPair<QPoint, QPoint>{p1, p2};
@@ -727,8 +720,12 @@ void ImageFrame::groupSelections(){
   for(auto i = 0; i < newTextObjects.size(); i++){
     if(i == start)
       final.append(textObject);
-    else
-      final.append(newTextObjects[i]);
+    final.append(newTextObjects[i]);
   }
+
+  if(!newTextObjects.size() || start >= newTextObjects.size()){
+    final.append(textObject);
+  }
+
   state->textObjects = final;
 }

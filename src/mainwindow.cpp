@@ -156,7 +156,6 @@ void MainWindow::pastImage(){
 void MainWindow::colorTray(){
   if(!iFrame) return;
   if(!iFrame->selection) return;
-  qDebug() << "HERE2";
 
   colorMenu->setModal(true);
   if(iFrame->selection){

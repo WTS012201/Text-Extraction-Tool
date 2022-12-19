@@ -5,7 +5,7 @@ ImageFrame::ImageFrame(
   QWidget* parent, QWidget* __tab, Ui::MainWindow* __ui, Options* options):
   selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
   scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, scene{new QGraphicsScene(this)},
-  mode{options->getPartialSelection()}, ui{__ui}, middleDown{false}, state{new State}
+  mode{options->getPILSelection()}, ui{__ui}, middleDown{false}, state{new State}
 {
   initUi(parent);
   setWidgets();
@@ -40,7 +40,7 @@ void ImageFrame::setMode(tesseract::PageIteratorLevel __mode){
 }
 
 void ImageFrame::setOptions(Options* options){
-  setMode(options->getPartialSelection());
+  setMode(options->getPILSelection());
 }
 
 void ImageFrame::changeZoom(){

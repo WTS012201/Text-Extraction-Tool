@@ -15,7 +15,7 @@ Options::~Options()
   delete ui;
 }
 
-tesseract::PageIteratorLevel Options::getPartialSelection(){
+tesseract::PageIteratorLevel Options::getPILSelection(){
   switch(ui->partialBox->currentIndex()){
   case 2:
     return tesseract::RIL_TEXTLINE;

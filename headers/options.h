@@ -15,7 +15,7 @@ class Options : public QDialog
 public:
   explicit Options(QWidget *parent = nullptr);
   ~Options();
-  tesseract::PageIteratorLevel getPartialSelection();
+  tesseract::PageIteratorLevel getPILSelection();
 private slots:
   void on_pushButton_3_clicked();
 

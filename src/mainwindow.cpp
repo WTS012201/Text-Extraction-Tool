@@ -46,6 +46,12 @@ void MainWindow::loadData(){
 void MainWindow::on_actionOptions_triggered(){
   options->setModal(true);
   if(options->exec() == QDialog::DialogCode::Rejected) return;
+
+  auto PIL_selection = options->getPILSelection();
+  for(auto i = 0; i < ui->tab->count(); i++){
+    auto tab = qobject_cast<TabScroll*>(ui->tab->widget(i));
+    tab->iFrame->setMode(PIL_selection);
+  }
 }
 
 void MainWindow::connections(){

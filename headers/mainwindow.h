@@ -1,26 +1,26 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
 #include "colortray.h"
 #include "imageframe.h"
 #include "tabscroll.h"
 
+#include <QClipboard>
+#include <QFile>
 #include <QFileDialog>
 #include <QMainWindow>
-#include <QFile>
+#include <QMovie>
+#include <QShortcut>
 #include <QSplitter>
 #include <QTextEdit>
-#include <QShortcut>
-#include <QClipboard>
-#include <QMovie>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class MainWindow;}
+namespace Ui {
+class MainWindow;
+}
 QT_END_NAMESPACE
 
-class MainWindow : public QMainWindow
-{
+class MainWindow : public QMainWindow {
   Q_OBJECT
 
 public:
@@ -33,7 +33,7 @@ signals:
 private slots:
   void colorTray();
   void on_actionSave_Image_triggered();
-  void on_actionOpen_Image_triggered(bool paste=false);
+  void on_actionOpen_Image_triggered(bool paste = false);
   void fontSelected();
   void fontSizeChanged();
   void on_actionOptions_triggered();
@@ -42,17 +42,17 @@ private slots:
   void pastImage();
 
 private:
-//  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
+  //  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
   QShortcut *zoomIn, *zoomOut;
   QClipboard *clipboard;
   ImageFrame *iFrame;
   Ui::MainWindow *ui;
-  Options* options;
-  ColorTray* colorMenu;
-  TabScroll* currTab;
+  Options *options;
+  ColorTray *colorMenu;
+  TabScroll *currTab;
 
-  void keyReleaseEvent(QKeyEvent* event) override;
-  void keyPressEvent(QKeyEvent* event) override;
+  void keyReleaseEvent(QKeyEvent *event) override;
+  void keyPressEvent(QKeyEvent *event) override;
   void loadImage(QString fileName);
   void initUi();
   void loadData();

@@ -1,15 +1,14 @@
 ﻿#ifndef COLORTRAY_H
 #define COLORTRAY_H
 
-#include <QDialog>
 #include "opencv2/opencv.hpp"
+#include <QDialog>
 
 namespace Ui {
 class ColorTray;
 }
 
-class ColorTray : public QDialog
-{
+class ColorTray : public QDialog {
   Q_OBJECT
 
 public:
@@ -17,6 +16,7 @@ public:
   void setColor(cv::Scalar scalar);
   ~ColorTray();
   QColor color;
+
 private:
   Ui::ColorTray *ui;
   void connections();

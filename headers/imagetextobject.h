@@ -1,31 +1,31 @@
 ﻿#ifndef IMAGETEXTOBJECT_H
 #define IMAGETEXTOBJECT_H
 
-#include "ui_mainwindow.h"
 #include "opencv2/opencv.hpp"
+#include "ui_mainwindow.h"
 
+#include "QDebug"
 #include <QFrame>
-#include <QWidget>
-#include <QVector>
-#include <QPair>
-#include <QPushButton>
-#include <QTextEdit>
 #include <QHash>
 #include <QImage>
 #include <QList>
+#include <QPair>
+#include <QPushButton>
+#include <QTextEdit>
+#include <QVector>
+#include <QWidget>
 #include <cmath>
 
-class QcvScalar : public cv::Scalar{
-  friend inline bool operator==(
-      const QcvScalar &e1, const QcvScalar &e2
-      ) noexcept{
+class QcvScalar : public cv::Scalar {
+  friend inline bool operator==(const QcvScalar &e1,
+                                const QcvScalar &e2) noexcept {
     bool rVal = (e1.val[0] == e2.val[0]);
     rVal &= (e1.val[1] == e2.val[1]);
     rVal &= (e1.val[2] == e2.val[2]);
     return rVal;
   }
 
-  friend inline uint qHash(const QcvScalar &key, uint seed) noexcept{
+  friend inline uint qHash(const QcvScalar &key, uint seed) noexcept {
     QtPrivate::QHashCombine hash;
     seed = hash(seed, key.val[0]);
     seed = hash(seed, key.val[1]);
@@ -38,8 +38,7 @@ namespace Ui {
 class ImageTextObject;
 }
 
-class ImageTextObject : public QWidget
-{
+class ImageTextObject : public QWidget {
   Q_OBJECT
 
 signals:
@@ -48,15 +47,11 @@ signals:
 public:
   bool isSelected, isChanged;
   cv::Scalar bgIntensity, fontIntensity;
-  cv::Mat* mat;
-  explicit ImageTextObject
-  (QWidget *parent = nullptr, cv::Mat* __mat = nullptr);
+  cv::Mat *mat;
+  explicit ImageTextObject(QWidget *parent = nullptr, cv::Mat *__mat = nullptr);
   ~ImageTextObject();
-  ImageTextObject(QWidget *parent,
-                  ImageTextObject& old,
-                  Ui::MainWindow* __ui,
-                  cv::Mat* mat
-                  );
+  ImageTextObject(QWidget *parent, ImageTextObject &old, Ui::MainWindow *__ui,
+                  cv::Mat *mat);
 
   QPoint topLeft, bottomRight;
   QPair<QPoint, QPoint> lineSpace;
@@ -66,7 +61,7 @@ public:
   void initSizeAndPos();
   void highlightSpaces();
   void scaleAndPosition(double scalar);
-  void setImage(cv::Mat* __image);
+  void setImage(cv::Mat *__image);
   void showCVImage();
   void setFilepath(QString __filepath);
   void fillBackground();
@@ -79,8 +74,8 @@ public:
   void reset();
 
 private:
-  QPushButton* highlightButton;
-  Ui::MainWindow* mUi;
+  QPushButton *highlightButton;
+  Ui::MainWindow *mUi;
 
   Ui::ImageTextObject *ui;
   QString filepath;

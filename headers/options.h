@@ -1,15 +1,14 @@
 ﻿#ifndef OPTIONS_H
 #define OPTIONS_H
 
-#include <QDialog>
 #include "tesseract/baseapi.h"
+#include <QDialog>
 
 namespace Ui {
 class Options;
 }
 
-class Options : public QDialog
-{
+class Options : public QDialog {
   Q_OBJECT
 
 public:

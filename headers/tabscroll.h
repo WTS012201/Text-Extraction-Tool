@@ -1,24 +1,23 @@
 ﻿#ifndef TABSCROLL_H
 #define TABSCROLL_H
 
-#include <QWidget>
 #include "imageframe.h"
-
+#include <QWidget>
 
 namespace Ui {
 class TabScroll;
 }
 
-class TabScroll : public QWidget
-{
+class TabScroll : public QWidget {
   Q_OBJECT
 
 public:
-  explicit TabScroll(QWidget *parent = nullptr, ImageFrame* = nullptr);
+  explicit TabScroll(QWidget *parent = nullptr, ImageFrame * = nullptr);
   ~TabScroll();
-  Ui::TabScroll* getUi();
-  ImageFrame* iFrame;
-  QScrollArea* getScrollArea();
+  Ui::TabScroll *getUi();
+  ImageFrame *iFrame;
+  QScrollArea *getScrollArea();
+
 private:
   Ui::TabScroll *ui;
 };

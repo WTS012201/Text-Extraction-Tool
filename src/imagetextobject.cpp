@@ -1,22 +1,17 @@
 ﻿#include "../headers/imagetextobject.h"
 #include "ui_imagetextobject.h"
 
-ImageTextObject::ImageTextObject(
-    QWidget *parent, cv::Mat* __mat) :
-  QWidget(parent), isSelected{false}, highlightButton{nullptr},
-  isChanged{false}, mat{__mat}, ui(new Ui::ImageTextObject),
-  colorStyle{"background:  rgba(255, 243, 0, 100);"}
-{
+ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
+    : QWidget(parent), isSelected{false},
+      highlightButton{nullptr}, isChanged{false}, mat{__mat},
+      ui(new Ui::ImageTextObject), colorStyle{
+                                       "background:  rgba(255, 243, 0, 100);"} {
   ui->setupUi(this);
 }
 
-ImageTextObject::ImageTextObject(
-    QWidget *parent, ImageTextObject& old,
-    Ui::MainWindow* __ui, cv::Mat* __mat):
-  QWidget(parent),
-  mat{__mat}, mUi{__ui},
-  ui(new Ui::ImageTextObject)
-{
+ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &old,
+                                 Ui::MainWindow *__ui, cv::Mat *__mat)
+    : QWidget(parent), mat{__mat}, mUi{__ui}, ui(new Ui::ImageTextObject) {
   topLeft = old.topLeft;
   bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
@@ -29,53 +24,44 @@ ImageTextObject::ImageTextObject(
   determineFontColor();
 }
 
-void ImageTextObject::setFilepath(QString __filepath){
-  filepath = __filepath;
-}
+void ImageTextObject::setFilepath(QString __filepath) { filepath = __filepath; }
 
-void ImageTextObject::setText(QString __text){
-  text = __text;
-}
+void ImageTextObject::setText(QString __text) { text = __text; }
 
-QString ImageTextObject::getText(){
-  return text;
-}
+QString ImageTextObject::getText() { return text; }
 
-ImageTextObject::~ImageTextObject(){
+ImageTextObject::~ImageTextObject() {
   delete ui;
   delete highlightButton;
 }
 
-void ImageTextObject::highlightSpaces(){
-    QPushButton* highlight = new QPushButton{ui->frame};
-    auto size = lineSpace.second - lineSpace.first;
+void ImageTextObject::highlightSpaces() {
+  QPushButton *highlight = new QPushButton{ui->frame};
+  auto size = lineSpace.second - lineSpace.first;
 
-    highlight->setCursor(Qt::CursorShape::PointingHandCursor);
-    highlight->setMinimumSize(QSize{size.x() - 1, size.y() - 1});
-    highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
-    highlight->show();
+  highlight->setCursor(Qt::CursorShape::PointingHandCursor);
+  highlight->setMinimumSize(QSize{size.x(), size.y()});
+  highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  highlight->show();
 
-    QObject::connect(
-          highlight, &QPushButton::clicked,
-          this, [=](...){
-              if(isChanged){
-//                int fsEstimate = bottomRight.y() - topLeft.y();
-
-//                mUi->fontSizeInput->setText(QString::number(fsEstimate));
-                mUi->fontSizeInput->setText(QString::number(14));
-                mUi->textEdit->setText(text);
-                highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
-                emit selection();
-              }
-            }
-          );
-    highlightButton = highlight;
+  QObject::connect(highlight, &QPushButton::clicked, this, [=](...) {
+    if (isChanged) {
+      /* int fsEstimate = bottomRight.y() - topLeft.y(); */
+      /*  */
+      /* mUi->fontSizeInput->setText(QString::number(fsEstimate)); */
+      mUi->fontSizeInput->setText(QString::number(14));
+      mUi->textEdit->setText(text);
+      highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
+      emit selection();
+    }
+  });
+  highlightButton = highlight;
 }
 
-void ImageTextObject::initSizeAndPos(){
+void ImageTextObject::initSizeAndPos() {
   auto size = bottomRight - topLeft;
 
-  if(size.x() < 0 || size.y() < 0){
+  if (size.x() < 0 || size.y() < 0) {
     qDebug() << "failed to establish size";
     return;
   }
@@ -87,8 +73,8 @@ void ImageTextObject::initSizeAndPos(){
   this->move(topLeft);
 }
 
-void ImageTextObject::scaleAndPosition(double scalar){
-  auto size = scalar*(lineSpace.second - lineSpace.first);
+void ImageTextObject::scaleAndPosition(double scalar) {
+  auto size = scalar * (lineSpace.second - lineSpace.first);
   highlightButton->setMinimumSize(QSize{size.x(), size.y()});
   auto tempBR = bottomRight * scalar;
   auto tempTL = topLeft * scalar;
@@ -103,9 +89,9 @@ void ImageTextObject::scaleAndPosition(double scalar){
   this->move(tempTL);
 }
 
-void ImageTextObject::scaleAndPosition(double sx, double sy){
-  int sizeX = sx*(lineSpace.second.x() - lineSpace.first.x());
-  int sizeY = sy*(lineSpace.second.y() - lineSpace.first.y());
+void ImageTextObject::scaleAndPosition(double sx, double sy) {
+  int sizeX = sx * (lineSpace.second.x() - lineSpace.first.x());
+  int sizeY = sy * (lineSpace.second.y() - lineSpace.first.y());
   highlightButton->setMinimumSize(QSize{sizeX, sizeY});
 
   auto tempBR = topLeft + QPoint{sizeX, sizeY};
@@ -117,10 +103,10 @@ void ImageTextObject::scaleAndPosition(double sx, double sy){
   this->adjustSize();
   ui->frame->adjustSize();
 
-  this->move(topLeft*mUi->zoomFactor->text().toDouble());
+  this->move(topLeft * mUi->zoomFactor->text().toDouble());
 }
 
-void ImageTextObject::showCVImage(){
+void ImageTextObject::showCVImage() {
   cv::namedWindow("image");
   cv::imshow("image", *mat);
   cv::waitKey();
@@ -128,10 +114,10 @@ void ImageTextObject::showCVImage(){
 
 // grabs most common border color
 
-void ImageTextObject::determineFontColor(){
+void ImageTextObject::determineFontColor() {
   cv::Scalar intensity;
 
-  if(!(mat->type() & CV_8UC3)){
+  if (!(mat->type() & CV_8UC3)) {
     qDebug() << "Image must have 3 channels";
     return;
   }
@@ -140,20 +126,18 @@ void ImageTextObject::determineFontColor(){
   QHash<QcvScalar, int> scalars;
   int max = 0;
 
-  for(auto i = left; i <= right; i++){
-    for(auto j = top; j <= bottom; j++){
-      QcvScalar key = QcvScalar{
-          mat->at<cv::Vec3b>(cv::Point{i, j})
-      };
-      if(key == bgIntensity){
+  for (auto i = left; i <= right; i++) {
+    for (auto j = top; j <= bottom; j++) {
+      QcvScalar key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, j})};
+      if (key == bgIntensity) {
         continue;
       }
-      if(!scalars.contains(key)){
+      if (!scalars.contains(key)) {
         scalars[key] = 1;
-      } else{
+      } else {
         ++scalars[key];
       }
-      if(max < scalars[key]){
+      if (max < scalars[key]) {
         max = scalars[key];
         intensity = key;
       }
@@ -162,10 +146,10 @@ void ImageTextObject::determineFontColor(){
   fontIntensity = intensity;
 }
 
-void ImageTextObject::determineBgColor(){
+void ImageTextObject::determineBgColor() {
   cv::Scalar intensity;
 
-  if(!(mat->type() & CV_8UC3)){
+  if (!(mat->type() & CV_8UC3)) {
     qDebug() << "Image must have 3 channels";
     return;
   }
@@ -180,51 +164,43 @@ void ImageTextObject::determineBgColor(){
   (bottom < mat->rows - 1) ? bottom += 1 : bottom;
 
   // Top / Bottom
-  for(auto i = left; i <= right; i++){
-    QcvScalar key = QcvScalar{
-        mat->at<cv::Vec3b>(cv::Point{i, top})
-    };
-    if(!scalars.contains(key)){
+  for (auto i = left; i <= right; i++) {
+    QcvScalar key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, top})};
+    if (!scalars.contains(key)) {
       scalars[key] = 1;
-    } else{
+    } else {
       ++scalars[key];
     }
 
-    key = QcvScalar{
-        mat->at<cv::Vec3b>(cv::Point{i, bottom})
-    };
-    if(!scalars.contains(key)){
+    key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, bottom})};
+    if (!scalars.contains(key)) {
       scalars[key] = 1;
-    } else{
+    } else {
       ++scalars[key];
     }
   }
 
-//   Right / Left
-  for(auto i = top; i <= bottom; i++){
-    auto key = QcvScalar{
-        mat->at<cv::Vec3b>(cv::Point{left, i})
-    };
-    if(!scalars.contains(key)){
+  //   Right / Left
+  for (auto i = top; i <= bottom; i++) {
+    auto key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{left, i})};
+    if (!scalars.contains(key)) {
       scalars[key] = 1;
-    } else{
+    } else {
       ++scalars[key];
     }
 
-    key = QcvScalar{
-        mat->at<cv::Vec3b>(cv::Point{right, i})
-    };
-    if(!scalars.contains(key)){
+    key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{right, i})};
+    if (!scalars.contains(key)) {
       scalars[key] = 1;
-    } else{
+    } else {
       ++scalars[key];
     }
   }
 
   int max = 0;
 
-  for(const auto& key : scalars.keys()){
-    if(scalars[key] > max){
+  for (const auto &key : scalars.keys()) {
+    if (scalars[key] > max) {
       max = scalars[key];
       intensity = key;
     }
@@ -232,7 +208,7 @@ void ImageTextObject::determineBgColor(){
   bgIntensity = intensity;
 }
 
-void ImageTextObject::fillBackground(){
+void ImageTextObject::fillBackground() {
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   cv::Vec3b bg;
@@ -247,45 +223,46 @@ void ImageTextObject::fillBackground(){
   (top > 0) ? top -= 1 : top;
   (bottom < mat->rows - 1) ? bottom += 1 : bottom;
 
-  for(auto i = top; i <= bottom; i++){
-    for(auto j = left; j <= right; j++){
-      auto& scalarRef = mat->at<cv::Vec3b>(cv::Point{j,i});
+  for (auto i = top; i <= bottom; i++) {
+    for (auto j = left; j <= right; j++) {
+      auto &scalarRef = mat->at<cv::Vec3b>(cv::Point{j, i});
       scalarRef = bg;
     }
   }
 }
 
-void ImageTextObject::highlight(){
-    highlightButton->isHidden() ? highlightButton->show() : highlightButton->hide();
+void ImageTextObject::highlight() {
+  highlightButton->isHidden() ? highlightButton->show()
+                              : highlightButton->hide();
 }
 
-void ImageTextObject::showHighlights(){
+void ImageTextObject::showHighlights() {
   this->show();
   highlightButton->show();
   highlightButton->setStyleSheet(colorStyle);
 }
 
-void ImageTextObject::setHighlightColor(QString __colorStyle){
- colorStyle = __colorStyle;
+void ImageTextObject::setHighlightColor(QString __colorStyle) {
+  colorStyle = __colorStyle;
 }
 
-void ImageTextObject::selectHighlight(){
+void ImageTextObject::selectHighlight() {
   this->show();
   isSelected = true;
   highlightButton->show();
   highlightButton->setStyleSheet("background:  rgba(37,122,253,100);");
 }
 
-void ImageTextObject::deselect(){
+void ImageTextObject::deselect() {
   highlightButton->setStyleSheet("background:  rgba(255, 243, 0, 100);");
   isSelected = false;
-  if(isChanged){
+  if (isChanged) {
     return;
   }
   highlightButton->hide();
 }
 
-void ImageTextObject::reset(){
+void ImageTextObject::reset() {
   deselect();
   hide();
   isChanged = false;

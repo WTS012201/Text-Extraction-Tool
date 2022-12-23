@@ -1,5 +1,6 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
+#include "qnamespace.h"
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *options)
@@ -210,8 +211,20 @@ void ImageFrame::changeText() {
   QFont font{"Times", fontSize};
   p.setFont(font);
 
+  /* take max horizontal length */
   QFontMetrics fm{p.font()};
-  double x = fm.horizontalAdvance(label);
+  auto j = 0, k = 0, max = 0;
+  while ((j = label.indexOf("\n", j)) != -1) {
+    auto sub = label.mid(k, j - k);
+    max = qMax(max, fm.horizontalAdvance(sub));
+    k = ++j;
+  }
+  auto sub = label.mid(k, label.size() - k);
+  max = qMax(max, fm.horizontalAdvance(sub));
+
+  double x = max;
+  /* QFontMetrics fm{p.font()}; */
+  /* double x = fm.horizontalAdvance(label); */
   double y = fm.height();
 
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
@@ -224,12 +237,35 @@ void ImageFrame::changeText() {
   QRect rect{selection->topLeft, selection->bottomRight};
 
   double newWidth = rect.width() * 1.0 / oldRect.width();
-  double newHeight = rect.height() * 1.0 / oldRect.height();
+  double newHeight =
+      (label.count("\n") + 1) * rect.height() * 1.0 / oldRect.height();
   selection->scaleAndPosition(newWidth, newHeight);
 
   p.save();
   p.setPen(color);
-  p.drawText(rect, label, Qt::AlignCenter | Qt::AlignLeft);
+
+  auto dy = rect.height();
+  auto i = 0;
+  j = 0, k = 0, max = 0;
+  while ((j = label.indexOf("\n", j)) != -1) {
+    auto sub = label.mid(k, j - k);
+    QPoint translateY{0, (i * dy)};
+
+    QRect subrect{translateY + selection->topLeft,
+                  translateY + selection->bottomRight};
+    p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
+    k = ++j;
+    i++;
+  }
+  sub = label.mid(k, label.size() - k);
+  QPoint translateY{0, (i * dy)};
+
+  QRect subrect{translateY + selection->topLeft,
+                translateY + selection->bottomRight};
+  p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
+  k = ++j;
+  i++;
+
   p.restore();
   p.end();
 

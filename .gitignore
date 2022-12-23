@@ -1,3 +1,5 @@
 **/*.jpg
 *.pro.user
 build
+.cache
+.qmake.stash

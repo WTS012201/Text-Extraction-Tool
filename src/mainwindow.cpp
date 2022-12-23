@@ -61,11 +61,14 @@ void MainWindow::connections() {
   auto add = new QShortcut{QKeySequence("Ctrl+A"), this};
   auto remove = new QShortcut{QKeySequence("Ctrl+R"), this};
   auto group = new QShortcut{QKeySequence("Ctrl+G"), this};
+  auto __delete = new QShortcut{QKeySequence("Ctrl+D"), this};
+
   zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
   zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
+
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx) {
     if (idx == -1 || !currTab)
       return;
@@ -76,6 +79,7 @@ void MainWindow::connections() {
 
     emit switchConnections();
   });
+
   QObject::connect(
       ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx) {
         if (!iFrame || iFrame->isProcessing)
@@ -94,54 +98,73 @@ void MainWindow::connections() {
           iFrame = nullptr;
         }
       });
+
   QObject::connect(find, &QShortcut::activated, this, [&] {
     ui->find->setFocus();
     if (iFrame)
       iFrame->keysPressed[Qt::Key_Control] = false;
   });
+
   QObject::connect(add, &QShortcut::activated, this, [&] {
     if (iFrame) {
       iFrame->keysPressed[Qt::Key_Control] = false;
       iFrame->highlightSelection();
     }
   });
+
   QObject::connect(remove, &QShortcut::activated, this, [&] {
     if (iFrame) {
       iFrame->keysPressed[Qt::Key_Control] = false;
       iFrame->removeSelection();
     }
   });
+
   QObject::connect(group, &QShortcut::activated, this, [&] {
     if (iFrame) {
       iFrame->keysPressed[Qt::Key_Control] = false;
       iFrame->groupSelections();
     }
   });
+
+  QObject::connect(__delete, &QShortcut::activated, this, [&] {
+    if (iFrame) {
+      iFrame->keysPressed[Qt::Key_Control] = false;
+      iFrame->deleteSelection();
+    }
+  });
+
   QObject::connect(open, &QShortcut::activated, this, [&] {
     on_actionOpen_Image_triggered();
     if (iFrame)
       iFrame->keysPressed[Qt::Key_Control] = false;
   });
+
   QObject::connect(save, &QShortcut::activated, this, [&] {
     on_actionSave_Image_triggered();
     if (iFrame)
       iFrame->keysPressed[Qt::Key_Control] = false;
   });
+
   QObject::connect(undo, &QShortcut::activated, this, [&] {
     on_actionUndo_triggered();
     if (iFrame)
       iFrame->keysPressed[Qt::Key_Control] = false;
   });
+
   QObject::connect(redo, &QShortcut::activated, this, [&] {
     on_actionRedo_2_triggered();
     if (iFrame)
       iFrame->keysPressed[Qt::Key_Control] = false;
   });
+
   QObject::connect(ui->fontSizeInput, &QLineEdit::textChanged, this,
                    &MainWindow::fontSizeChanged);
+
   QObject::connect(ui->color, &QPushButton::clicked, this,
                    &MainWindow::colorTray);
+
   QObject::connect(paste, &QShortcut::activated, this, &MainWindow::pastImage);
+
   QObject::connect(this, &MainWindow::switchConnections, this, [&] {
     QObject::connect(zoomIn, &QShortcut::activated, iFrame,
                      &ImageFrame::zoomIn);

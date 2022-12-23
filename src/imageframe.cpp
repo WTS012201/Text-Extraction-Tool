@@ -673,8 +673,8 @@ void ImageFrame::groupSelections() {
 
   QString contiguousStr{""};
   QPoint newTL{-1, -1}, newBR{-1, -1};
-  QVector<ImageTextObject *> oldObjs = state->textObjects;
 
+  QVector<ImageTextObject *> oldObjs = state->textObjects;
   State *oldState = new State{oldObjs, cv::Mat{}};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
@@ -741,4 +741,24 @@ void ImageFrame::groupSelections() {
   }
 
   state->textObjects = final;
+}
+
+void ImageFrame::deleteSelection() {
+  if (!selection) {
+    qDebug() << "No selection";
+    return;
+  }
+  if (!this->isEnabled())
+    return;
+  if (state->textObjects.isEmpty())
+    return;
+
+  auto idx = state->textObjects.indexOf(selection);
+  selection->reset();
+  QVector<ImageTextObject *> oldObjs = state->textObjects;
+  State *oldState = new State{oldObjs, cv::Mat{}};
+  state->matrix.copyTo(oldState->matrix);
+  undo.push(oldState);
+
+  state->textObjects.remove(idx);
 }

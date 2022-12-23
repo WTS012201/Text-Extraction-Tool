@@ -42,6 +42,7 @@ public:
   void extract(cv::Mat *mat = nullptr);
   void clear();
   void pasteImage(QImage *img);
+  void deleteSelection();
   cv::Mat getImageMatrix();
 
   typedef struct State {

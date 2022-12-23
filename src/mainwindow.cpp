@@ -241,9 +241,29 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste) {
       return;
 
     selection = dialog.selectedFiles();
+
     for (const auto &file : selection) {
       loadImage(file);
     }
+
+    /* const int LOAD_LIMIT = 2; */
+    /* QVector<ImageFrame *> load; */
+    /* for (const auto &file : selection) { */
+    /*   auto loadIt = load.begin(); */
+    /*   while (load.size() >= LOAD_LIMIT) { */
+    /*  */
+    /*     if (!(**loadIt).isProcessing) */
+    /*       loadIt = load.erase(loadIt); */
+    /*     if (loadIt == load.end()) */
+    /*       loadIt = load.begin(); */
+    /*  */
+    /*     loadIt++; */
+    /*   } */
+    /*  */
+    /*   loadImage(file); */
+    /*   load.push_back(iFrame); */
+    /* } */
+
     emit switchConnections();
     return;
   }

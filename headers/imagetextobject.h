@@ -16,6 +16,11 @@
 #include <QWidget>
 #include <cmath>
 
+#define BLUE_HIGHLIGHT "background:  rgba(37,122,253,100);"
+#define YELLOW_HIGHLIGHT "background:  rgba(255, 243, 0, 100);"
+#define PURPLE_HIGHLIGHT "background:  rgba(255, 0, 243, 100);"
+#define GREEN_HIGHLIGHT "background:  rgba(0, 255, 0, 100);"
+
 class QcvScalar : public cv::Scalar {
   friend inline bool operator==(const QcvScalar &e1,
                                 const QcvScalar &e2) noexcept {
@@ -71,6 +76,7 @@ public:
   void deselect();
   void showHighlights();
   void setHighlightColor(QString colorStyle);
+  QString getHighlightColor();
   void reset();
 
 private:

@@ -41,7 +41,7 @@ void ImageTextObject::highlightSpaces() {
 
   highlight->setCursor(Qt::CursorShape::PointingHandCursor);
   highlight->setMinimumSize(QSize{size.x(), size.y()});
-  highlight->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  highlight->setStyleSheet(YELLOW_HIGHLIGHT);
   highlight->show();
 
   QObject::connect(highlight, &QPushButton::clicked, this, [=](...) {
@@ -51,7 +51,7 @@ void ImageTextObject::highlightSpaces() {
       /* mUi->fontSizeInput->setText(QString::number(fsEstimate)); */
       mUi->fontSizeInput->setText(QString::number(14));
       mUi->textEdit->setText(text);
-      highlight->setStyleSheet("background:  rgba(0, 255, 0, 100);");
+      highlight->setStyleSheet(GREEN_HIGHLIGHT);
       emit selection();
     }
   });
@@ -246,15 +246,17 @@ void ImageTextObject::setHighlightColor(QString __colorStyle) {
   colorStyle = __colorStyle;
 }
 
+QString ImageTextObject::getHighlightColor() { return colorStyle; }
+
 void ImageTextObject::selectHighlight() {
   this->show();
   isSelected = true;
   highlightButton->show();
-  highlightButton->setStyleSheet("background:  rgba(37,122,253,100);");
+  highlightButton->setStyleSheet(BLUE_HIGHLIGHT);
 }
 
 void ImageTextObject::deselect() {
-  highlightButton->setStyleSheet("background:  rgba(255, 243, 0, 100);");
+  highlightButton->setStyleSheet(colorStyle);
   isSelected = false;
   if (isChanged) {
     return;

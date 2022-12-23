@@ -223,8 +223,6 @@ void ImageFrame::changeText() {
   max = qMax(max, fm.horizontalAdvance(sub));
 
   double x = max;
-  /* QFontMetrics fm{p.font()}; */
-  /* double x = fm.horizontalAdvance(label); */
   double y = fm.height();
 
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
@@ -325,15 +323,23 @@ void ImageFrame::findSubstrings() {
   QString query = ui->find->text();
 
   if (query.isEmpty()) {
+
+    for (auto &obj : state->textObjects) {
+      if (obj->getHighlightColor() == PURPLE_HIGHLIGHT) {
+        obj->setHighlightColor(BLUE_HIGHLIGHT);
+        obj->isChanged = false;
+      }
+    }
     return;
   }
 
   for (auto &obj : state->textObjects) {
     if (obj->getText().contains(query, Qt::CaseInsensitive)) {
-      obj->setHighlightColor("background:  rgba(255, 0, 243, 100);");
+      obj->setHighlightColor(PURPLE_HIGHLIGHT);
       obj->showHighlights();
+      obj->isChanged = true;
     } else {
-      obj->setHighlightColor("background:  rgba(255, 243, 0, 100);");
+      obj->setHighlightColor(YELLOW_HIGHLIGHT);
     }
   }
 }
@@ -344,6 +350,7 @@ void ImageFrame::highlightSelection() {
 
   for (auto &obj : state->textObjects) {
     if (obj->isSelected) {
+      obj->setHighlightColor(YELLOW_HIGHLIGHT);
       obj->isChanged = true;
       obj->deselect();
     }
@@ -368,7 +375,7 @@ void ImageFrame::initUi(QWidget *parent) {
 void ImageFrame::zoomIn() {
   if (!this->isEnabled())
     return;
-  //  auto relPos = this->mapFromGlobal(this->cursor().pos());
+
   auto sa =
       qobject_cast<TabScroll *>(ui->tab->currentWidget())->getScrollArea();
   auto hb = sa->horizontalScrollBar();
@@ -579,7 +586,6 @@ QString ImageFrame::collect(cv::Mat &matrix) {
 
   int x1, y1, x2, y2;
 
-  qDebug() << mode;
   if (ri != 0) {
     do {
       QString word = ri->GetUTF8Text(mode);

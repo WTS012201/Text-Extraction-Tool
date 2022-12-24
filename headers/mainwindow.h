@@ -50,6 +50,7 @@ private:
   Options *options;
   ColorTray *colorMenu;
   TabScroll *currTab;
+  quint8 shift;
 
   void keyReleaseEvent(QKeyEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;

@@ -6,7 +6,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), iFrame{nullptr},
-      ui(new Ui::MainWindow), currTab{nullptr} {
+      ui(new Ui::MainWindow), currTab{nullptr}, shift{1} {
   loadData();
   initUi();
   connections();
@@ -29,6 +29,8 @@ void MainWindow::loadData() {
   if (check_file.exists() && check_file.isFile()) {
     return;
   }
+
+  // write to .config/tfi later
   QFile file{"eng.traineddata"}, qrcFile(":/other/eng.traineddata");
   if (!qrcFile.open(QFile::ReadOnly | QFile::Text)) {
     qDebug() << "failed to open qrc file";
@@ -75,6 +77,12 @@ void MainWindow::connections() {
   clipboard = QApplication::clipboard();
 
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
+  QObject::connect(ui->moveFactor, &QLineEdit::editingFinished, this, [&] {
+    QString text = ui->moveFactor->text();
+    if (quint8 num = text.toInt()) {
+      shift = qMax(num, shift);
+    }
+  });
 
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx) {
     if (idx == -1 || !currTab)
@@ -114,25 +122,25 @@ void MainWindow::connections() {
 
   QObject::connect(up, &QShortcut::activated, this, [&] {
     if (iFrame) {
-      iFrame->move(QPoint{0, -1});
+      iFrame->move(QPoint{0, -shift});
     }
   });
 
   QObject::connect(down, &QShortcut::activated, this, [&] {
     if (iFrame) {
-      iFrame->move(QPoint{0, 1});
+      iFrame->move(QPoint{0, shift});
     }
   });
 
   QObject::connect(left, &QShortcut::activated, this, [&] {
     if (iFrame) {
-      iFrame->move(QPoint{-1, 0});
+      iFrame->move(QPoint{-shift, 0});
     }
   });
 
   QObject::connect(right, &QShortcut::activated, this, [&] {
     if (iFrame) {
-      iFrame->move(QPoint{1, 0});
+      iFrame->move(QPoint{shift, 0});
     }
   });
 

@@ -1014,18 +1014,21 @@ QProgressBar::chunk
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout">
+                <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1,1,1,4,1,1">
                  <item>
                   <widget class="QLabel" name="zoomLabel">
                    <property name="text">
-                    <string>Zoom factor:</string>
+                    <string>Zoom:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLineEdit" name="zoomFactor">
                    <property name="sizePolicy">
-                    <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                      <horstretch>0</horstretch>
                      <verstretch>0</verstretch>
                     </sizepolicy>
@@ -1041,12 +1044,40 @@ QProgressBar::chunk
                    <property name="text">
                     <string>1.0</string>
                    </property>
+                   <property name="maxLength">
+                    <number>5</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLabel" name="label_3">
+                   <property name="text">
+                    <string>Move:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QLineEdit" name="moveFactor">
+                   <property name="styleSheet">
+                    <string notr="true">.QLineEdit{
+	background: rgba(255, 255, 255, 10)
+}</string>
+                   </property>
+                   <property name="text">
+                    <string>1</string>
+                   </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QLabel" name="label">
                    <property name="text">
                     <string>Find:</string>
+                   </property>
+                   <property name="alignment">
+                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -1068,29 +1099,16 @@ QProgressBar::chunk
                     </size>
                    </property>
                    <property name="text">
-                    <string>Add Selection</string>
+                    <string>Add</string>
                    </property>
                   </widget>
                  </item>
                  <item>
                   <widget class="QPushButton" name="removeSelection">
                    <property name="text">
-                    <string>Remove Selection</string>
+                    <string>Remove</string>
                    </property>
                   </widget>
-                 </item>
-                 <item>
-                  <spacer name="horizontalSpacer">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                 </layout>
                </item>
@@ -1283,7 +1301,7 @@ background:transparent;
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>24</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menutest">

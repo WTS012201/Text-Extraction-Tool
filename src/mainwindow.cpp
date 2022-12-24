@@ -248,6 +248,11 @@ void MainWindow::colorTray() {
                      [&]() { colorMenu->setColor(color); });
 
     colorMenu->palette->addWidget(cb);
+    QString style = "background-color: rgb(";
+    style += QString::number(color[2]) + ',';
+    style += QString::number(color[1]) + ',';
+    style += QString::number(color[0]) + ')';
+    cb->setStyleSheet(style);
     buttons.push_back(cb);
   }
 

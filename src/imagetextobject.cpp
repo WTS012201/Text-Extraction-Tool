@@ -173,16 +173,16 @@ void ImageTextObject::determineFontColor() {
   QVector<cv::Scalar> __colorPalette;
   typedef QHash<QcvScalar, int>::iterator T;
 
-  auto cmp = [](T lhs, T rhs) { return (lhs.value() ^ 1) < (rhs.value() ^ 1); };
-  std::priority_queue<T, QVector<T>, decltype(cmp)> heapq(cmp);
+  auto cmp = [](T lhs, T rhs) { return lhs.value() < rhs.value(); };
+  std::priority_queue<T, QVector<T>, decltype(cmp)> pq(cmp);
 
   for (T it = scalars.begin(); it != scalars.end(); ++it) {
-    heapq.push(it);
+    pq.push(it);
   }
 
   for (auto i = 0; i < PALETTE_LIMIT; i++) {
-    __colorPalette.push_back(heapq.top().key());
-    heapq.pop();
+    __colorPalette.push_back(pq.top().key());
+    pq.pop();
   }
 
   colorPalette = __colorPalette;

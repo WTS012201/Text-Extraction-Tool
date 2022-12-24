@@ -23,7 +23,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &old,
   initSizeAndPos();
   highlightSpaces();
   determineBgColor();
-  determineFontColor();
+  generatePalette();
 }
 
 void ImageTextObject::setFilepath(QString __filepath) { filepath = __filepath; }
@@ -143,7 +143,7 @@ void ImageTextObject::showCVImage() {
 
 // grabs most common border color
 
-void ImageTextObject::determineFontColor() {
+void ImageTextObject::generatePalette() {
   cv::Scalar intensity;
 
   if (!(mat->type() & CV_8UC3)) {
@@ -173,7 +173,7 @@ void ImageTextObject::determineFontColor() {
   QVector<cv::Scalar> __colorPalette;
   typedef QHash<QcvScalar, int>::iterator T;
 
-  auto cmp = [](T lhs, T rhs) { return lhs.value() < rhs.value(); };
+  auto cmp = [](T lhs, T rhs) -> bool { return lhs.value() > rhs.value(); };
   std::priority_queue<T, QVector<T>, decltype(cmp)> pq(cmp);
 
   for (T it = scalars.begin(); it != scalars.end(); ++it) {

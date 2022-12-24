@@ -95,7 +95,7 @@ private:
 
   cv::Mat QImageToMat();
   void determineBgColor();
-  void determineFontColor();
+  void generatePalette();
 };
 
 #endif // IMAGETEXTOBJECT_H

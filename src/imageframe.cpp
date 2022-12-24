@@ -208,7 +208,8 @@ void ImageFrame::changeText() {
   int fontSize = ui->fontSizeInput->text().toInt();
   QString label = ui->textEdit->toPlainText();
   selection->setText(label);
-  QFont font{"Times", fontSize};
+  qDebug() << ui->fontBox->itemText(ui->fontBox->currentIndex());
+  QFont font{ui->fontBox->itemText(ui->fontBox->currentIndex()), fontSize};
   p.setFont(font);
 
   /* take max horizontal length */

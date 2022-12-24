@@ -235,12 +235,29 @@ void MainWindow::colorTray() {
   if (!iFrame->selection)
     return;
 
-  colorMenu->setModal(true);
   if (iFrame->selection) {
     colorMenu->setColor(iFrame->selection->fontIntensity);
   }
-  if (colorMenu->exec() == QDialog::DialogCode::Rejected)
+
+  colorMenu->setModal(true);
+
+  QVector<QPushButton *> buttons;
+  for (const auto &color : iFrame->selection->colorPalette) {
+    QPushButton *cb = new QPushButton{};
+    QObject::connect(cb, &QPushButton::pressed, colorMenu,
+                     [&]() { colorMenu->setColor(color); });
+
+    colorMenu->palette->addWidget(cb);
+    buttons.push_back(cb);
+  }
+
+  if (colorMenu->exec() == QDialog::DialogCode::Rejected) {
+    for (const auto &cb : buttons) {
+      colorMenu->palette->removeWidget(cb);
+      delete cb;
+    }
     return;
+  }
 
   cv::Scalar scalar{
       static_cast<double>(colorMenu->color.blue()),
@@ -249,6 +266,10 @@ void MainWindow::colorTray() {
   };
 
   iFrame->selection->fontIntensity = scalar;
+  for (const auto &cb : buttons) {
+    colorMenu->palette->removeWidget(cb);
+    delete cb;
+  }
 }
 
 void MainWindow::fontSelected() {

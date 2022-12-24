@@ -1,5 +1,7 @@
 ﻿#include "../headers/imagetextobject.h"
+#include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
+#include <queue>
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false},
@@ -156,9 +158,6 @@ void ImageTextObject::determineFontColor() {
   for (auto i = left; i <= right; i++) {
     for (auto j = top; j <= bottom; j++) {
       QcvScalar key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, j})};
-      if (key == bgIntensity) {
-        continue;
-      }
       if (!scalars.contains(key)) {
         scalars[key] = 1;
       } else {
@@ -170,7 +169,23 @@ void ImageTextObject::determineFontColor() {
       }
     }
   }
-  fontIntensity = intensity;
+
+  QVector<cv::Scalar> __colorPalette;
+  typedef QHash<QcvScalar, int>::iterator T;
+
+  auto cmp = [](T lhs, T rhs) { return (lhs.value() ^ 1) < (rhs.value() ^ 1); };
+  std::priority_queue<T, QVector<T>, decltype(cmp)> heapq(cmp);
+
+  for (T it = scalars.begin(); it != scalars.end(); ++it) {
+    heapq.push(it);
+  }
+
+  for (auto i = 0; i < PALETTE_LIMIT; i++) {
+    __colorPalette.push_back(heapq.top().key());
+    heapq.pop();
+  }
+
+  colorPalette = __colorPalette;
 }
 
 void ImageTextObject::determineBgColor() {

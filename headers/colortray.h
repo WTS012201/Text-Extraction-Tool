@@ -2,7 +2,9 @@
 #define COLORTRAY_H
 
 #include "opencv2/opencv.hpp"
+#include "qboxlayout.h"
 #include <QDialog>
+#include <QLayout>
 
 namespace Ui {
 class ColorTray;
@@ -16,6 +18,7 @@ public:
   void setColor(cv::Scalar scalar);
   ~ColorTray();
   QColor color;
+  QHBoxLayout *palette;
 
 private:
   Ui::ColorTray *ui;

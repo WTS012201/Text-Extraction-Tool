@@ -3,6 +3,7 @@
 
 ColorTray::ColorTray(QWidget *parent) : QDialog(parent), ui(new Ui::ColorTray) {
   ui->setupUi(this);
+  palette = ui->palette;
 
   connections();
 }

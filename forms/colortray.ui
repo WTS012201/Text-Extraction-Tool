@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>299</width>
-    <height>128</height>
+    <height>142</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -86,6 +86,12 @@
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
+           <property name="invertedAppearance">
+            <bool>false</bool>
+           </property>
+           <property name="invertedControls">
+            <bool>false</bool>
+           </property>
           </widget>
          </item>
         </layout>
@@ -107,6 +113,9 @@
       </layout>
      </item>
     </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="palette"/>
    </item>
    <item>
     <spacer name="verticalSpacer">

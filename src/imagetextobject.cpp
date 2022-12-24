@@ -73,6 +73,33 @@ void ImageTextObject::initSizeAndPos() {
   this->move(topLeft);
 }
 
+void ImageTextObject::reposition(QPoint shift) {
+  auto newPosTL = topLeft + shift;
+  auto newPosBR = bottomRight + shift;
+  auto frameSize = QSize(mat->cols, mat->rows);
+
+  // bound x
+  if (newPosTL.x() < 0) {
+    newPosTL = QPoint{0, newPosTL.y()};
+    newPosBR = bottomRight;
+  } else if (newPosBR.x() >= frameSize.width()) {
+    newPosTL = topLeft;
+    newPosBR = QPoint{frameSize.width() - 1, newPosBR.y()};
+  }
+
+  // bound y
+  if (newPosTL.y() < 0) {
+    newPosTL = QPoint{newPosTL.x(), 0};
+    newPosBR = bottomRight;
+  } else if (newPosBR.y() >= frameSize.height()) {
+    newPosTL = topLeft;
+    newPosBR = QPoint{newPosBR.x(), frameSize.height() - 1};
+  }
+
+  topLeft = newPosTL;
+  bottomRight = newPosBR;
+}
+
 void ImageTextObject::scaleAndPosition(double scalar) {
   auto size = scalar * (lineSpace.second - lineSpace.first);
   highlightButton->setMinimumSize(QSize{size.x(), size.y()});

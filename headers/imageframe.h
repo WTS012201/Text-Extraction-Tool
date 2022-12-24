@@ -54,6 +54,7 @@ public:
   bool isProcessing;
   double scalar;
   double scaleFactor;
+  void move(QPoint shift);
 
 public slots:
   void zoomIn();

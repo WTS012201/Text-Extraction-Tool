@@ -55,13 +55,20 @@ void MainWindow::connections() {
   auto paste = new QShortcut{QKeySequence("Ctrl+V"), this};
   auto open = new QShortcut{QKeySequence("Ctrl+O"), this};
   auto save = new QShortcut{QKeySequence("Ctrl+S"), this};
+
   auto undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
   auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
   auto find = new QShortcut{QKeySequence("Ctrl+F"), this};
+
   auto add = new QShortcut{QKeySequence("Ctrl+A"), this};
   auto remove = new QShortcut{QKeySequence("Ctrl+R"), this};
   auto group = new QShortcut{QKeySequence("Ctrl+G"), this};
   auto __delete = new QShortcut{QKeySequence("Ctrl+D"), this};
+
+  auto up = new QShortcut{QKeySequence("Shift+Up"), this};
+  auto down = new QShortcut{QKeySequence("Shift+Down"), this};
+  auto left = new QShortcut{QKeySequence("Shift+Left"), this};
+  auto right = new QShortcut{QKeySequence("Shift+Right"), this};
 
   zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
   zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
@@ -103,6 +110,30 @@ void MainWindow::connections() {
     ui->find->setFocus();
     if (iFrame)
       iFrame->keysPressed[Qt::Key_Control] = false;
+  });
+
+  QObject::connect(up, &QShortcut::activated, this, [&] {
+    if (iFrame) {
+      iFrame->move(QPoint{0, -1});
+    }
+  });
+
+  QObject::connect(down, &QShortcut::activated, this, [&] {
+    if (iFrame) {
+      iFrame->move(QPoint{0, 1});
+    }
+  });
+
+  QObject::connect(left, &QShortcut::activated, this, [&] {
+    if (iFrame) {
+      iFrame->move(QPoint{-1, 0});
+    }
+  });
+
+  QObject::connect(right, &QShortcut::activated, this, [&] {
+    if (iFrame) {
+      iFrame->move(QPoint{1, 0});
+    }
   });
 
   QObject::connect(add, &QShortcut::activated, this, [&] {

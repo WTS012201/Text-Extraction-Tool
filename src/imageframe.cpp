@@ -548,6 +548,8 @@ void ImageFrame::extract(cv::Mat *mat) {
   showAll();
 }
 
+ImageFrame::State *&ImageFrame::getState() { return state; }
+
 void ImageFrame::populateTextObjects() {
   QVector<ImageTextObject *> tempObjects;
 
@@ -663,8 +665,6 @@ void ImageFrame::redoAction() {
   changeImage();
 }
 
-ImageFrame::State *&ImageFrame::getState() { return state; }
-
 void ImageFrame::groupSelections() {
   if (!this->isEnabled())
     return;
@@ -761,4 +761,18 @@ void ImageFrame::deleteSelection() {
   undo.push(oldState);
 
   state->textObjects.remove(idx);
+}
+
+void ImageFrame::move(QPoint shift) {
+  if (!selection) {
+    qDebug() << "No selection";
+    return;
+  }
+  if (!this->isEnabled())
+    return;
+  if (state->textObjects.isEmpty())
+    return;
+
+  selection->reposition(shift);
+  changeZoom();
 }

@@ -69,6 +69,7 @@ private slots:
 
 signals:
   void processing();
+  void colorSelected(cv::Scalar);
 
 private:
   QString filepath;

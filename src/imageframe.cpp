@@ -423,14 +423,14 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
   if (dropper) {
     auto point = event->pos();
     auto color = display.at<cv::Vec3b>(cv::Point{point.x(), point.y()});
-    dropper = false;
 
     QString style = "background-color: rgb(";
     style += QString::number(color[2]) + ',';
     style += QString::number(color[1]) + ',';
     style += QString::number(color[0]) + ')';
     ui->dropper->setStyleSheet(style);
-    return;
+
+    emit colorSelected(color);
   }
 
   if (!keysPressed[Qt::Key_Control]) {
@@ -469,6 +469,10 @@ void ImageFrame::mouseReleaseEvent(QMouseEvent *event) {
     return;
   if (state->textObjects.isEmpty())
     return;
+  if (dropper) {
+    dropper = false;
+    return;
+  }
   rubberBand->hide();
   auto dest = event->pos();
 

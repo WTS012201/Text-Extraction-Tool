@@ -1,7 +1,5 @@
 ﻿#include "../headers/imagetextobject.h"
-#include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
-#include <queue>
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false},
@@ -79,6 +77,8 @@ void ImageTextObject::reposition(QPoint shift) {
   auto newPosTL = topLeft + shift;
   auto newPosBR = bottomRight + shift;
   auto frameSize = QSize(mat->cols, mat->rows);
+  /* qDebug() << newPosBR; */
+  /* qDebug() << frameSize; */
 
   // bound x
   if (newPosTL.x() < 0) {
@@ -133,12 +133,6 @@ void ImageTextObject::scaleAndPosition(double sx, double sy) {
   ui->frame->adjustSize();
 
   this->move(topLeft * mUi->zoomFactor->text().toDouble());
-}
-
-void ImageTextObject::showCVImage() {
-  cv::namedWindow("image");
-  cv::imshow("image", *mat);
-  cv::waitKey();
 }
 
 // grabs most frequent colors;

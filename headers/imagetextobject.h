@@ -1,10 +1,13 @@
 ﻿#ifndef IMAGETEXTOBJECT_H
 #define IMAGETEXTOBJECT_H
 
-#include "opencv2/opencv.hpp"
+#include "opencv2/core/mat.hpp"
+#include "opencv2/core/types.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
 #include "ui_mainwindow.h"
 
-#include "QDebug"
+#include <QDebug>
 #include <QFrame>
 #include <QHash>
 #include <QImage>
@@ -71,7 +74,6 @@ public:
   void highlightSpaces();
   void scaleAndPosition(double scalar);
   void setImage(cv::Mat *__image);
-  void showCVImage();
   void setFilepath(QString __filepath);
   void fillBackground();
   void scaleAndPosition(double x, double y);

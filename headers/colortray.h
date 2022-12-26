@@ -1,7 +1,11 @@
 ﻿#ifndef COLORTRAY_H
 #define COLORTRAY_H
 
-#include "opencv2/opencv.hpp"
+#include "opencv2/core/mat.hpp"
+#include "opencv2/core/types.hpp"
+#include "opencv2/imgcodecs.hpp"
+#include "opencv2/imgproc.hpp"
+
 #include "qboxlayout.h"
 #include <QDialog>
 #include <QLayout>

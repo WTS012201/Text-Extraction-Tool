@@ -2,7 +2,6 @@
 #define IMAGEFRAME_H
 
 #include "imagetextobject.h"
-#include "opencv2/opencv.hpp"
 #include "options.h"
 #include "tesseract/baseapi.h"
 #include "ui_mainwindow.h"

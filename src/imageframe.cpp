@@ -26,7 +26,7 @@ ImageFrame::~ImageFrame() {
   for (const auto &state : redo) {
     delete state;
   }
-  //  delete state;
+
   delete scene;
   delete rubberBand;
 }
@@ -190,16 +190,18 @@ void ImageFrame::changeText() {
   selection->hide();
   selection->setDisabled(true);
   selection = new ImageTextObject{this, *selection, ui, &state->matrix};
-  state->textObjects.push_back(selection);
+  selection->setHighlightColor(GREEN_HIGHLIGHT);
+  selection->isChanged = true;
 
+  state->textObjects.push_back(selection);
   State *oldState = new State{oldObjs, cv::Mat{}};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
   selection->fillBackground();
-  state->matrix.copyTo(display);
-  QImage *img = new QImage{(uchar *)display.data, display.cols, display.rows,
-                           (int)display.step, QImage::Format_BGR888};
+  QImage *img = new QImage{(uchar *)state->matrix.data, state->matrix.cols,
+                           state->matrix.rows, (int)state->matrix.step,
+                           QImage::Format_BGR888};
   QPainter p;
   if (!p.begin(img)) {
     qDebug() << "error with painter";
@@ -796,13 +798,6 @@ void ImageFrame::move(QPoint shift) {
   if (state->textObjects.isEmpty())
     return;
 
-  QVector<ImageTextObject *> oldObjs = state->textObjects;
-  /* State *oldState = new State{oldObjs, cv::Mat{}}; */
-
-  changeText();
   selection->reposition(shift);
-  changeZoom();
-
-  /* state->matrix.copyTo(oldState->matrix); */
-  /* undo.push(oldState); */
+  changeText();
 }

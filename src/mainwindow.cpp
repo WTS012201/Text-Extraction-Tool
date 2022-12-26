@@ -213,7 +213,6 @@ void MainWindow::connections() {
     ui->zoomFactor->setText(QString::number(iFrame->scalar));
     ui->textEdit->setText(iFrame->selection ? iFrame->selection->getText()
                                             : "");
-
     QObject::connect(
         iFrame, &ImageFrame::colorSelected, this,
         [&](cv::Scalar color) { iFrame->selection->fontIntensity = color; });

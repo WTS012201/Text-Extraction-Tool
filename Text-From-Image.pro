@@ -41,6 +41,9 @@ FORMS = \
 RESOURCES += \
     ./res/res.qrc \
 
+#INCLUDEPATH += /usr/include/opencv4/opencv2
+#LIBS += -L/usr/lib -lopencv_imgproc -lopencv_core -lopencv_imgcodecs
+
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target

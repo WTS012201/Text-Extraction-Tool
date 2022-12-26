@@ -19,6 +19,7 @@ MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::initUi() {
   ui->setupUi(this);
+  ui->dropper->setIcon(QIcon(":/img/dropper.png"));
   options = new Options{this};
   colorMenu = new ColorTray{this};
 }

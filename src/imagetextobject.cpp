@@ -141,8 +141,7 @@ void ImageTextObject::showCVImage() {
   cv::waitKey();
 }
 
-// grabs most common border color
-
+// grabs most frequent colors;
 void ImageTextObject::generatePalette() {
   cv::Scalar intensity;
 

@@ -81,6 +81,8 @@ private:
   Ui::MainWindow *ui;
   QMovie *spinner;
   QWidget *tab;
+
+  bool dropper;
   bool middleDown;
 
   QStack<State *> undo, redo;

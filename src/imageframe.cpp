@@ -7,7 +7,7 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
     : selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
       scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr},
       scene{new QGraphicsScene(this)}, mode{options->getPILSelection()},
-      ui{__ui}, middleDown{false}, state{new State} {
+      ui{__ui}, middleDown{false}, state{new State}, dropper{false} {
   initUi(parent);
   setWidgets();
   connections();
@@ -208,7 +208,6 @@ void ImageFrame::changeText() {
   int fontSize = ui->fontSizeInput->text().toInt();
   QString label = ui->textEdit->toPlainText();
   selection->setText(label);
-  qDebug() << ui->fontBox->itemText(ui->fontBox->currentIndex());
   QFont font{ui->fontBox->itemText(ui->fontBox->currentIndex()), fontSize};
   p.setFont(font);
 
@@ -298,6 +297,7 @@ void ImageFrame::connections() {
       spinner->start();
     }
   });
+  connect(ui->dropper, &QToolButton::pressed, this, [&] { dropper = true; });
   connect(ui->highlightAll, &QPushButton::pressed, this,
           &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this,
@@ -420,6 +420,19 @@ void ImageFrame::zoomOut() {
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent *event) {
+  if (dropper) {
+    auto point = event->pos();
+    auto color = display.at<cv::Vec3b>(cv::Point{point.x(), point.y()});
+    dropper = false;
+
+    QString style = "background-color: rgb(";
+    style += QString::number(color[2]) + ',';
+    style += QString::number(color[1]) + ',';
+    style += QString::number(color[0]) + ')';
+    ui->dropper->setStyleSheet(style);
+    return;
+  }
+
   if (!keysPressed[Qt::Key_Control]) {
     for (auto &obj : state->textObjects) {
       obj->deselect();
@@ -428,6 +441,7 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
       }
     }
   }
+
   origin = event->pos();
   if (!rubberBand) {
     rubberBand = new QRubberBand{QRubberBand::Rectangle, this};
@@ -451,6 +465,10 @@ void ImageFrame::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void ImageFrame::mouseReleaseEvent(QMouseEvent *event) {
+  if (!this->isEnabled())
+    return;
+  if (state->textObjects.isEmpty())
+    return;
   rubberBand->hide();
   auto dest = event->pos();
 
@@ -774,6 +792,13 @@ void ImageFrame::move(QPoint shift) {
   if (state->textObjects.isEmpty())
     return;
 
+  QVector<ImageTextObject *> oldObjs = state->textObjects;
+  /* State *oldState = new State{oldObjs, cv::Mat{}}; */
+
+  changeText();
   selection->reposition(shift);
   changeZoom();
+
+  /* state->matrix.copyTo(oldState->matrix); */
+  /* undo.push(oldState); */
 }

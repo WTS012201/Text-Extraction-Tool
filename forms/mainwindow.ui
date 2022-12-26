@@ -1185,7 +1185,7 @@ QProgressBar::chunk
                 </widget>
                </item>
                <item>
-                <layout class="QHBoxLayout" name="textOptions" stretch="0,2,0,1,0,5,0">
+                <layout class="QHBoxLayout" name="textOptions" stretch="0,2,0,1,0,0,5,0">
                  <item>
                   <widget class="QLabel" name="label_2">
                    <property name="text">
@@ -1261,6 +1261,13 @@ background:transparent;
                   </widget>
                  </item>
                  <item>
+                  <widget class="QToolButton" name="dropper">
+                   <property name="text">
+                    <string>...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
                   <spacer name="horizontalSpacer_2">
                    <property name="orientation">
                     <enum>Qt::Horizontal</enum>
@@ -1301,7 +1308,7 @@ background:transparent;
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>20</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menutest">

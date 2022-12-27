@@ -675,10 +675,11 @@ void ImageFrame::undoAction() {
     /* obj->reset(); */
   }
 
-  if (!state->textObjects.empty()) {
-    selection = state->textObjects.last();
-    selection->showHighlights();
-  }
+  /* if (!state->textObjects.empty()) { */
+  /*   selection = state->textObjects.last(); */
+  /*   selection->showHighlights(); */
+  /* } */
+  selection = nullptr;
 
   changeImage();
 }
@@ -703,8 +704,9 @@ void ImageFrame::redoAction() {
     /* obj->reset(); */
   }
 
-  selection = state->textObjects.last();
-  selection->showHighlights();
+  /* selection = state->textObjects.last(); */
+  /* selection->showHighlights(); */
+  selection = nullptr;
   changeImage();
 }
 
@@ -817,7 +819,19 @@ void ImageFrame::move(QPoint shift) {
   if (state->textObjects.isEmpty())
     return;
 
+  QVector<ImageTextObject *> oldObjs = state->textObjects;
+  State *oldState = new State{oldObjs, cv::Mat{}};
+  state->matrix.copyTo(oldState->matrix);
+  undo.push(oldState);
+
   selection->fillBackground();
   selection->reposition(shift);
   changeText();
+
+  auto curr = std::move(undo.pop());
+  auto prev = std::move(undo.pop());
+  prev->textObjects = std::move(curr->textObjects);
+  delete curr;
+
+  undo.push(prev);
 }

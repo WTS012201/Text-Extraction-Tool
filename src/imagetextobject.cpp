@@ -240,7 +240,6 @@ void ImageTextObject::determineBgColor() {
   }
 
   int max = 0;
-
   for (const auto &key : scalars.keys()) {
     if (scalars[key] > max) {
       max = scalars[key];

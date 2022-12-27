@@ -124,7 +124,7 @@ void ImageFrame::pasteImage(QImage *img) {
     obj->setDisabled(true);
   }
 
-  State *oldState = new State{state->textObjects, cv::Mat{}};
+  State *oldState = new State{state->textObjects, cv::Mat{}, selection};
 
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState); // scene dims
@@ -198,7 +198,7 @@ void ImageFrame::changeText() {
   connectSelection(selection);
 
   state->textObjects.push_back(selection);
-  State *oldState = new State{oldObjs, cv::Mat{}};
+  State *oldState = new State{oldObjs, cv::Mat{}, selection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
@@ -661,7 +661,7 @@ void ImageFrame::undoAction() {
     obj->setDisabled(true);
   }
 
-  State *currState = new State{state->textObjects, cv::Mat{}};
+  State *currState = new State{state->textObjects, cv::Mat{}, selection};
 
   state->matrix.copyTo(currState->matrix);
 
@@ -672,14 +672,8 @@ void ImageFrame::undoAction() {
     obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
-    /* obj->reset(); */
   }
-
-  /* if (!state->textObjects.empty()) { */
-  /*   selection = state->textObjects.last(); */
-  /*   selection->showHighlights(); */
-  /* } */
-  selection = nullptr;
+  selection = state->selection;
 
   changeImage();
 }
@@ -701,12 +695,9 @@ void ImageFrame::redoAction() {
     obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
-    /* obj->reset(); */
   }
+  selection = state->selection;
 
-  /* selection = state->textObjects.last(); */
-  /* selection->showHighlights(); */
-  selection = nullptr;
   changeImage();
 }
 
@@ -720,7 +711,7 @@ void ImageFrame::groupSelections() {
   QPoint newTL{-1, -1}, newBR{-1, -1};
 
   QVector<ImageTextObject *> oldObjs = state->textObjects;
-  State *oldState = new State{oldObjs, cv::Mat{}};
+  State *oldState = new State{oldObjs, cv::Mat{}, selection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
@@ -802,7 +793,7 @@ void ImageFrame::deleteSelection() {
   auto idx = state->textObjects.indexOf(selection);
   selection->reset();
   QVector<ImageTextObject *> oldObjs = state->textObjects;
-  State *oldState = new State{oldObjs, cv::Mat{}};
+  State *oldState = new State{oldObjs, cv::Mat{}, selection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
@@ -820,7 +811,7 @@ void ImageFrame::move(QPoint shift) {
     return;
 
   QVector<ImageTextObject *> oldObjs = state->textObjects;
-  State *oldState = new State{oldObjs, cv::Mat{}};
+  State *oldState = new State{oldObjs, cv::Mat{}, selection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
@@ -828,8 +819,7 @@ void ImageFrame::move(QPoint shift) {
   selection->reposition(shift);
   changeText();
 
-  auto curr = std::move(undo.pop());
-  auto prev = std::move(undo.pop());
+  auto curr = std::move(undo.pop()), prev = std::move(undo.pop());
   prev->textObjects = std::move(curr->textObjects);
   delete curr;
 

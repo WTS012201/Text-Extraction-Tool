@@ -49,6 +49,7 @@ public:
   typedef struct State {
     QVector<ImageTextObject *> textObjects;
     cv::Mat matrix;
+    ImageTextObject *selection;
   } State;
   State *&getState();
   QString rawText;

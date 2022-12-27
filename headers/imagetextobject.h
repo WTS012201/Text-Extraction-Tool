@@ -85,6 +85,7 @@ public:
   void reposition(QPoint shift);
   QString getHighlightColor();
   void reset();
+  static QString formatStyle(cv::Scalar);
 
 private:
   QPushButton *highlightButton;

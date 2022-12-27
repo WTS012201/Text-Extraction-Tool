@@ -1,5 +1,6 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
+#include "headers/imagetextobject.h"
 #include "qnamespace.h"
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
@@ -439,10 +440,7 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
     auto point = event->pos();
     auto color = display.at<cv::Vec3b>(cv::Point{point.x(), point.y()});
 
-    QString style = "background-color: rgb(";
-    style += QString::number(color[2]) + ',';
-    style += QString::number(color[1]) + ',';
-    style += QString::number(color[0]) + ')';
+    QString style = ImageTextObject::formatStyle(color);
     ui->dropper->setStyleSheet(style);
 
     emit colorSelected(color);
@@ -598,10 +596,7 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
     }
 
     auto color = selection->fontIntensity;
-    QString style = "background-color: rgb(";
-    style += QString::number(color[2]) + ',';
-    style += QString::number(color[1]) + ',';
-    style += QString::number(color[0]) + ')';
+    QString style = ImageTextObject::formatStyle(color);
     ui->dropper->setStyleSheet(style);
   });
 }
@@ -677,8 +672,7 @@ void ImageFrame::undoAction() {
     obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
-
-    obj->reset();
+    /* obj->reset(); */
   }
 
   if (!state->textObjects.empty()) {
@@ -706,7 +700,7 @@ void ImageFrame::redoAction() {
     obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
     obj->show();
     obj->setDisabled(false);
-    obj->reset();
+    /* obj->reset(); */
   }
 
   selection = state->textObjects.last();

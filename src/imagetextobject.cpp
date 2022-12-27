@@ -304,3 +304,13 @@ void ImageTextObject::reset() {
   hide();
   isChanged = false;
 }
+
+QString ImageTextObject::formatStyle(cv::Scalar color) {
+
+  QString style = "background-color: rgb(";
+  style += QString::number(color[2]) + ',';
+  style += QString::number(color[1]) + ',';
+  style += QString::number(color[0]) + ')';
+
+  return style;
+}

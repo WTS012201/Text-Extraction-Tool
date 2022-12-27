@@ -778,6 +778,16 @@ void ImageFrame::groupSelections() {
   }
 
   state->textObjects = final;
+
+  connect(textObject, &ImageTextObject::selection, this, [&]() {
+    selection = qobject_cast<ImageTextObject *>(sender());
+    for (auto &tempObj : state->textObjects) {
+      if (tempObj == selection) {
+        continue;
+      }
+      tempObj->deselect();
+    }
+  });
 }
 
 void ImageFrame::deleteSelection() {

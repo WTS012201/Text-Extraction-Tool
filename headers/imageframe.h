@@ -84,6 +84,7 @@ private:
 
   bool dropper;
   bool middleDown;
+  bool zoomChanged;
 
   QStack<State *> undo, redo;
   State *state;

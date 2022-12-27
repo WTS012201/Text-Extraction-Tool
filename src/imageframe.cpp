@@ -5,13 +5,14 @@
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *options)
     : selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
-      scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr},
+      scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, zoomChanged{false},
       scene{new QGraphicsScene(this)}, mode{options->getPILSelection()},
       ui{__ui}, middleDown{false}, state{new State}, dropper{false} {
   initUi(parent);
   setWidgets();
   connections();
   setOptions(options);
+  qDebug() << scalar;
 
   ui->zoomFactor->deselect();
 }
@@ -43,6 +44,7 @@ void ImageFrame::changeZoom() {
   if (!this->isEnabled())
     return;
 
+  zoomChanged = true;
   double val = (ui->zoomFactor->text()).toDouble();
 
   scalar = (val < 0.1) ? 0.1 : val;
@@ -199,9 +201,17 @@ void ImageFrame::changeText() {
   undo.push(oldState);
 
   selection->fillBackground();
-  QImage *img = new QImage{(uchar *)state->matrix.data, state->matrix.cols,
-                           state->matrix.rows, (int)state->matrix.step,
-                           QImage::Format_BGR888};
+
+  QImage *img;
+  if (!zoomChanged) {
+    state->matrix.copyTo(display);
+    img = new QImage{(uchar *)display.data, display.cols, display.rows,
+                     (int)display.step, QImage::Format_BGR888};
+  } else {
+    img = new QImage{(uchar *)state->matrix.data, state->matrix.cols,
+                     state->matrix.rows, (int)state->matrix.step,
+                     QImage::Format_BGR888};
+  }
   QPainter p;
   if (!p.begin(img)) {
     qDebug() << "error with painter";
@@ -379,6 +389,7 @@ void ImageFrame::zoomIn() {
   if (!this->isEnabled())
     return;
 
+  zoomChanged = true;
   auto sa =
       qobject_cast<TabScroll *>(ui->tab->currentWidget())->getScrollArea();
   auto hb = sa->horizontalScrollBar();
@@ -402,6 +413,7 @@ void ImageFrame::zoomOut() {
   if (!this->isEnabled())
     return;
 
+  zoomChanged = true;
   auto sa =
       qobject_cast<TabScroll *>(ui->tab->currentWidget())->getScrollArea();
   auto hb = sa->horizontalScrollBar();

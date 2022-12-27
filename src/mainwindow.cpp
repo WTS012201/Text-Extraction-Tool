@@ -80,9 +80,7 @@ void MainWindow::connections() {
   connect(ui->fontBox, SIGNAL(activated(int)), this, SLOT(fontSelected()));
   QObject::connect(ui->moveFactor, &QLineEdit::editingFinished, this, [&] {
     QString text = ui->moveFactor->text();
-    if (quint8 num = text.toInt()) {
-      shift = qMax(num, shift);
-    }
+    shift = (text.toInt() > 10) ? 10 : text.toInt();
   });
 
   QObject::connect(ui->tab, &QTabWidget::currentChanged, this, [&](int idx) {

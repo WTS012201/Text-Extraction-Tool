@@ -24,6 +24,8 @@
 #include <QWidget>
 #include <QtConcurrent/QtConcurrent>
 
+#define ZOOM_MAX 5.0
+
 class ImageFrame : public QGraphicsView {
   Q_OBJECT
 

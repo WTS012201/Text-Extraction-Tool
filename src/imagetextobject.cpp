@@ -80,20 +80,24 @@ void ImageTextObject::reposition(QPoint shift) {
 
   // bound x
   if (newPosTL.x() < 0) {
-    newPosTL = QPoint{0, newPosTL.y()};
-    newPosBR = bottomRight;
+    QPoint shiftBack{newPosTL.x(), 0};
+    newPosTL -= shiftBack;
+    newPosBR -= shiftBack;
   } else if (newPosBR.x() >= frameSize.width()) {
-    newPosTL = topLeft;
-    newPosBR = QPoint{frameSize.width() - 1, newPosBR.y()};
+    QPoint shiftBack{newPosBR.x() - frameSize.width(), 0};
+    newPosTL -= shiftBack;
+    newPosBR -= shiftBack;
   }
 
   // bound y
   if (newPosTL.y() < 0) {
-    newPosTL = QPoint{newPosTL.x(), 0};
-    newPosBR = bottomRight;
+    QPoint shiftBack{0, newPosTL.y()};
+    newPosTL -= shiftBack;
+    newPosBR -= shiftBack;
   } else if (newPosBR.y() >= frameSize.height()) {
-    newPosTL = topLeft;
-    newPosBR = QPoint{newPosBR.x(), frameSize.height() - 1};
+    QPoint shiftBack{0, newPosBR.y() - frameSize.height()};
+    newPosTL -= shiftBack;
+    newPosBR -= shiftBack;
   }
 
   topLeft = newPosTL;
@@ -119,6 +123,8 @@ void ImageTextObject::scaleAndPosition(double scalar) {
 void ImageTextObject::scaleAndPosition(double sx, double sy) {
   int sizeX = sx * (lineSpace.second.x() - lineSpace.first.x());
   int sizeY = sy * (lineSpace.second.y() - lineSpace.first.y());
+  /* qDebug() << sizeX; */
+  /* qDebug() << sizeY; */
   highlightButton->setMinimumSize(QSize{sizeX, sizeY});
 
   auto tempBR = topLeft + QPoint{sizeX, sizeY};
@@ -261,8 +267,7 @@ void ImageTextObject::fillBackground() {
 
   for (auto i = top; i <= bottom; i++) {
     for (auto j = left; j <= right; j++) {
-      auto &scalarRef = mat->at<cv::Vec3b>(cv::Point{j, i});
-      scalarRef = bg;
+      mat->at<cv::Vec3b>(cv::Point{j, i}) = bg;
     }
   }
 }

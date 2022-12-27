@@ -49,7 +49,7 @@ void ImageFrame::changeZoom() {
   double val = (ui->zoomFactor->text()).toDouble();
 
   scalar = (val < 0.1) ? 0.1 : val;
-  scalar = (scalar > 10.0) ? 10.0 : scalar;
+  scalar = (scalar > ZOOM_MAX) ? ZOOM_MAX : scalar;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
   for (auto &obj : state->textObjects) {
@@ -400,7 +400,7 @@ void ImageFrame::zoomIn() {
   int prevH = hb->value() - hb->maximum();
   int prevV = vb->value() - vb->maximum();
 
-  (scalar + scaleFactor > 10.0) ? scalar = 10.0 : scalar += scaleFactor;
+  (scalar + scaleFactor > ZOOM_MAX) ? scalar = ZOOM_MAX : scalar += scaleFactor;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
   for (auto &obj : state->textObjects) {
@@ -784,7 +784,6 @@ void ImageFrame::groupSelections() {
   }
 
   state->textObjects = final;
-
   connectSelection(textObject);
 }
 
@@ -818,6 +817,7 @@ void ImageFrame::move(QPoint shift) {
   if (state->textObjects.isEmpty())
     return;
 
+  selection->fillBackground();
   selection->reposition(shift);
   changeText();
 }

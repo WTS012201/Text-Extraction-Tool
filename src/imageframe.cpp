@@ -194,6 +194,7 @@ void ImageFrame::changeText() {
   selection = new ImageTextObject{this, *selection, ui, &state->matrix};
   selection->setHighlightColor(GREEN_HIGHLIGHT);
   selection->isChanged = true;
+  connectSelection(selection);
 
   state->textObjects.push_back(selection);
   State *oldState = new State{oldObjs, cv::Mat{}};
@@ -447,7 +448,7 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
     emit colorSelected(color);
   }
 
-  if (!keysPressed[Qt::Key_Control]) {
+  if (!keysPressed[Qt::Key_Control] && !dropper) {
     for (auto &obj : state->textObjects) {
       obj->deselect();
       if (!obj->isChanged) {
@@ -585,6 +586,26 @@ void ImageFrame::extract(cv::Mat *mat) {
   showAll();
 }
 
+void ImageFrame::connectSelection(ImageTextObject *obj) {
+  connect(obj, &ImageTextObject::selection, this, [&]() {
+    selection = qobject_cast<ImageTextObject *>(sender());
+    for (auto &tempObj : state->textObjects) {
+      if (tempObj == selection) {
+        continue;
+      }
+      tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
+      tempObj->deselect();
+    }
+
+    auto color = selection->fontIntensity;
+    QString style = "background-color: rgb(";
+    style += QString::number(color[2]) + ',';
+    style += QString::number(color[1]) + ',';
+    style += QString::number(color[0]) + ')';
+    ui->dropper->setStyleSheet(style);
+  });
+}
+
 ImageFrame::State *&ImageFrame::getState() { return state; }
 
 void ImageFrame::populateTextObjects() {
@@ -596,16 +617,7 @@ void ImageFrame::populateTextObjects() {
 
     tempObjects.push_back(temp);
 
-    connect(temp, &ImageTextObject::selection, this, [&]() {
-      selection = qobject_cast<ImageTextObject *>(sender());
-      for (auto &tempObj : state->textObjects) {
-        if (tempObj == selection) {
-          continue;
-        }
-        tempObj->deselect();
-      }
-    });
-
+    connectSelection(temp);
     delete obj;
   }
 
@@ -779,15 +791,7 @@ void ImageFrame::groupSelections() {
 
   state->textObjects = final;
 
-  connect(textObject, &ImageTextObject::selection, this, [&]() {
-    selection = qobject_cast<ImageTextObject *>(sender());
-    for (auto &tempObj : state->textObjects) {
-      if (tempObj == selection) {
-        continue;
-      }
-      tempObj->deselect();
-    }
-  });
+  connectSelection(textObject);
 }
 
 void ImageFrame::deleteSelection() {

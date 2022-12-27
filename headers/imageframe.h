@@ -103,6 +103,7 @@ private:
   void changeImage(QImage *img = nullptr);
   QString collect(cv::Mat &matrix);
   void inliers(QPair<QPoint, QPoint>);
+  void connectSelection(ImageTextObject *obj);
 };
 
 #endif // IMAGEFRAME_H

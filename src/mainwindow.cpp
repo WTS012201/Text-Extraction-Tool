@@ -213,9 +213,11 @@ void MainWindow::connections() {
     ui->zoomFactor->setText(QString::number(iFrame->scalar));
     ui->textEdit->setText(iFrame->selection ? iFrame->selection->getText()
                                             : "");
-    QObject::connect(
-        iFrame, &ImageFrame::colorSelected, this,
-        [&](cv::Scalar color) { iFrame->selection->fontIntensity = color; });
+    QObject::connect(iFrame, &ImageFrame::colorSelected, this,
+                     [&](cv::Scalar color) {
+                       if (iFrame && iFrame->selection)
+                         iFrame->selection->fontIntensity = color;
+                     });
   });
 }
 
@@ -268,17 +270,23 @@ void MainWindow::colorTray() {
     return;
   }
 
-  cv::Scalar scalar{
+  cv::Scalar color{
       static_cast<double>(colorMenu->color.blue()),
       static_cast<double>(colorMenu->color.green()),
       static_cast<double>(colorMenu->color.red()),
   };
 
-  iFrame->selection->fontIntensity = scalar;
+  iFrame->selection->fontIntensity = color;
   for (const auto &cb : buttons) {
     colorMenu->palette->removeWidget(cb);
     delete cb;
   }
+
+  QString style = "background-color: rgb(";
+  style += QString::number(color[2]) + ',';
+  style += QString::number(color[1]) + ',';
+  style += QString::number(color[0]) + ')';
+  ui->dropper->setStyleSheet(style);
 }
 
 void MainWindow::fontSelected() {

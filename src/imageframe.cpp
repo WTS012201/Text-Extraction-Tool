@@ -573,7 +573,7 @@ void ImageFrame::extract(cv::Mat *mat) {
   }
 
   QFuture<void> future = QtConcurrent::run(
-      [&](cv::Mat matrix) mutable -> void {
+      [&](cv::Mat matrix) -> void {
         emit processing();
         rawText = collect(matrix);
         state->matrix.copyTo(display);

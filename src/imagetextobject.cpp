@@ -77,8 +77,6 @@ void ImageTextObject::reposition(QPoint shift) {
   auto newPosTL = topLeft + shift;
   auto newPosBR = bottomRight + shift;
   auto frameSize = QSize(mat->cols, mat->rows);
-  /* qDebug() << newPosBR; */
-  /* qDebug() << frameSize; */
 
   // bound x
   if (newPosTL.x() < 0) {
@@ -148,8 +146,8 @@ void ImageTextObject::generatePalette() {
   QHash<QcvScalar, int> scalars;
   int max = 0;
 
-  for (auto i = left; i <= right; i++) {
-    for (auto j = top; j <= bottom; j++) {
+  for (auto i = left; i < right; i++) {
+    for (auto j = top; j < bottom; j++) {
       QcvScalar key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, j})};
       if (!scalars.contains(key)) {
         scalars[key] = 1;
@@ -192,14 +190,17 @@ void ImageTextObject::determineBgColor() {
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   QHash<QcvScalar, int> scalars;
 
+  //  Traverse the outside of the box's edges
   (left > 0) ? left -= 1 : left;
   (right < mat->cols - 1) ? right += 1 : right;
-
   (top > 0) ? top -= 1 : top;
   (bottom < mat->rows - 1) ? bottom += 1 : bottom;
 
+  (right == mat->cols) ? right -= 1 : right;
+  (bottom == mat->rows) ? bottom -= 1 : bottom;
+
   // Top / Bottom
-  for (auto i = left; i <= right; i++) {
+  for (auto i = left; i < right; i++) {
     QcvScalar key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, top})};
     if (!scalars.contains(key)) {
       scalars[key] = 1;
@@ -216,7 +217,7 @@ void ImageTextObject::determineBgColor() {
   }
 
   //   Right / Left
-  for (auto i = top; i <= bottom; i++) {
+  for (auto i = top; i < bottom; i++) {
     auto key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{left, i})};
     if (!scalars.contains(key)) {
       scalars[key] = 1;

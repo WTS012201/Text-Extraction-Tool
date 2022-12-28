@@ -76,7 +76,7 @@ void ImageTextObject::initSizeAndPos() {
 void ImageTextObject::reposition(QPoint shift) {
   auto newPosTL = topLeft + shift;
   auto newPosBR = bottomRight + shift;
-  auto frameSize = QSize(mat->cols, mat->rows);
+  auto frameSize = QSize{mat->cols, mat->rows};
 
   // bound x
   if (newPosTL.x() < 0) {
@@ -123,8 +123,6 @@ void ImageTextObject::scaleAndPosition(double scalar) {
 void ImageTextObject::scaleAndPosition(double sx, double sy) {
   int sizeX = sx * (lineSpace.second.x() - lineSpace.first.x());
   int sizeY = sy * (lineSpace.second.y() - lineSpace.first.y());
-  /* qDebug() << sizeX; */
-  /* qDebug() << sizeY; */
   highlightButton->setMinimumSize(QSize{sizeX, sizeY});
 
   auto tempBR = topLeft + QPoint{sizeX, sizeY};

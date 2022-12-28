@@ -71,7 +71,7 @@ void MainWindow::readConfig() {
 
 void MainWindow::writeConfig(bool __default) {
   if (__default) {
-    options->setRIL(tesseract::RIL_TEXTLINE);
+    options->setRIL(tesseract::RIL_WORD);
     options->setOEM(tesseract::OEM_DEFAULT);
     options->setPSM(tesseract::PSM_AUTO);
     options->setDataDir(QDir::homePath() + "/.config/tfi/");

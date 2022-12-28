@@ -51,6 +51,7 @@ public:
     ImageTextObject *selection;
   } State;
   State *&getState();
+
   QString rawText;
   bool isProcessing;
   double scalar;
@@ -71,6 +72,7 @@ private slots:
 signals:
   void processing();
   void colorSelected(cv::Scalar);
+  void unlockState();
 
 private:
   QString filepath;
@@ -90,12 +92,14 @@ private:
 
   QStack<State *> undo, redo;
   State *state;
+  State *stagedState;
 
   cv::Mat QImageToMat(QImage image);
   void mousePressEvent(QMouseEvent *event) override;
   void mouseReleaseEvent(QMouseEvent *event) override;
   void mouseMoveEvent(QMouseEvent *event) override;
   void wheelEvent(QWheelEvent *event) override;
+  void keyReleaseEvent(QKeyEvent *event) override;
   void connections();
   void initUi(QWidget *parent);
   void showAll();

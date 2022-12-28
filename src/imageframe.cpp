@@ -8,7 +8,8 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
     : selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
       scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, options{__options},
       zoomChanged{false}, scene{new QGraphicsScene(this)}, ui{__ui},
-      middleDown{false}, state{new State}, dropper{false} {
+      middleDown{false}, state{new State}, stagedState{nullptr}, dropper{
+                                                                     false} {
   initUi(parent);
   setWidgets();
   connections();
@@ -156,6 +157,8 @@ void ImageFrame::changeImage(QImage *img) {
 
   auto imagePixmap = QPixmap::fromImage(*img);
 
+  delete scene;
+  scene = new QGraphicsScene(this);
   scene->addPixmap(imagePixmap);
   scene->setSceneRect(imagePixmap.rect());
   scene->update();
@@ -661,7 +664,6 @@ void ImageFrame::undoAction() {
   State *currState = new State{state->textObjects, cv::Mat{}, selection};
 
   state->matrix.copyTo(currState->matrix);
-
   redo.push(currState);
   state = undo.pop();
 
@@ -797,6 +799,13 @@ void ImageFrame::deleteSelection() {
   state->textObjects.remove(idx);
 }
 
+void ImageFrame::keyReleaseEvent(QKeyEvent *event) {
+  keysPressed[event->key()] = false;
+  if (!keysPressed[Qt::Key_Shift] && stagedState) {
+    undo.push(stagedState);
+    stagedState = nullptr;
+  }
+}
 void ImageFrame::move(QPoint shift) {
   if (!selection) {
     qDebug() << "No selection";
@@ -820,5 +829,11 @@ void ImageFrame::move(QPoint shift) {
   prev->textObjects = std::move(curr->textObjects);
   delete curr;
 
-  undo.push(prev);
+  if (stagedState) {
+    delete stagedState;
+    stagedState = prev;
+  } else {
+    stagedState = prev;
+  }
+  /* undo.push(prev); */
 }

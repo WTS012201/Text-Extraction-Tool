@@ -1,9 +1,9 @@
 ﻿#ifndef IMAGEFRAME_H
 #define IMAGEFRAME_H
 
+#include "../headers/options.h"
 #include "imagetextobject.h"
 #include "options.h"
-#include "tesseract/baseapi.h"
 #include "ui_mainwindow.h"
 
 #include <QFuture>
@@ -39,7 +39,6 @@ public:
   void redoAction();
   void setImage(QString);
   void setWidgets();
-  void setMode(tesseract::PageIteratorLevel __mode);
   void extract(cv::Mat *mat = nullptr);
   void clear();
   void pasteImage(QImage *img);
@@ -80,7 +79,7 @@ private:
   QGraphicsScene *scene;
   QWidget *parent;
   cv::Mat display;
-  tesseract::PageIteratorLevel mode;
+  Options *options;
   Ui::MainWindow *ui;
   QMovie *spinner;
   QWidget *tab;

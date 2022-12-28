@@ -25,33 +25,38 @@ void MainWindow::initUi() {
 }
 
 void MainWindow::loadData() {
-  QFileInfo check_file("eng.traineddata");
+  QString path = QDir::homePath() + "/.config/tfi/";
+  QDir::setCurrent(path);
 
+  QFileInfo check_file{"eng.traineddata"};
   if (check_file.exists() && check_file.isFile()) {
     return;
   }
 
-  // write to .config/tfi later
   QFile file{"eng.traineddata"}, qrcFile(":/other/eng.traineddata");
   if (!qrcFile.open(QFile::ReadOnly | QFile::Text)) {
-    qDebug() << "failed to open qrc file";
+    return;
   }
   if (!file.open(QFile::WriteOnly | QFile::Text)) {
-    qDebug() << "failed to write to file";
+    return;
   }
+
   file.write(qrcFile.readAll());
+
+  check_file = QFileInfo{"config"};
+  if (check_file.exists() && check_file.isFile()) {
+    return;
+  }
+  writeConfig(true);
 }
+
+void MainWindow::readConfig() { QFile config{"config"}; }
+void MainWindow::writeConfig(bool __default) { QFile config{"config"}; }
 
 void MainWindow::on_actionOptions_triggered() {
   options->setModal(true);
   if (options->exec() == QDialog::DialogCode::Rejected)
     return;
-
-  auto PIL_selection = options->getPILSelection();
-  for (auto i = 0; i < ui->tab->count(); i++) {
-    auto tab = qobject_cast<TabScroll *>(ui->tab->widget(i));
-    tab->iFrame->setMode(PIL_selection);
-  }
 }
 
 void MainWindow::connections() {

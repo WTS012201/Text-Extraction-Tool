@@ -58,5 +58,7 @@ private:
   void initUi();
   void loadData();
   void connections();
+  void readConfig();
+  void writeConfig(bool __default = false);
 };
 #endif // MAINWINDOW_H

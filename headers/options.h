@@ -3,6 +3,7 @@
 
 #include "tesseract/baseapi.h"
 #include <QDialog>
+#include <tesseract/publictypes.h>
 
 namespace Ui {
 class Options;
@@ -14,7 +15,10 @@ class Options : public QDialog {
 public:
   explicit Options(QWidget *parent = nullptr);
   ~Options();
-  tesseract::PageIteratorLevel getPILSelection();
+  tesseract::PageIteratorLevel getRILSelection();
+  tesseract::OcrEngineMode getOEMSelection();
+  tesseract::PageSegMode getPSMSelection();
+
 private slots:
   void on_pushButton_3_clicked();
 

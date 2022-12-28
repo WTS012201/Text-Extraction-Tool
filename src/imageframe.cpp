@@ -4,16 +4,14 @@
 #include "qnamespace.h"
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
-                       Options *options)
+                       Options *__options)
     : selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
-      scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, zoomChanged{false},
-      scene{new QGraphicsScene(this)}, mode{options->getPILSelection()},
-      ui{__ui}, middleDown{false}, state{new State}, dropper{false} {
+      scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, options{__options},
+      zoomChanged{false}, scene{new QGraphicsScene(this)}, ui{__ui},
+      middleDown{false}, state{new State}, dropper{false} {
   initUi(parent);
   setWidgets();
   connections();
-  setOptions(options);
-  qDebug() << scalar;
 
   ui->zoomFactor->deselect();
 }
@@ -34,12 +32,6 @@ ImageFrame::~ImageFrame() {
 }
 
 cv::Mat ImageFrame::getImageMatrix() { return state->matrix; }
-
-void ImageFrame::setMode(tesseract::PageIteratorLevel __mode) { mode = __mode; }
-
-void ImageFrame::setOptions(Options *options) {
-  setMode(options->getPILSelection());
-}
 
 void ImageFrame::changeZoom() {
   if (!this->isEnabled())
@@ -622,8 +614,12 @@ void ImageFrame::populateTextObjects() {
 QString ImageFrame::collect(cv::Mat &matrix) {
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
-  api->Init(nullptr, "eng", tesseract::OEM_DEFAULT);
-  api->SetPageSegMode(tesseract::PSM_AUTO);
+  const auto RIL = options->getRILSelection();
+  const auto OEM = options->getOEMSelection();
+  const auto PSM = options->getPSMSelection();
+
+  api->Init(nullptr, "eng", OEM);
+  api->SetPageSegMode(PSM);
   api->SetImage(matrix.data, matrix.cols, matrix.rows, 3, matrix.step);
   api->Recognize(0);
 
@@ -634,8 +630,8 @@ QString ImageFrame::collect(cv::Mat &matrix) {
 
   if (ri != 0) {
     do {
-      QString word = ri->GetUTF8Text(mode);
-      ri->BoundingBox(mode, &x1, &y1, &x2, &y2);
+      QString word = ri->GetUTF8Text(RIL);
+      ri->BoundingBox(RIL, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
 
       ImageTextObject *textObject = new ImageTextObject{nullptr};
@@ -644,7 +640,7 @@ QString ImageFrame::collect(cv::Mat &matrix) {
       textObject->topLeft = p1;
       textObject->bottomRight = p2;
       state->textObjects.push_back(textObject);
-    } while (ri->Next(mode));
+    } while (ri->Next(RIL));
   }
 
   api->End();

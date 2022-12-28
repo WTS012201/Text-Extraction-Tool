@@ -172,11 +172,6 @@
             <widget class="QComboBox" name="pageSegMode">
              <item>
               <property name="text">
-               <string>OSD Only</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>Auto OSD</string>
               </property>
              </item>
@@ -247,15 +242,42 @@
            <item>
             <widget class="QLabel" name="label_3">
              <property name="text">
-              <string>Tesseract Data Path: </string>
+              <string>Tesseract Data Dir: </string>
              </property>
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="trainingDataPath"/>
+            <widget class="QLineEdit" name="dataDir"/>
            </item>
            <item>
             <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="2,2,3">
+           <item>
+            <widget class="QLabel" name="label_6">
+             <property name="text">
+              <string>Tesseract Data File:</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QLineEdit" name="dataFile"/>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_5">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
@@ -277,7 +299,7 @@
            <property name="sizeHint" stdset="0">
             <size>
              <width>20</width>
-             <height>199</height>
+             <height>166</height>
             </size>
            </property>
           </spacer>

@@ -1,14 +1,15 @@
 ﻿#include "../headers/mainwindow.h"
 #include "ui_mainwindow.h"
 #include "ui_tabscroll.h"
+#include <tesseract/publictypes.h>
 
 // weird behavior on save, sometimes crashes
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), iFrame{nullptr},
       ui(new Ui::MainWindow), currTab{nullptr}, shift{1} {
-  loadData();
   initUi();
+  loadData();
   connections();
 
   ui->zoomFactor->deselect();
@@ -28,30 +29,39 @@ void MainWindow::loadData() {
   QString path = QDir::homePath() + "/.config/tfi/";
   QDir::setCurrent(path);
 
-  QFileInfo check_file{"eng.traineddata"};
-  if (check_file.exists() && check_file.isFile()) {
-    return;
+  auto check_file = QFileInfo{"config"};
+  if (!check_file.exists()) {
+    writeConfig(true);
   }
 
-  QFile file{"eng.traineddata"}, qrcFile(":/other/eng.traineddata");
-  if (!qrcFile.open(QFile::ReadOnly | QFile::Text)) {
-    return;
-  }
-  if (!file.open(QFile::WriteOnly | QFile::Text)) {
-    return;
-  }
+  // ASSUMING IT EXISTS
+  QDir::setCurrent(options->getDataDir());
+  check_file = QFileInfo{options->getDataFile() + ".traineddata"};
+  if (!check_file.exists()) {
+    QFile file{"eng.traineddata"}, qrcFile{":/other/eng.traineddata"};
 
-  file.write(qrcFile.readAll());
-
-  check_file = QFileInfo{"config"};
-  if (check_file.exists() && check_file.isFile()) {
-    return;
+    if (!qrcFile.open(QFile::ReadOnly | QFile::Text)) {
+      return;
+    }
+    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+      return;
+    }
+    file.write(qrcFile.readAll());
   }
-  writeConfig(true);
 }
 
 void MainWindow::readConfig() { QFile config{"config"}; }
-void MainWindow::writeConfig(bool __default) { QFile config{"config"}; }
+
+void MainWindow::writeConfig(bool __default) {
+  if (__default) {
+    options->setRIL(tesseract::RIL_TEXTLINE);
+    options->setOEM(tesseract::OEM_DEFAULT);
+    options->setPSM(tesseract::PSM_AUTO);
+    options->setDataDir(QDir::homePath() + "/.config/tfi/");
+    options->setDataFile("eng");
+  }
+  QFile config{"config"};
+}
 
 void MainWindow::on_actionOptions_triggered() {
   options->setModal(true);
@@ -331,11 +341,13 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste) {
   QStringList selection, filters{"*.png *.jpeg *.jpg"};
 
   if (!paste) {
+    QDir::setCurrent(QDir::homePath());
     QFileDialog dialog(this);
     dialog.setNameFilters(filters);
     dialog.setFileMode(QFileDialog::ExistingFiles);
-    if (!dialog.exec())
+    if (!dialog.exec()) {
       return;
+    }
 
     selection = dialog.selectedFiles();
 
@@ -343,6 +355,7 @@ void MainWindow::on_actionOpen_Image_triggered(bool paste) {
       loadImage(file);
     }
 
+    QDir::setCurrent(options->getDataDir());
     emit switchConnections();
     return;
   }
@@ -389,8 +402,10 @@ void MainWindow::on_actionSave_Image_triggered() {
   if (!iFrame || ui->tab->count() == 0)
     return;
   QString fName = ui->tab->tabText(ui->tab->currentIndex());
+  QDir::setCurrent(QDir::homePath());
   auto saveFile = QFileDialog::getSaveFileName(0, "Save file", fName, ".png");
   //                                               ".png;;.jpeg;;.jpg");
   cv::Mat image = iFrame->getImageMatrix();
   cv::imwrite(saveFile.toStdString() + ".png", image);
+  QDir::setCurrent(options->getDataDir());
 }

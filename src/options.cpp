@@ -4,15 +4,13 @@
 
 Options::Options(QWidget *parent) : QDialog(parent), ui(new Ui::Options) {
   ui->setupUi(this);
-  //  connect(ui->partialBox, SIGNAL(activated(int)), this,
-  //  SLOT(partialSelected()));
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 Options::~Options() { delete ui; }
 
-tesseract::PageIteratorLevel Options::getRILSelection() {
+tesseract::PageIteratorLevel Options::getRIL() {
   switch (ui->partialBox->currentIndex()) {
   case 0:
     return tesseract::RIL_WORD;
@@ -29,7 +27,7 @@ tesseract::PageIteratorLevel Options::getRILSelection() {
   return tesseract::RIL_TEXTLINE;
 }
 
-tesseract::OcrEngineMode Options::getOEMSelection() {
+tesseract::OcrEngineMode Options::getOEM() {
   switch (ui->engineMode->currentIndex()) {
   case 0:
     return tesseract::OEM_TESSERACT_ONLY;
@@ -44,7 +42,7 @@ tesseract::OcrEngineMode Options::getOEMSelection() {
   return tesseract::OEM_DEFAULT;
 }
 
-tesseract::PageSegMode Options::getPSMSelection() {
+tesseract::PageSegMode Options::getPSM() {
   switch (ui->pageSegMode->currentIndex()) {
   case 0:
     return tesseract::PSM_AUTO_OSD;
@@ -71,6 +69,64 @@ tesseract::PageSegMode Options::getPSMSelection() {
   return tesseract::PSM_AUTO;
 }
 
+void Options::setRIL(tesseract::PageIteratorLevel RIL) {
+  switch (RIL) {
+  case tesseract::RIL_WORD:
+    ui->partialBox->setCurrentIndex(0);
+    return;
+  case tesseract::RIL_BLOCK:
+    ui->partialBox->setCurrentIndex(1);
+    return;
+  case tesseract::RIL_TEXTLINE:
+    ui->partialBox->setCurrentIndex(2);
+    return;
+  case tesseract::RIL_PARA:
+    ui->partialBox->setCurrentIndex(3);
+    return;
+  case tesseract::RIL_SYMBOL:
+    ui->partialBox->setCurrentIndex(4);
+    return;
+  }
+}
+
+void Options::setOEM(tesseract::OcrEngineMode OCR) {
+  ui->engineMode->setCurrentIndex(OCR);
+}
+void Options::setPSM(tesseract::PageSegMode PSM) {
+  switch (PSM) {
+  case tesseract::PSM_AUTO_OSD:
+    ui->pageSegMode->setCurrentIndex(0);
+    return;
+  case tesseract::PSM_AUTO:
+    ui->pageSegMode->setCurrentIndex(1);
+    return;
+  case tesseract::PSM_SINGLE_COLUMN:
+    ui->pageSegMode->setCurrentIndex(2);
+    return;
+  case tesseract::PSM_SINGLE_BLOCK_VERT_TEXT:
+    ui->pageSegMode->setCurrentIndex(3);
+    return;
+  case tesseract::PSM_SINGLE_BLOCK:
+    ui->pageSegMode->setCurrentIndex(4);
+    return;
+  case tesseract::PSM_SINGLE_LINE:
+    ui->pageSegMode->setCurrentIndex(5);
+    return;
+  case tesseract::PSM_SINGLE_WORD:
+    ui->pageSegMode->setCurrentIndex(6);
+    return;
+  case tesseract::PSM_SINGLE_CHAR:
+    ui->pageSegMode->setCurrentIndex(7);
+    return;
+  case tesseract::PSM_CIRCLE_WORD:
+    ui->pageSegMode->setCurrentIndex(8);
+    return;
+  case tesseract::PSM_SPARSE_TEXT:
+    ui->pageSegMode->setCurrentIndex(9);
+    return;
+  }
+}
+
 void Options::on_pushButton_3_clicked() {
   ui->stackedWidget->setCurrentIndex(2);
 }
@@ -80,3 +136,12 @@ void Options::on_pushButton_clicked() { ui->stackedWidget->setCurrentIndex(0); }
 void Options::on_pushButton_2_clicked() {
   ui->stackedWidget->setCurrentIndex(1);
 }
+
+// MAKE SURE THEY EXIST
+void Options::setDataDir(QString dirName) { ui->dataDir->setText(dirName); }
+
+void Options::setDataFile(QString fileName) { ui->dataFile->setText(fileName); }
+
+QString Options::getDataDir() { return ui->dataDir->text(); }
+
+QString Options::getDataFile() { return ui->dataFile->text(); }

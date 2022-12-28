@@ -15,9 +15,16 @@ class Options : public QDialog {
 public:
   explicit Options(QWidget *parent = nullptr);
   ~Options();
-  tesseract::PageIteratorLevel getRILSelection();
-  tesseract::OcrEngineMode getOEMSelection();
-  tesseract::PageSegMode getPSMSelection();
+  tesseract::PageIteratorLevel getRIL();
+  tesseract::OcrEngineMode getOEM();
+  tesseract::PageSegMode getPSM();
+  void setRIL(tesseract::PageIteratorLevel RIL);
+  void setOEM(tesseract::OcrEngineMode OCR);
+  void setPSM(tesseract::PageSegMode PSM);
+  void setDataDir(QString dirName);
+  void setDataFile(QString fileName);
+  QString getDataDir();
+  QString getDataFile();
 
 private slots:
   void on_pushButton_3_clicked();

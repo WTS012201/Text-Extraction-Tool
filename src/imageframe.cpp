@@ -614,11 +614,12 @@ void ImageFrame::populateTextObjects() {
 QString ImageFrame::collect(cv::Mat &matrix) {
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
-  const auto RIL = options->getRILSelection();
-  const auto OEM = options->getOEMSelection();
-  const auto PSM = options->getPSMSelection();
+  const auto RIL = options->getRIL();
+  const auto OEM = options->getOEM();
+  const auto PSM = options->getPSM();
+  auto data = options->getDataFile().toLocal8Bit();
 
-  api->Init(nullptr, "eng", OEM);
+  api->Init(nullptr, data.data(), OEM);
   api->SetPageSegMode(PSM);
   api->SetImage(matrix.data, matrix.cols, matrix.rows, 3, matrix.step);
   api->Recognize(0);
@@ -633,8 +634,8 @@ QString ImageFrame::collect(cv::Mat &matrix) {
       QString word = ri->GetUTF8Text(RIL);
       ri->BoundingBox(RIL, &x1, &y1, &x2, &y2);
       QPoint p1{x1, y1}, p2{x2, y2};
-
       ImageTextObject *textObject = new ImageTextObject{nullptr};
+
       textObject->setText(word);
       textObject->lineSpace = QPair<QPoint, QPoint>{p1, p2};
       textObject->topLeft = p1;

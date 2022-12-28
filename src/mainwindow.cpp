@@ -28,10 +28,13 @@ void MainWindow::initUi() {
 void MainWindow::loadData() {
   QString path = QDir::homePath() + "/.config/tfi/";
   QDir::setCurrent(path);
+  settings = new QSettings{"config.ini", QSettings::IniFormat};
 
-  auto check_file = QFileInfo{"config"};
+  auto check_file = QFileInfo{"config.ini"};
   if (!check_file.exists()) {
     writeConfig(true);
+  } else {
+    readConfig();
   }
 
   // ASSUMING IT EXISTS
@@ -50,7 +53,21 @@ void MainWindow::loadData() {
   }
 }
 
-void MainWindow::readConfig() { QFile config{"config"}; }
+void MainWindow::readConfig() {
+  auto RIL = settings->value("tesseract/RIL", options->getRIL()).toInt();
+  auto OEM = settings->value("tesseract/OEM", options->getOEM()).toInt();
+  auto PSM = settings->value("tesseract/PSM", options->getPSM()).toInt();
+  auto dataDir =
+      settings->value("tesseract/DataDir", options->getDataDir()).toString();
+  auto dataFile =
+      settings->value("tesseract/DataFile", options->getDataFile()).toString();
+
+  options->setRIL(static_cast<tesseract::PageIteratorLevel>(RIL));
+  options->setOEM(static_cast<tesseract::OcrEngineMode>(OEM));
+  options->setPSM(static_cast<tesseract::PageSegMode>(PSM));
+  options->setDataDir(dataDir);
+  options->setDataFile(dataFile);
+}
 
 void MainWindow::writeConfig(bool __default) {
   if (__default) {
@@ -60,13 +77,20 @@ void MainWindow::writeConfig(bool __default) {
     options->setDataDir(QDir::homePath() + "/.config/tfi/");
     options->setDataFile("eng");
   }
-  QFile config{"config"};
+
+  settings->setValue("tesseract/RIL", options->getRIL());
+  settings->setValue("tesseract/OEM", options->getOEM());
+  settings->setValue("tesseract/PSM", options->getPSM());
+  settings->setValue("tesseract/DataDir", options->getDataDir());
+  settings->setValue("tesseract/DataFile", options->getDataFile());
+  settings->sync();
 }
 
 void MainWindow::on_actionOptions_triggered() {
   options->setModal(true);
   if (options->exec() == QDialog::DialogCode::Rejected)
     return;
+  writeConfig();
 }
 
 void MainWindow::connections() {

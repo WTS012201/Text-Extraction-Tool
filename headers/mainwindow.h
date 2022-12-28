@@ -10,6 +10,7 @@
 #include <QFileDialog>
 #include <QMainWindow>
 #include <QMovie>
+#include <QSettings>
 #include <QShortcut>
 #include <QSplitter>
 #include <QTextEdit>
@@ -51,6 +52,7 @@ private:
   ColorTray *colorMenu;
   TabScroll *currTab;
   quint8 shift;
+  QSettings *settings;
 
   void keyReleaseEvent(QKeyEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;

@@ -806,6 +806,12 @@ void ImageFrame::keyReleaseEvent(QKeyEvent *event) {
     stagedState = nullptr;
   }
 }
+
+void ImageFrame::stageState() {
+  undo.push(stagedState);
+  stagedState = nullptr;
+}
+
 void ImageFrame::move(QPoint shift) {
   if (!selection) {
     qDebug() << "No selection";

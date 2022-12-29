@@ -44,11 +44,8 @@ void ImageTextObject::highlightSpaces() {
   highlight->setStyleSheet(YELLOW_HIGHLIGHT);
   highlight->show();
 
-  QObject::connect(highlight, &QPushButton::clicked, this, [=](...) {
+  QObject::connect(highlight, &QPushButton::clicked, this, [=] {
     if (isChanged) {
-      /* int fsEstimate = bottomRight.y() - topLeft.y(); */
-      /*  */
-      /* mUi->fontSizeInput->setText(QString::number(fsEstimate)); */
       mUi->fontSizeInput->setText(QString::number(14));
       mUi->textEdit->setText(text);
       highlight->setStyleSheet(GREEN_HIGHLIGHT);

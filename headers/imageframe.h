@@ -51,12 +51,14 @@ public:
     ImageTextObject *selection;
   } State;
   State *&getState();
+  State *stagedState;
 
   QString rawText;
   bool isProcessing;
   double scalar;
   double scaleFactor;
   void move(QPoint shift);
+  void stageState();
 
 public slots:
   void zoomIn();
@@ -92,7 +94,6 @@ private:
 
   QStack<State *> undo, redo;
   State *state;
-  State *stagedState;
 
   cv::Mat QImageToMat(QImage image);
   void mousePressEvent(QMouseEvent *event) override;

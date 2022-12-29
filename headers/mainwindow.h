@@ -43,7 +43,6 @@ private slots:
   void pastImage();
 
 private:
-  //  QShortcut *undo, *redo, *ctrl, *open, *save, *paste;
   QShortcut *zoomIn, *zoomOut;
   QClipboard *clipboard;
   ImageFrame *iFrame;

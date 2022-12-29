@@ -3,8 +3,6 @@
 #include "ui_tabscroll.h"
 #include <tesseract/publictypes.h>
 
-// weird behavior on save, sometimes crashes
-
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), iFrame{nullptr},
       ui(new Ui::MainWindow), currTab{nullptr}, shift{1} {
@@ -358,6 +356,9 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
   iFrame->keysPressed[event->key()] = false;
   if (event->key() & Qt::SHIFT) {
     this->setCursor(Qt::CursorShape::ArrowCursor);
+  }
+  if (!iFrame->keysPressed[Qt::Key_Shift] && iFrame->stagedState) {
+    iFrame->stageState();
   }
 }
 

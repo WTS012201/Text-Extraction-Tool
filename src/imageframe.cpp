@@ -816,24 +816,26 @@ void ImageFrame::move(QPoint shift) {
   if (state->textObjects.isEmpty())
     return;
 
-  QVector<ImageTextObject *> oldObjs = state->textObjects;
-  State *oldState = new State{oldObjs, cv::Mat{}, selection};
-  state->matrix.copyTo(oldState->matrix);
-  undo.push(oldState);
-
-  selection->fillBackground();
-  selection->reposition(shift);
-  changeText();
-
-  auto curr = std::move(undo.pop()), prev = std::move(undo.pop());
-  prev->textObjects = std::move(curr->textObjects);
-  delete curr;
-
-  if (stagedState) {
-    delete stagedState;
-    stagedState = prev;
-  } else {
-    stagedState = prev;
+  if (!stagedState) {
+    QVector<ImageTextObject *> oldObjs = state->textObjects;
+    State *oldState = new State{oldObjs, cv::Mat{}, selection};
+    state->matrix.copyTo(oldState->matrix);
+    stagedState = oldState;
   }
-  /* undo.push(prev); */
+
+  // update selection on move
+  selection->hide();
+  selection->setDisabled(true);
+  state->textObjects.remove(state->textObjects.indexOf(selection));
+
+  selection = new ImageTextObject{this, *selection, ui, &state->matrix};
+  selection->setHighlightColor(GREEN_HIGHLIGHT);
+  selection->isChanged = true;
+  selection->showHighlights();
+  connectSelection(selection);
+  state->textObjects.push_back(selection);
+
+  selection->reposition(shift);
+  selection->scaleAndPosition(scalar);
+  changeImage();
 }

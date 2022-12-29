@@ -78,6 +78,12 @@ void ImageTextObject::reposition(QPoint shift) {
   auto newPosBR = bottomRight + shift;
   auto frameSize = QSize{mat->cols, mat->rows};
 
+  auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
+                         cv::Point{bottomRight.x(), bottomRight.y()}};
+  cv::Mat draw;
+  (*mat)(region).copyTo(draw);
+  fillBackground();
+
   // bound x
   if (newPosTL.x() < 0) {
     QPoint shiftBack{newPosTL.x(), 0};
@@ -102,6 +108,8 @@ void ImageTextObject::reposition(QPoint shift) {
 
   topLeft = newPosTL;
   bottomRight = newPosBR;
+  draw.copyTo(mat->rowRange(topLeft.y(), bottomRight.y())
+                  .colRange(topLeft.x(), bottomRight.x()));
 }
 
 void ImageTextObject::scaleAndPosition(double scalar) {

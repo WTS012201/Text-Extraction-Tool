@@ -980,7 +980,7 @@ QProgressBar::chunk
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QVBoxLayout" name="verticalLayout_3">
+   <layout class="QVBoxLayout" name="verticalLayout_9">
     <item>
      <widget class="QWidget" name="widget_3" native="true">
       <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -1014,60 +1014,113 @@ QProgressBar::chunk
               </property>
               <layout class="QVBoxLayout" name="verticalLayout_2">
                <item>
-                <layout class="QHBoxLayout" name="horizontalLayout" stretch="1,1,1,1,1,4,1,1">
+                <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0,4">
                  <item>
-                  <widget class="QLabel" name="zoomLabel">
-                   <property name="text">
-                    <string>Zoom:</string>
+                  <layout class="QVBoxLayout" name="verticalLayout_3">
+                   <property name="sizeConstraint">
+                    <enum>QLayout::SetFixedSize</enum>
                    </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="zoomFactor">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="autoFillBackground">
-                    <bool>false</bool>
-                   </property>
-                   <property name="styleSheet">
-                    <string notr="true">.QLineEdit{
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_12">
+                     <item>
+                      <widget class="QLabel" name="label_3">
+                       <property name="text">
+                        <string>Move Amount:</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="moveFactor">
+                       <property name="styleSheet">
+                        <string notr="true">.QLineEdit{
 	background: rgba(255, 255, 255, 10)
 }</string>
-                   </property>
-                   <property name="text">
-                    <string>1.0</string>
-                   </property>
-                   <property name="maxLength">
-                    <number>5</number>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="label_3">
-                   <property name="text">
-                    <string>Move:</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="moveFactor">
-                   <property name="styleSheet">
-                    <string notr="true">.QLineEdit{
+                       </property>
+                       <property name="text">
+                        <string>1</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_11">
+                     <item>
+                      <widget class="QLabel" name="zoomLabel">
+                       <property name="text">
+                        <string>Zoom Amount:</string>
+                       </property>
+                       <property name="alignment">
+                        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="zoomFactor">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="autoFillBackground">
+                        <bool>false</bool>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">.QLineEdit{
 	background: rgba(255, 255, 255, 10)
 }</string>
+                       </property>
+                       <property name="text">
+                        <string>1.0</string>
+                       </property>
+                       <property name="maxLength">
+                        <number>5</number>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="Line" name="line_2">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
                    </property>
-                   <property name="text">
-                    <string>1</string>
+                  </widget>
+                 </item>
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout_8">
+                   <item>
+                    <widget class="QPushButton" name="highlightAll">
+                     <property name="minimumSize">
+                      <size>
+                       <width>92</width>
+                       <height>0</height>
+                      </size>
+                     </property>
+                     <property name="text">
+                      <string>Add</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item>
+                    <widget class="QPushButton" name="removeSelection">
+                     <property name="text">
+                      <string>Remove</string>
+                     </property>
+                    </widget>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="Line" name="line_3">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
                    </property>
                   </widget>
                  </item>
@@ -1087,26 +1140,6 @@ QProgressBar::chunk
                     <string notr="true">.QLineEdit{
 	background: rgba(255, 255, 255, 10)
 }</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="highlightAll">
-                   <property name="minimumSize">
-                    <size>
-                     <width>92</width>
-                     <height>0</height>
-                    </size>
-                   </property>
-                   <property name="text">
-                    <string>Add</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QPushButton" name="removeSelection">
-                   <property name="text">
-                    <string>Remove</string>
                    </property>
                   </widget>
                  </item>
@@ -1185,71 +1218,111 @@ QProgressBar::chunk
                 </widget>
                </item>
                <item>
-                <layout class="QHBoxLayout" name="textOptions" stretch="0,2,0,1,0,0,5,0">
+                <layout class="QHBoxLayout" name="textOptions" stretch="0,0,0,0,5,0">
                  <item>
-                  <widget class="QLabel" name="label_2">
-                   <property name="text">
-                    <string>Font:</string>
+                  <layout class="QVBoxLayout" name="verticalLayout_5">
+                   <property name="sizeConstraint">
+                    <enum>QLayout::SetFixedSize</enum>
                    </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QComboBox" name="fontBox">
                    <item>
-                    <property name="text">
-                     <string>Sans Serif</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>FreeMono</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>FreeSans</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>FreeSerif</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Monospace</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Source Code Pro</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Arial</string>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Open Sans</string>
-                    </property>
-                   </item>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="fontSizeLabel">
-                   <property name="text">
-                    <string>Font size:</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLineEdit" name="fontSizeInput">
-                   <property name="styleSheet">
-                    <string notr="true">.QLineEdit{
+                    <layout class="QHBoxLayout" name="horizontalLayout_7">
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SetFixedSize</enum>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="fontSizeLabel">
+                       <property name="text">
+                        <string>Font size:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="fontSizeInput">
+                       <property name="sizePolicy">
+                        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                         <horstretch>0</horstretch>
+                         <verstretch>0</verstretch>
+                        </sizepolicy>
+                       </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>40</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
+                       <property name="styleSheet">
+                        <string notr="true">.QLineEdit{
 background:transparent;
 }</string>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_6">
+                     <property name="sizeConstraint">
+                      <enum>QLayout::SetFixedSize</enum>
+                     </property>
+                     <item>
+                      <widget class="QLabel" name="label_2">
+                       <property name="text">
+                        <string>Font:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QComboBox" name="fontBox">
+                       <item>
+                        <property name="text">
+                         <string>Sans Serif</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>FreeMono</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>FreeSans</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>FreeSerif</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Monospace</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Source Code Pro</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Arial</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>Open Sans</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="Line" name="line">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
                    </property>
                   </widget>
                  </item>

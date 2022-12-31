@@ -20,12 +20,11 @@
 #include <cmath>
 #include <queue>
 
-#define BLUE_HIGHLIGHT "background:  rgba(37,122,253,100);"
-#define YELLOW_HIGHLIGHT "background:  rgba(255, 243, 0, 100);"
-#define PURPLE_HIGHLIGHT "background:  rgba(255, 0, 243, 100);"
-#define GREEN_HIGHLIGHT "background:  rgba(0, 255, 0, 100);"
-
-constexpr static int PALETTE_LIMIT = 5;
+constexpr char BLUE_HIGHLIGHT[] = "background:  rgba(37,122,253,100);";
+constexpr char YELLOW_HIGHLIGHT[] = "background:  rgba(255, 243, 0, 100);";
+constexpr char PURPLE_HIGHLIGHT[] = "background:  rgba(255, 0, 243, 100);";
+constexpr char GREEN_HIGHLIGHT[] = "background:  rgba(0, 255, 0, 100);";
+constexpr int PALETTE_LIMIT = 5;
 
 class QcvScalar : public cv::Scalar {
   friend inline bool operator==(const QcvScalar &e1,

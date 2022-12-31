@@ -57,9 +57,9 @@ private:
   void keyPressEvent(QKeyEvent *event) override;
   void loadImage(QString fileName);
   void initUi();
-  void loadData();
+  void scanSettings();
   void connections();
-  void readConfig();
-  void writeConfig(bool __default = false);
+  void readSettings();
+  void writeSettings(bool __default = false);
 };
 #endif // MAINWINDOW_H

@@ -7,7 +7,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), iFrame{nullptr},
       ui(new Ui::MainWindow), currTab{nullptr}, shift{1} {
   initUi();
-  loadData();
+  scanSettings();
   connections();
 
   ui->zoomFactor->deselect();
@@ -23,35 +23,48 @@ void MainWindow::initUi() {
   colorMenu = new ColorTray{this};
 }
 
-void MainWindow::loadData() {
+void MainWindow::scanSettings() {
   QString path = QDir::homePath() + "/.config/tfi/";
   QDir::setCurrent(path);
-  settings = new QSettings{"config.ini", QSettings::IniFormat};
+  settings = new QSettings{"settings.ini", QSettings::IniFormat};
 
-  auto check_file = QFileInfo{"config.ini"};
-  if (!check_file.exists()) {
-    writeConfig(true);
+  if (!QFileInfo{"settings.ini"}.exists()) {
+    writeSettings(true);
   } else {
-    readConfig();
+    readSettings();
   }
 
-  // ASSUMING IT EXISTS
-  QDir::setCurrent(options->getDataDir());
-  check_file = QFileInfo{options->getDataFile() + ".traineddata"};
-  if (!check_file.exists()) {
-    QFile file{"eng.traineddata"}, qrcFile{":/other/eng.traineddata"};
+  const auto dataDir = options->getDataDir();
+  if (QDir{dataDir}.exists()) {
+    QDir::setCurrent(options->getDataDir());
+  } else {
+    qDebug() << "Data directory " << dataDir
+             << " doesn't exists, using default path " << path;
+    options->setDataDir(path);
+    QDir::setCurrent(path);
+  }
 
+  const auto dataFile = options->getDataFile() + ".traineddata";
+  if (!QFileInfo{dataFile}.exists()) {
+    qDebug() << "Data file " << dataFile
+             << " doesn't exists, using default file "
+             << "eng.traineddata";
+    options->setDataFile("eng");
+
+    QFile file{"eng.traineddata"}, qrcFile{":/other/eng.traineddata"};
     if (!qrcFile.open(QFile::ReadOnly | QFile::Text)) {
+      qDebug() << "Failed to open qrc eng.traineddata";
       return;
     }
     if (!file.open(QFile::WriteOnly | QFile::Text)) {
+      qDebug() << "Failed to open eng.traineddata";
       return;
     }
     file.write(qrcFile.readAll());
   }
 }
 
-void MainWindow::readConfig() {
+void MainWindow::readSettings() {
   auto RIL = settings->value("tesseract/RIL", options->getRIL()).toInt();
   auto OEM = settings->value("tesseract/OEM", options->getOEM()).toInt();
   auto PSM = settings->value("tesseract/PSM", options->getPSM()).toInt();
@@ -67,7 +80,7 @@ void MainWindow::readConfig() {
   options->setDataFile(dataFile);
 }
 
-void MainWindow::writeConfig(bool __default) {
+void MainWindow::writeSettings(bool __default) {
   if (__default) {
     options->setRIL(tesseract::RIL_WORD);
     options->setOEM(tesseract::OEM_DEFAULT);
@@ -88,7 +101,10 @@ void MainWindow::on_actionOptions_triggered() {
   options->setModal(true);
   if (options->exec() == QDialog::DialogCode::Rejected)
     return;
-  writeConfig();
+
+  writeSettings(false);
+  readSettings();
+  scanSettings();
 }
 
 void MainWindow::connections() {

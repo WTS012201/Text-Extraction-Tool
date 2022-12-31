@@ -5,11 +5,11 @@
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
-    : selection{nullptr}, isProcessing{false}, spinner{nullptr}, tab{__tab},
-      scalar{1.0}, scaleFactor{0.1}, rubberBand{nullptr}, options{__options},
-      zoomChanged{false}, scene{new QGraphicsScene(this)}, ui{__ui},
-      middleDown{false}, state{new State}, stagedState{nullptr}, dropper{
-                                                                     false} {
+    : selection{nullptr}, isProcessing{false},
+      stagedState{nullptr}, scalar{1.0}, scaleFactor{0.1}, tab{__tab},
+      rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
+      ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
+      zoomChanged{false}, state{new State} {
   initUi(parent);
   setWidgets();
   connections();
@@ -679,8 +679,10 @@ void ImageFrame::undoAction() {
     return;
   }
 
-  selection->setHighlightColor(YELLOW_HIGHLIGHT);
-  selection->showHighlight();
+  if (selection) {
+    selection->setHighlightColor(YELLOW_HIGHLIGHT);
+    selection->showHighlight();
+  }
   for (auto &obj : state->textObjects) {
     obj->hide();
     obj->setDisabled(true);
@@ -697,7 +699,11 @@ void ImageFrame::undoAction() {
     obj->show();
     obj->setDisabled(false);
   }
-  selection = state->selection;
+
+  if ((selection = state->selection)) {
+    selection->setHighlightColor(GREEN_HIGHLIGHT);
+    selection->showHighlight();
+  }
 
   changeImage();
 }
@@ -720,9 +726,11 @@ void ImageFrame::redoAction() {
     obj->show();
     obj->setDisabled(false);
   }
-  selection = state->selection;
-  selection->setHighlightColor(GREEN_HIGHLIGHT);
-  selection->showHighlight();
+
+  if ((selection = state->selection)) {
+    selection->setHighlightColor(GREEN_HIGHLIGHT);
+    selection->showHighlight();
+  }
 
   changeImage();
 }
@@ -824,6 +832,7 @@ void ImageFrame::deleteSelection() {
   undo.push(oldState);
 
   state->textObjects.remove(idx);
+  selection = nullptr;
 }
 
 void ImageFrame::keyReleaseEvent(QKeyEvent *event) {

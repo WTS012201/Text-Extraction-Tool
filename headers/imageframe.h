@@ -30,8 +30,21 @@ class ImageFrame : public QGraphicsView {
   Q_OBJECT
 
 public:
+  typedef struct State {
+    QVector<ImageTextObject *> textObjects;
+    cv::Mat matrix;
+    ImageTextObject *selection;
+  } State;
+
   QHash<int, bool> keysPressed;
   ImageTextObject *selection;
+  bool isProcessing;
+  State *stagedState;
+
+  QString rawText;
+  double scalar;
+  double scaleFactor;
+
   ImageFrame(QWidget *parent = nullptr, QWidget *tab = nullptr,
              Ui::MainWindow *ui = nullptr, Options *options = nullptr);
   ~ImageFrame();
@@ -45,18 +58,7 @@ public:
   void deleteSelection();
   cv::Mat getImageMatrix();
 
-  typedef struct State {
-    QVector<ImageTextObject *> textObjects;
-    cv::Mat matrix;
-    ImageTextObject *selection;
-  } State;
   State *&getState();
-  State *stagedState;
-
-  QString rawText;
-  bool isProcessing;
-  double scalar;
-  double scaleFactor;
   void move(QPoint shift);
   void stageState();
 
@@ -77,6 +79,7 @@ signals:
   void unlockState();
 
 private:
+  QWidget *tab;
   QString filepath;
   QRubberBand *rubberBand;
   QPoint origin;
@@ -86,7 +89,6 @@ private:
   Options *options;
   Ui::MainWindow *ui;
   QMovie *spinner;
-  QWidget *tab;
 
   bool dropper;
   bool middleDown;

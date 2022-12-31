@@ -179,21 +179,23 @@ void ImageFrame::changeText() {
   }
   const cv::Scalar colorSelection = selection->fontIntensity;
   QColor color{
-      (int)selection->fontIntensity[2],
-      (int)selection->fontIntensity[1],
-      (int)selection->fontIntensity[0],
+      static_cast<int>(selection->fontIntensity[2]),
+      static_cast<int>(selection->fontIntensity[1]),
+      static_cast<int>(selection->fontIntensity[0]),
   };
+
   QVector<ImageTextObject *> oldObjs = state->textObjects;
   state->textObjects.remove(state->textObjects.indexOf(selection));
   selection->hide();
   selection->setDisabled(true);
+  auto *oldSelection = selection;
   selection = new ImageTextObject{this, *selection, ui, &state->matrix};
   selection->setHighlightColor(GREEN_HIGHLIGHT);
   selection->isChanged = true;
   connectSelection(selection);
 
   state->textObjects.push_back(selection);
-  State *oldState = new State{oldObjs, cv::Mat{}, selection};
+  State *oldState = new State{oldObjs, cv::Mat{}, oldSelection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
 
@@ -570,8 +572,10 @@ void ImageFrame::extract(cv::Mat *mat) {
   QFuture<void> future = QtConcurrent::run(
       [&](cv::Mat matrix) -> void {
         emit processing();
+
         rawText = collect(matrix);
         state->matrix.copyTo(display);
+
         emit processing();
       },
       state->matrix);
@@ -629,13 +633,23 @@ QString ImageFrame::collect(cv::Mat &matrix) {
 
   QString text = QString{api->GetUTF8Text()};
   tesseract::ResultIterator *ri = api->GetIterator();
-
   int x1, y1, x2, y2;
 
   if (ri != 0) {
     do {
       QString word = ri->GetUTF8Text(RIL);
       ri->BoundingBox(RIL, &x1, &y1, &x2, &y2);
+
+      x1 = x1 < 0 ? 0 : x1;
+      x1 = x1 > matrix.cols ? matrix.cols - 1 : x1;
+      x2 = x2 < 0 ? 0 : x2;
+      x2 = x2 > matrix.cols ? matrix.cols - 1 : x2;
+
+      y1 = y1 < 0 ? 0 : y1;
+      y1 = y1 > matrix.cols ? matrix.cols - 1 : y1;
+      y2 = y2 < 0 ? 0 : y2;
+      y2 = y2 > matrix.cols ? matrix.cols - 1 : y2;
+
       QPoint p1{x1, y1}, p2{x2, y2};
       ImageTextObject *textObject = new ImageTextObject{nullptr};
 

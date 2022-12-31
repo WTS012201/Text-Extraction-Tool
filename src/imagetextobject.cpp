@@ -9,7 +9,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
   ui->setupUi(this);
 }
 
-ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &old,
+ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
                                  Ui::MainWindow *__ui, cv::Mat *__mat)
     : QWidget(parent), mat{__mat}, mUi{__ui}, ui(new Ui::ImageTextObject) {
   topLeft = old.topLeft;
@@ -28,7 +28,7 @@ void ImageTextObject::setFilepath(QString __filepath) { filepath = __filepath; }
 
 void ImageTextObject::setText(QString __text) { text = __text; }
 
-QString ImageTextObject::getText() { return text; }
+QString ImageTextObject::getText() const { return text; }
 
 ImageTextObject::~ImageTextObject() {
   delete ui;
@@ -62,6 +62,20 @@ void ImageTextObject::initSizeAndPos() {
     qDebug() << "failed to establish size";
     return;
   }
+  /* QSize maxSize{mat->cols - 1, mat->rows - 1}; */
+  /* if (topLeft.x() < 0) { */
+  /*   topLeft.setX(0); */
+  /* } */
+  /* if (topLeft.y() < 0) { */
+  /*   topLeft.setY(0); */
+  /* } */
+  /*  */
+  /* if (bottomRight.x() > maxSize.x()) { */
+  /*   bottomRight.setX(maxSize.x()); */
+  /* } */
+  /* if (bottomRight.y() > maxSize.y()) { */
+  /*   bottomRight.setY(maxSize.y()); */
+  /* } */
 
   this->setFixedSize(QSize{size.x(), size.y()});
   ui->frame->setFixedSize(QSize{size.x(), size.y()});
@@ -150,10 +164,15 @@ void ImageTextObject::generatePalette() {
     qDebug() << "Image must have 3 channels";
     return;
   }
+
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   QHash<QcvScalar, int> scalars;
   int max = 0;
+
+  if (left == right || top == bottom) {
+    return;
+  }
 
   for (auto i = left; i < right; i++) {
     for (auto j = top; j < bottom; j++) {

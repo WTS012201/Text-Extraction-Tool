@@ -61,15 +61,15 @@ public:
   cv::Mat *mat;
   explicit ImageTextObject(QWidget *parent = nullptr, cv::Mat *__mat = nullptr);
   ~ImageTextObject();
-  ImageTextObject(QWidget *parent, ImageTextObject &old, Ui::MainWindow *__ui,
-                  cv::Mat *mat);
+  ImageTextObject(QWidget *parent, const ImageTextObject &old,
+                  Ui::MainWindow *__ui, cv::Mat *mat);
 
   QPoint topLeft, bottomRight;
   QPair<QPoint, QPoint> lineSpace;
   QVector<cv::Scalar> colorPalette;
 
   void setText(QString __text);
-  QString getText();
+  QString getText() const;
   void initSizeAndPos();
   void highlightSpaces();
   void scaleAndPosition(double scalar);

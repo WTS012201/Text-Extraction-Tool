@@ -43,7 +43,7 @@ public:
 
   QString rawText;
   double scalar;
-  double scaleFactor;
+  double scaleIncrement;
 
   ImageFrame(QWidget *parent = nullptr, QWidget *tab = nullptr,
              Ui::MainWindow *ui = nullptr, Options *options = nullptr);

@@ -6,7 +6,7 @@
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
     : selection{nullptr}, isProcessing{false},
-      stagedState{nullptr}, scalar{1.0}, scaleFactor{0.1}, tab{__tab},
+      stagedState{nullptr}, scalar{1.0}, scaleIncrement{0.1}, tab{__tab},
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
       zoomChanged{false}, state{new State} {
@@ -139,6 +139,7 @@ void ImageFrame::pasteImage(QImage *img) {
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
   auto mat = QImageToCvMat(*img);
+
   extract(&mat);
   populateTextObjects();
 }
@@ -405,7 +406,8 @@ void ImageFrame::zoomIn() {
   int prevH = hb->value() - hb->maximum();
   int prevV = vb->value() - vb->maximum();
 
-  (scalar + scaleFactor > ZOOM_MAX) ? scalar = ZOOM_MAX : scalar += scaleFactor;
+  (scalar + scaleIncrement > ZOOM_MAX) ? scalar = ZOOM_MAX
+                                       : scalar += scaleIncrement;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
   for (auto &obj : state->textObjects) {
@@ -429,7 +431,7 @@ void ImageFrame::zoomOut() {
   int prevH = hb->value() - hb->maximum();
   int prevV = vb->value() - vb->maximum();
 
-  (scalar - scaleFactor < 0.1) ? scalar = 0.1 : scalar -= scaleFactor;
+  (scalar - scaleIncrement < 0.1) ? scalar = 0.1 : scalar -= scaleIncrement;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
   for (auto &obj : state->textObjects) {
@@ -700,7 +702,7 @@ void ImageFrame::undoAction() {
   state = undo.pop();
 
   for (auto &obj : state->textObjects) {
-    obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
+    obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
   }
@@ -727,7 +729,7 @@ void ImageFrame::redoAction() {
   state = redo.pop();
 
   for (auto &obj : state->textObjects) {
-    obj->scaleAndPosition(ui->zoomFactor->text().toDouble());
+    obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
   }

@@ -50,8 +50,8 @@ void ImageFrame::changeZoom() {
   }
 }
 
-inline cv::Mat QImageToCvMat(const QImage &inImage,
-                             bool inCloneImageData = true) {
+static inline cv::Mat QImageToCvMat(const QImage &inImage,
+                                    bool inCloneImageData = true) {
   switch (inImage.format()) {
   // 8-bit, 4 channel
   case QImage::Format_ARGB32:
@@ -112,6 +112,10 @@ inline cv::Mat QImageToCvMat(const QImage &inImage,
 }
 
 void ImageFrame::pasteImage(QImage *img) {
+  if (isProcessing) {
+    return;
+  }
+
   for (auto &obj : state->textObjects) {
     obj->hide();
     obj->setDisabled(true);
@@ -300,6 +304,7 @@ void ImageFrame::connections() {
 
     if (!this->isEnabled())
       return;
+
     if (!isProcessing) {
       populateTextObjects();
       spinner->stop();

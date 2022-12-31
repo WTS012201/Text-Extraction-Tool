@@ -298,7 +298,7 @@ void ImageTextObject::highlight() {
                               : highlightButton->hide();
 }
 
-void ImageTextObject::showHighlights() {
+void ImageTextObject::showHighlight() {
   this->show();
   highlightButton->show();
   highlightButton->setStyleSheet(colorStyle);

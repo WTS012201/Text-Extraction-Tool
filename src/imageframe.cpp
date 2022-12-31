@@ -283,7 +283,7 @@ void ImageFrame::changeText() {
       cv::Mat{img->height(), img->width(), CV_8UC3, (void *)img->constBits(),
               (size_t)img->bytesPerLine()};
   selection->isChanged = true;
-  selection->showHighlights();
+  selection->showHighlight();
   selection->mat = &state->matrix;
   selection->fontIntensity = colorSelection;
   delete img;
@@ -327,6 +327,9 @@ void ImageFrame::removeSelection() {
       obj->deselect();
       obj->hide();
       obj->isChanged = false;
+      if (obj == selection) {
+        selection = nullptr;
+      }
     }
   }
 }
@@ -348,7 +351,7 @@ void ImageFrame::findSubstrings() {
   for (auto &obj : state->textObjects) {
     if (obj->getText().contains(query, Qt::CaseInsensitive)) {
       obj->setHighlightColor(PURPLE_HIGHLIGHT);
-      obj->showHighlights();
+      obj->showHighlight();
       obj->isChanged = true;
     } else {
       obj->setHighlightColor(YELLOW_HIGHLIGHT);
@@ -445,6 +448,11 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
 
   if (!keysPressed[Qt::Key_Control] && !dropper) {
     for (auto &obj : state->textObjects) {
+      if (obj == selection) {
+        selection->setHighlightColor(GREEN_HIGHLIGHT);
+        selection->showHighlight();
+        continue;
+      }
       obj->deselect();
       if (!obj->isChanged) {
         obj->hide();
@@ -670,6 +678,9 @@ void ImageFrame::undoAction() {
   if (undo.empty() || isProcessing) {
     return;
   }
+
+  selection->setHighlightColor(YELLOW_HIGHLIGHT);
+  selection->showHighlight();
   for (auto &obj : state->textObjects) {
     obj->hide();
     obj->setDisabled(true);
@@ -710,6 +721,8 @@ void ImageFrame::redoAction() {
     obj->setDisabled(false);
   }
   selection = state->selection;
+  selection->setHighlightColor(GREEN_HIGHLIGHT);
+  selection->showHighlight();
 
   changeImage();
 }
@@ -851,7 +864,7 @@ void ImageFrame::move(QPoint shift) {
   selection = new ImageTextObject{this, *selection, ui, &state->matrix};
   selection->setHighlightColor(GREEN_HIGHLIGHT);
   selection->isChanged = true;
-  selection->showHighlights();
+  selection->showHighlight();
   connectSelection(selection);
   state->textObjects.push_back(selection);
 

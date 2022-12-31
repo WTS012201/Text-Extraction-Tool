@@ -80,7 +80,7 @@ public:
   void selectHighlight();
   void highlight();
   void deselect();
-  void showHighlights();
+  void showHighlight();
   void setHighlightColor(QString colorStyle);
   void reposition(QPoint shift);
   QString getHighlightColor();

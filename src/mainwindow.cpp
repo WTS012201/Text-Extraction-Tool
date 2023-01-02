@@ -450,3 +450,5 @@ void MainWindow::on_actionSave_Image_triggered() {
   cv::imwrite(saveFile.toStdString() + ".png", image);
   QDir::setCurrent(options->getDataDir());
 }
+
+void MainWindow::on_actionHide_All_triggered() { iFrame->hideHighlights(); }

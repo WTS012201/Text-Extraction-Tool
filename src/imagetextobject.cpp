@@ -61,20 +61,6 @@ void ImageTextObject::initSizeAndPos() {
     qDebug() << "failed to establish size";
     return;
   }
-  /* QSize maxSize{mat->cols - 1, mat->rows - 1}; */
-  /* if (topLeft.x() < 0) { */
-  /*   topLeft.setX(0); */
-  /* } */
-  /* if (topLeft.y() < 0) { */
-  /*   topLeft.setY(0); */
-  /* } */
-  /*  */
-  /* if (bottomRight.x() > maxSize.x()) { */
-  /*   bottomRight.setX(maxSize.x()); */
-  /* } */
-  /* if (bottomRight.y() > maxSize.y()) { */
-  /*   bottomRight.setY(maxSize.y()); */
-  /* } */
 
   this->setFixedSize(QSize{size.x(), size.y()});
   ui->frame->setFixedSize(QSize{size.x(), size.y()});

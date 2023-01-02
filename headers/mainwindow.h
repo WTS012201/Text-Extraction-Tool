@@ -32,6 +32,7 @@ signals:
   void switchConnections();
 
 private slots:
+  void on_actionHide_All_triggered();
   void colorTray();
   void on_actionSave_Image_triggered();
   void on_actionOpen_Image_triggered(bool paste = false);

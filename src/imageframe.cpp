@@ -9,7 +9,7 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
       stagedState{nullptr}, scalar{1.0}, scaleIncrement{0.1}, tab{__tab},
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
-      zoomChanged{false}, state{new State} {
+      zoomChanged{false}, hideAll{false}, state{new State} {
   initUi(parent);
   setWidgets();
   connections();
@@ -33,22 +33,6 @@ ImageFrame::~ImageFrame() {
 }
 
 cv::Mat ImageFrame::getImageMatrix() { return state->matrix; }
-
-void ImageFrame::changeZoom() {
-  if (!this->isEnabled())
-    return;
-
-  zoomChanged = true;
-  double val = (ui->zoomFactor->text()).toDouble();
-
-  scalar = (val < 0.1) ? 0.1 : val;
-  scalar = (scalar > ZOOM_MAX) ? ZOOM_MAX : scalar;
-  ui->zoomFactor->setText(QString::number(scalar));
-  changeImage();
-  for (auto &obj : state->textObjects) {
-    obj->scaleAndPosition(scalar);
-  }
-}
 
 static inline cv::Mat QImageToCvMat(const QImage &inImage,
                                     bool inCloneImageData = true) {
@@ -116,7 +100,7 @@ void ImageFrame::pasteImage(QImage *img) {
     return;
   }
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->hide();
     obj->setDisabled(true);
   }
@@ -150,6 +134,8 @@ void ImageFrame::changeImage(QImage *img) {
     cv::resize(display, display, cv::Size{}, scalar, scalar, cv::INTER_CUBIC);
   } catch (cv::Exception &e) {
     // if no image in first state, have to do this
+    qDebug() << "NO IMAGE DETECTED";
+
     delete scene;
     scene = new QGraphicsScene(this);
     return;
@@ -328,7 +314,7 @@ void ImageFrame::connections() {
 }
 
 void ImageFrame::removeSelection() {
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     if (obj->isSelected) {
       obj->deselect();
       obj->hide();
@@ -345,7 +331,7 @@ void ImageFrame::findSubstrings() {
 
   if (query.isEmpty()) {
 
-    for (auto &obj : state->textObjects) {
+    for (const auto &obj : state->textObjects) {
       if (obj->getHighlightColor() == PURPLE_HIGHLIGHT) {
         obj->setHighlightColor(BLUE_HIGHLIGHT);
         obj->isChanged = false;
@@ -354,7 +340,7 @@ void ImageFrame::findSubstrings() {
     return;
   }
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     if (obj->getText().contains(query, Qt::CaseInsensitive)) {
       obj->setHighlightColor(PURPLE_HIGHLIGHT);
       obj->showHighlight();
@@ -369,7 +355,7 @@ void ImageFrame::highlightSelection() {
   if (!this->isEnabled())
     return;
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     if (obj->isSelected) {
       obj->setHighlightColor(YELLOW_HIGHLIGHT);
       obj->isChanged = true;
@@ -393,6 +379,22 @@ void ImageFrame::initUi(QWidget *parent) {
   this->hide();
 }
 
+void ImageFrame::changeZoom() {
+  if (!this->isEnabled())
+    return;
+
+  zoomChanged = true;
+  double val = (ui->zoomFactor->text()).toDouble();
+
+  scalar = (val < 0.1) ? 0.1 : val;
+  scalar = (scalar > ZOOM_MAX) ? ZOOM_MAX : scalar;
+  ui->zoomFactor->setText(QString::number(scalar));
+  changeImage();
+  for (auto &obj : state->textObjects) {
+    obj->scaleAndPosition(scalar);
+  }
+}
+
 void ImageFrame::zoomIn() {
   if (!this->isEnabled())
     return;
@@ -410,7 +412,7 @@ void ImageFrame::zoomIn() {
                                        : scalar += scaleIncrement;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
   }
 
@@ -434,7 +436,7 @@ void ImageFrame::zoomOut() {
   (scalar - scaleIncrement < 0.1) ? scalar = 0.1 : scalar -= scaleIncrement;
   ui->zoomFactor->setText(QString::number(scalar));
   changeImage();
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
   }
 
@@ -454,7 +456,7 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
   }
 
   if (!keysPressed[Qt::Key_Control] && !dropper) {
-    for (auto &obj : state->textObjects) {
+    for (const auto &obj : state->textObjects) {
       if (obj == selection) {
         selection->setHighlightColor(GREEN_HIGHLIGHT);
         selection->showHighlight();
@@ -526,7 +528,7 @@ void ImageFrame::inliers(QPair<QPoint, QPoint> boundingBox) {
   auto a = boundingBox.first;
   auto b = boundingBox.second;
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     if (!obj->isEnabled()) {
       continue;
     }
@@ -601,7 +603,7 @@ void ImageFrame::extract(cv::Mat *mat) {
 void ImageFrame::connectSelection(ImageTextObject *obj) {
   connect(obj, &ImageTextObject::selection, this, [&]() {
     selection = qobject_cast<ImageTextObject *>(sender());
-    for (auto &tempObj : state->textObjects) {
+    for (const auto &tempObj : state->textObjects) {
       if (tempObj == selection) {
         continue;
       }
@@ -620,7 +622,7 @@ ImageFrame::State *&ImageFrame::getState() { return state; }
 void ImageFrame::populateTextObjects() {
   QVector<ImageTextObject *> tempObjects;
 
-  for (auto obj : state->textObjects) {
+  for (const auto obj : state->textObjects) {
     ImageTextObject *temp = new ImageTextObject{this, *obj, ui, &state->matrix};
     temp->hide();
 
@@ -690,7 +692,7 @@ void ImageFrame::undoAction() {
     selection->setHighlightColor(YELLOW_HIGHLIGHT);
     selection->showHighlight();
   }
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->hide();
     obj->setDisabled(true);
   }
@@ -701,7 +703,7 @@ void ImageFrame::undoAction() {
   redo.push(currState);
   state = undo.pop();
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
@@ -720,7 +722,7 @@ void ImageFrame::redoAction() {
     return;
   }
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->hide();
     obj->setDisabled(true);
   }
@@ -728,7 +730,7 @@ void ImageFrame::redoAction() {
   undo.push(state);
   state = redo.pop();
 
-  for (auto &obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
@@ -887,4 +889,12 @@ void ImageFrame::move(QPoint shift) {
   selection->reposition(shift);
   selection->scaleAndPosition(scalar);
   changeImage();
+}
+
+void ImageFrame::hideHighlights() {
+  hideAll = !hideAll;
+  for (const auto &obj : state->textObjects) {
+    hideAll ? obj->hide() : obj->show();
+    obj->setDisabled(hideAll);
+  }
 }

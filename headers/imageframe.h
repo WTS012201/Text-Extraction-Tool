@@ -61,6 +61,7 @@ public:
   State *&getState();
   void move(QPoint shift);
   void stageState();
+  void hideHighlights();
 
 public slots:
   void zoomIn();
@@ -93,6 +94,7 @@ private:
   bool dropper;
   bool middleDown;
   bool zoomChanged;
+  bool hideAll;
 
   QStack<State *> undo, redo;
   State *state;

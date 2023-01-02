@@ -2,6 +2,7 @@
 #include "../headers/tabscroll.h"
 #include "headers/imagetextobject.h"
 #include "qnamespace.h"
+#include "qobject.h"
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -10,6 +11,7 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
       zoomChanged{false}, hideAll{false}, state{new State} {
+  qApp->installEventFilter(this);
   initUi(parent);
   setWidgets();
   connections();
@@ -300,7 +302,11 @@ void ImageFrame::connections() {
       spinner->start();
     }
   });
-  connect(ui->dropper, &QToolButton::pressed, this, [&] { dropper = true; });
+  connect(ui->dropper, &QToolButton::pressed, this, [&] {
+    this->setCursor(Qt::CursorShape::CrossCursor);
+    hideHighlights();
+    dropper = true;
+  });
   connect(ui->highlightAll, &QPushButton::pressed, this,
           &ImageFrame::highlightSelection);
   connect(ui->changeButton, &QPushButton::pressed, this,
@@ -452,6 +458,8 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
     QString style = ImageTextObject::formatStyle(color);
     ui->dropper->setStyleSheet(style);
 
+    this->setCursor(Qt::CursorShape::ArrowCursor);
+    hideHighlights();
     emit colorSelected(color);
   }
 
@@ -487,8 +495,34 @@ void ImageFrame::wheelEvent(QWheelEvent *event) {
   }
 }
 
+bool ImageFrame::eventFilter(QObject *obj, QEvent *event) {
+  if (obj->objectName() != this->objectName()) {
+    return false;
+  }
+
+  if (dropper && event->type() == QEvent::MouseMove) {
+    QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+    auto pos = mouseEvent->pos();
+    if (pos.x() < 0 || pos.x() >= display.cols) {
+      return false;
+    }
+    if (pos.y() < 0 || pos.y() >= display.rows) {
+      return false;
+    }
+
+    auto color = display.at<cv::Vec3b>(cv::Point{pos.x(), pos.y()});
+
+    QString style = ImageTextObject::formatStyle(color);
+    ui->dropper->setStyleSheet(style);
+  }
+
+  return false;
+}
+
 void ImageFrame::mouseMoveEvent(QMouseEvent *event) {
-  rubberBand->setGeometry(QRect{origin, event->pos()}.normalized());
+  auto pos = event->pos();
+
+  rubberBand->setGeometry(QRect{origin, pos}.normalized());
 }
 
 void ImageFrame::mouseReleaseEvent(QMouseEvent *event) {
@@ -894,7 +928,14 @@ void ImageFrame::move(QPoint shift) {
 void ImageFrame::hideHighlights() {
   hideAll = !hideAll;
   for (const auto &obj : state->textObjects) {
-    hideAll ? obj->hide() : obj->show();
+    if (hideAll) {
+      obj->hide();
+      if (!obj->isChanged) {
+        obj->deselect();
+      }
+    } else {
+      obj->show();
+    }
     obj->setDisabled(hideAll);
   }
 }

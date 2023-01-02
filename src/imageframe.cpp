@@ -1,6 +1,7 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
 #include "headers/imagetextobject.h"
+#include "opencv2/imgproc.hpp"
 #include "qnamespace.h"
 #include "qobject.h"
 
@@ -133,7 +134,7 @@ void ImageFrame::pasteImage(QImage *img) {
 void ImageFrame::changeImage(QImage *img) {
   try {
     state->matrix.copyTo(display);
-    cv::resize(display, display, cv::Size{}, scalar, scalar, cv::INTER_CUBIC);
+    cv::resize(display, display, cv::Size{}, scalar, scalar, cv::INTER_AREA);
   } catch (cv::Exception &e) {
     // if no image in first state, have to do this
     qDebug() << "NO IMAGE DETECTED";

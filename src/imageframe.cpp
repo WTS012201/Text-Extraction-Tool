@@ -934,7 +934,12 @@ void ImageFrame::move(QPoint shift) {
 }
 
 void ImageFrame::hideHighlights() {
-  hideAll = !hideAll;
+  if ((hideAll = !hideAll)) {
+    ui->actionHide_All->setText("Show All");
+  } else {
+    ui->actionHide_All->setText("Hide All");
+  }
+
   for (const auto &obj : state->textObjects) {
     if (hideAll) {
       obj->hide();

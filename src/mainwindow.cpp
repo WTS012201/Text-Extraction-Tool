@@ -108,23 +108,24 @@ void MainWindow::on_actionOptions_triggered() {
 }
 
 void MainWindow::connections() {
-  auto paste = new QShortcut{QKeySequence("Ctrl+V"), this};
-  auto open = new QShortcut{QKeySequence("Ctrl+O"), this};
-  auto save = new QShortcut{QKeySequence("Ctrl+S"), this};
+  const auto paste = new QShortcut{QKeySequence("Ctrl+V"), this};
+  const auto open = new QShortcut{QKeySequence("Ctrl+O"), this};
+  const auto save = new QShortcut{QKeySequence("Ctrl+S"), this};
 
-  auto undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
-  auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
-  auto find = new QShortcut{QKeySequence("Ctrl+F"), this};
+  const auto undo = new QShortcut{QKeySequence("Ctrl+Z"), this};
+  const auto redo = new QShortcut{QKeySequence("Ctrl+Shift+Z"), this};
+  const auto find = new QShortcut{QKeySequence("Ctrl+F"), this};
 
-  auto add = new QShortcut{QKeySequence("Ctrl+A"), this};
-  auto remove = new QShortcut{QKeySequence("Ctrl+R"), this};
-  auto group = new QShortcut{QKeySequence("Ctrl+G"), this};
-  auto __delete = new QShortcut{QKeySequence("Ctrl+D"), this};
+  const auto add = new QShortcut{QKeySequence("Ctrl+A"), this};
+  const auto remove = new QShortcut{QKeySequence("Ctrl+R"), this};
+  const auto group = new QShortcut{QKeySequence("Ctrl+G"), this};
+  const auto __delete = new QShortcut{QKeySequence("Ctrl+D"), this};
 
-  auto up = new QShortcut{QKeySequence("Shift+Up"), this};
-  auto down = new QShortcut{QKeySequence("Shift+Down"), this};
-  auto left = new QShortcut{QKeySequence("Shift+Left"), this};
-  auto right = new QShortcut{QKeySequence("Shift+Right"), this};
+  const auto up = new QShortcut{QKeySequence("Shift+Up"), this};
+  const auto down = new QShortcut{QKeySequence("Shift+Down"), this};
+  const auto left = new QShortcut{QKeySequence("Shift+Left"), this};
+  const auto right = new QShortcut{QKeySequence("Shift+Right"), this};
+  const auto toggleHigh = new QShortcut{QKeySequence("Ctrl+T"), this};
 
   zoomIn = new QShortcut{QKeySequence("Ctrl+="), this};
   zoomOut = new QShortcut{QKeySequence("Ctrl+-"), this};
@@ -175,6 +176,12 @@ void MainWindow::connections() {
   QObject::connect(up, &QShortcut::activated, this, [&] {
     if (iFrame) {
       iFrame->move(QPoint{0, -shift});
+    }
+  });
+
+  QObject::connect(toggleHigh, &QShortcut::activated, this, [&] {
+    if (iFrame) {
+      iFrame->hideHighlights();
     }
   });
 

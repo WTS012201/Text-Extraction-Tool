@@ -24,7 +24,7 @@
 #include <QWidget>
 #include <QtConcurrent/QtConcurrent>
 
-#define ZOOM_MAX 5.0
+constexpr double ZOOM_MAX = 5.0;
 
 class ImageFrame : public QGraphicsView {
   Q_OBJECT
@@ -44,6 +44,7 @@ public:
   QString rawText;
   double scalar;
   double scaleIncrement;
+  static cv::Scalar defaultColor;
 
   ImageFrame(QWidget *parent = nullptr, QWidget *tab = nullptr,
              Ui::MainWindow *ui = nullptr, Options *options = nullptr);

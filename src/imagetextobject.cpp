@@ -2,8 +2,8 @@
 #include "ui_imagetextobject.h"
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
-    : QWidget(parent), isSelected{false}, isChanged{false}, mat{__mat},
-      highlightButton{nullptr},
+    : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
+      mat{__mat}, highlightButton{nullptr},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
@@ -14,6 +14,9 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   topLeft = old.topLeft;
   bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
+  fontIntensity = old.fontIntensity;
+  colorSet = old.colorSet;
+
   ui->setupUi(this);
   setText(old.getText());
 

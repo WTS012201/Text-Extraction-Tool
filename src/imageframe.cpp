@@ -136,8 +136,9 @@ void ImageFrame::changeImage(QImage *img) {
     state->matrix.copyTo(display);
     cv::resize(display, display, cv::Size{}, scalar, scalar, cv::INTER_AREA);
   } catch (cv::Exception &e) {
-    // if no image in first state, have to do this
-    qDebug() << "NO IMAGE DETECTED";
+    // if no image in first state or resize failed
+    qDebug() << "In changeImage:";
+    qDebug() << e.what();
 
     delete scene;
     scene = new QGraphicsScene(this);
@@ -303,7 +304,7 @@ void ImageFrame::connections() {
       spinner->start();
     }
   });
-  connect(ui->dropper, &QToolButton::pressed, this, [&] {
+  connect(ui->dropper, &QPushButton::pressed, this, [&] {
     this->setCursor(Qt::CursorShape::CrossCursor);
     hideHighlights();
     dropper = true;
@@ -456,8 +457,9 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
     auto point = event->pos();
     auto color = display.at<cv::Vec3b>(cv::Point{point.x(), point.y()});
 
-    QString style = ImageTextObject::formatStyle(color);
-    ui->dropper->setStyleSheet(style);
+    /* QString style = ImageTextObject::formatStyle(color); */
+    /* ui->colorSelect->setStyleSheet(style); */
+    /* selection->colorSet = true; */
 
     this->setCursor(Qt::CursorShape::ArrowCursor);
     hideHighlights();
@@ -514,7 +516,7 @@ bool ImageFrame::eventFilter(QObject *obj, QEvent *event) {
     auto color = display.at<cv::Vec3b>(cv::Point{pos.x(), pos.y()});
 
     QString style = ImageTextObject::formatStyle(color);
-    ui->dropper->setStyleSheet(style);
+    ui->colorSelect->setStyleSheet(style);
   }
 
   return false;
@@ -635,6 +637,8 @@ void ImageFrame::extract(cv::Mat *mat) {
   showAll();
 }
 
+cv::Scalar ImageFrame::defaultColor;
+
 void ImageFrame::connectSelection(ImageTextObject *obj) {
   connect(obj, &ImageTextObject::selection, this, [&]() {
     selection = qobject_cast<ImageTextObject *>(sender());
@@ -646,9 +650,12 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
       tempObj->deselect();
     }
 
-    auto color = selection->fontIntensity;
-    QString style = ImageTextObject::formatStyle(color);
-    ui->dropper->setStyleSheet(style);
+    if (!obj->colorSet) {
+      selection->fontIntensity = ImageFrame::defaultColor;
+    }
+
+    QString style = ImageTextObject::formatStyle(selection->fontIntensity);
+    ui->colorSelect->setStyleSheet(style);
   });
 }
 
@@ -657,7 +664,7 @@ ImageFrame::State *&ImageFrame::getState() { return state; }
 void ImageFrame::populateTextObjects() {
   QVector<ImageTextObject *> tempObjects;
 
-  for (const auto obj : state->textObjects) {
+  for (const auto &obj : state->textObjects) {
     ImageTextObject *temp = new ImageTextObject{this, *obj, ui, &state->matrix};
     temp->hide();
 

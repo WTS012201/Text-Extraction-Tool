@@ -266,8 +266,14 @@ void MainWindow::connections() {
                                             : "");
     QObject::connect(iFrame, &ImageFrame::colorSelected, this,
                      [&](cv::Scalar color) {
-                       if (iFrame && iFrame->selection)
+                       if (iFrame && iFrame->selection) {
+                         QString style = ImageTextObject::formatStyle(color);
+                         ImageFrame::defaultColor = color;
+
+                         iFrame->selection->colorSet = true;
                          iFrame->selection->fontIntensity = color;
+                         ui->colorSelect->setStyleSheet(style);
+                       }
                      });
   });
 }
@@ -324,14 +330,15 @@ void MainWindow::colorTray() {
       static_cast<double>(colorMenu->color.red()),
   };
 
-  iFrame->selection->fontIntensity = color;
   for (const auto &cb : buttons) {
     colorMenu->palette->removeWidget(cb);
     delete cb;
   }
 
-  QString style = ImageTextObject::formatStyle(color);
-  ui->dropper->setStyleSheet(style);
+  emit iFrame->colorSelected(color);
+  /* iFrame->selection->fontIntensity = color; */
+  /* QString style = ImageTextObject::formatStyle(color); */
+  /* ui->colorSelect->setStyleSheet(style); */
 }
 
 void MainWindow::fontSelected() {

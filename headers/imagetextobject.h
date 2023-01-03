@@ -55,7 +55,7 @@ signals:
   void selection();
 
 public:
-  bool isSelected, isChanged;
+  bool isSelected, isChanged, colorSet;
   cv::Scalar bgIntensity, fontIntensity;
   cv::Mat *mat;
   explicit ImageTextObject(QWidget *parent = nullptr, cv::Mat *__mat = nullptr);

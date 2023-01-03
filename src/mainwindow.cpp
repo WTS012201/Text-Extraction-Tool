@@ -268,7 +268,10 @@ void MainWindow::connections() {
                      &ImageFrame::zoomIn);
     QObject::connect(zoomOut, &QShortcut::activated, iFrame,
                      &ImageFrame::zoomOut);
-    ui->zoomFactor->setText(QString::number(iFrame->scalar));
+
+    ui->zoomFactor->setText("");
+    ui->zoomFactor->setPlaceholderText(QString::number(100 * iFrame->scalar) +
+                                       "%");
     ui->textEdit->setText(iFrame->selection ? iFrame->selection->getText()
                                             : "");
     QObject::connect(iFrame, &ImageFrame::colorSelected, this,

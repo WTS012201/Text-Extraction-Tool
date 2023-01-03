@@ -12,11 +12,11 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
       zoomChanged{false}, hideAll{false}, state{new State} {
+
   qApp->installEventFilter(this);
   initUi(parent);
   setWidgets();
   connections();
-
   ui->zoomFactor->deselect();
 }
 
@@ -211,10 +211,24 @@ void ImageFrame::changeText() {
     qDebug() << "error with painter";
     return;
   }
-  int fontSize = ui->fontSizeInput->text().toInt();
+
+  auto fontSizeStr = ui->fontSizeInput->text();
+  if (fontSizeStr.isEmpty() || fontSizeStr.toInt() == -1) {
+    fontSizeStr = "0";
+    ui->fontSizeInput->setText(fontSizeStr);
+  }
+  int fontSize = fontSizeStr.toInt();
+
   QString label = ui->textEdit->toPlainText();
   selection->setText(label);
+
   QFont font{ui->fontBox->itemText(ui->fontBox->currentIndex()), fontSize};
+  auto spacing = ui->letterSpacing->text();
+  if (spacing.isEmpty() || spacing.toInt() == -1) {
+    spacing = "0";
+    ui->letterSpacing->setText(spacing);
+  }
+  font.setLetterSpacing(QFont::AbsoluteSpacing, spacing.toInt());
   p.setFont(font);
 
   /* take max horizontal length */
@@ -281,6 +295,7 @@ void ImageFrame::changeText() {
   selection->showHighlight();
   selection->mat = &state->matrix;
   selection->fontIntensity = colorSelection;
+  selection->scaleAndPosition(scalar);
   delete img;
 
   changeImage();
@@ -393,10 +408,16 @@ void ImageFrame::changeZoom() {
 
   zoomChanged = true;
   double val = (ui->zoomFactor->text()).toDouble();
+  if (val == 0) {
+    val = scalar;
+  } else {
+    val /= 100;
+  }
 
   scalar = (val < 0.1) ? 0.1 : val;
   scalar = (scalar > ZOOM_MAX) ? ZOOM_MAX : scalar;
-  ui->zoomFactor->setText(QString::number(scalar));
+  ui->zoomFactor->setText("");
+  ui->zoomFactor->setPlaceholderText(QString::number(100 * scalar) + "%");
   changeImage();
   for (auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
@@ -418,7 +439,8 @@ void ImageFrame::zoomIn() {
 
   (scalar + scaleIncrement > ZOOM_MAX) ? scalar = ZOOM_MAX
                                        : scalar += scaleIncrement;
-  ui->zoomFactor->setText(QString::number(scalar));
+  ui->zoomFactor->setText("");
+  ui->zoomFactor->setPlaceholderText(QString::number(100 * scalar) + "%");
   changeImage();
   for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
@@ -442,7 +464,9 @@ void ImageFrame::zoomOut() {
   int prevV = vb->value() - vb->maximum();
 
   (scalar - scaleIncrement < 0.1) ? scalar = 0.1 : scalar -= scaleIncrement;
-  ui->zoomFactor->setText(QString::number(scalar));
+
+  ui->zoomFactor->setText("");
+  ui->zoomFactor->setPlaceholderText(QString::number(100 * scalar) + "%");
   changeImage();
   for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);

@@ -1034,6 +1034,12 @@ QProgressBar::chunk
                      </item>
                      <item>
                       <widget class="QLineEdit" name="moveFactor">
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
                        <property name="styleSheet">
                         <string notr="true">.QLineEdit{
 	background: rgba(255, 255, 255, 10)
@@ -1066,6 +1072,12 @@ QProgressBar::chunk
                          <verstretch>0</verstretch>
                         </sizepolicy>
                        </property>
+                       <property name="maximumSize">
+                        <size>
+                         <width>50</width>
+                         <height>16777215</height>
+                        </size>
+                       </property>
                        <property name="autoFillBackground">
                         <bool>false</bool>
                        </property>
@@ -1075,10 +1087,13 @@ QProgressBar::chunk
 }</string>
                        </property>
                        <property name="text">
-                        <string>1.0</string>
+                        <string/>
                        </property>
                        <property name="maxLength">
                         <number>5</number>
+                       </property>
+                       <property name="placeholderText">
+                        <string>100%</string>
                        </property>
                       </widget>
                      </item>
@@ -1278,7 +1293,7 @@ QProgressBar::chunk
                        </property>
                        <property name="maximumSize">
                         <size>
-                         <width>40</width>
+                         <width>50</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -1304,7 +1319,7 @@ background:transparent;
                       <widget class="QLineEdit" name="letterSpacing">
                        <property name="maximumSize">
                         <size>
-                         <width>40</width>
+                         <width>50</width>
                          <height>16777215</height>
                         </size>
                        </property>
@@ -1312,6 +1327,12 @@ background:transparent;
                         <string notr="true">.QLineEdit{
 background:transparent;
 }</string>
+                       </property>
+                       <property name="text">
+                        <string>0</string>
+                       </property>
+                       <property name="placeholderText">
+                        <string>100%</string>
                        </property>
                       </widget>
                      </item>

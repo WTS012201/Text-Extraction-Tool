@@ -228,7 +228,7 @@ void ImageFrame::changeText() {
     spacing = "0";
     ui->letterSpacing->setText(spacing);
   }
-  font.setLetterSpacing(QFont::AbsoluteSpacing, spacing.toInt());
+  /* font.setLetterSpacing(QFont::AbsoluteSpacing, spacing.toInt()); */
   p.setFont(font);
 
   /* take max horizontal length */
@@ -248,6 +248,8 @@ void ImageFrame::changeText() {
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
   QRect oldRect{selection->topLeft, selection->bottomRight};
 
+  // Scale back to normal size before resizing
+  selection->scaleAndPosition(1);
   auto offset = wh.y() - selection->bottomRight.y();
   selection->topLeft.setY(selection->topLeft.y() - offset);
   selection->bottomRight = wh;
@@ -258,6 +260,8 @@ void ImageFrame::changeText() {
   double newHeight =
       (label.count("\n") + 1) * rect.height() * 1.0 / oldRect.height();
   selection->scaleAndPosition(newWidth, newHeight);
+  // Scale to current size
+  selection->scaleAndPosition(scalar);
 
   p.save();
   p.setPen(color);
@@ -295,7 +299,7 @@ void ImageFrame::changeText() {
   selection->showHighlight();
   selection->mat = &state->matrix;
   selection->fontIntensity = colorSelection;
-  selection->scaleAndPosition(scalar);
+  /* selection->scaleAndPosition(scalar); */
   delete img;
 
   changeImage();

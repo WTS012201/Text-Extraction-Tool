@@ -132,16 +132,19 @@ void ImageTextObject::scaleAndPosition(double sx, double sy) {
   int sizeY = sy * (lineSpace.second.y() - lineSpace.first.y());
   highlightButton->setMinimumSize(QSize{sizeX, sizeY});
 
-  auto tempBR = topLeft + QPoint{sizeX, sizeY};
-  lineSpace = QPair<QPoint, QPoint>(topLeft, tempBR);
-  auto size = tempBR - topLeft;
+  auto diff = topLeft + QPoint{sizeX, sizeY};
+  bottomRight = diff; // added this
+  lineSpace = QPair<QPoint, QPoint>(topLeft, diff);
+  auto size = diff - topLeft;
 
   this->setFixedSize(QSize{size.x(), size.y()});
   ui->frame->setFixedSize(QSize{size.x(), size.y()});
   this->adjustSize();
   ui->frame->adjustSize();
 
-  this->move(topLeft * mUi->zoomFactor->text().toDouble());
+  auto scaleString = mUi->zoomFactor->placeholderText();
+  scaleString = scaleString.remove('%');
+  this->move(topLeft * scaleString.toDouble() / 100);
 }
 
 // grabs most frequent colors;

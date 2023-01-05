@@ -212,8 +212,8 @@ void ImageFrame::changeText() {
   }
 
   auto fontSizeStr = ui->fontSizeInput->text();
-  if (fontSizeStr.isEmpty() || fontSizeStr.toInt() == -1) {
-    fontSizeStr = "0";
+  if (fontSizeStr.isEmpty() || fontSizeStr.toInt() == 0) {
+    fontSizeStr = QString::number(selection->fontSize);
     ui->fontSizeInput->setText(fontSizeStr);
   }
   int fontSize = fontSizeStr.toInt();
@@ -223,11 +223,11 @@ void ImageFrame::changeText() {
 
   QFont font{ui->fontBox->itemText(ui->fontBox->currentIndex()), fontSize};
   auto spacing = ui->letterSpacing->text();
-  if (spacing.isEmpty() || spacing.toInt() == -1) {
+  if (spacing.isEmpty() || spacing.toInt() == 0) {
     spacing = "0";
     ui->letterSpacing->setText(spacing);
   }
-  /* font.setLetterSpacing(QFont::AbsoluteSpacing, spacing.toInt()); */
+  font.setLetterSpacing(QFont::AbsoluteSpacing, spacing.toInt());
   p.setFont(font);
 
   /* take max horizontal length */
@@ -323,6 +323,15 @@ void ImageFrame::connections() {
     this->setCursor(Qt::CursorShape::CrossCursor);
     hideHighlights();
     dropper = true;
+  });
+  connect(ui->fontSizeInput, &QLineEdit::editingFinished, this, [&] {
+    if (selection) {
+      auto str = ui->fontSizeInput->text();
+      if (str.isEmpty() || str.toInt() == 0) {
+        return;
+      }
+      selection->fontSize = str.toInt();
+    }
   });
   connect(ui->highlightAll, &QPushButton::pressed, this,
           &ImageFrame::highlightSelection);
@@ -716,7 +725,10 @@ QString ImageFrame::collect(cv::Mat &matrix) {
 
   if (ri != 0) {
     do {
-      QString word = ri->GetUTF8Text(RIL);
+      QString string = ri->GetUTF8Text(RIL);
+      if (string.trimmed() == "") {
+        continue;
+      }
       ri->BoundingBox(RIL, &x1, &y1, &x2, &y2);
 
       x1 = x1 < 0 ? 0 : x1;
@@ -732,7 +744,7 @@ QString ImageFrame::collect(cv::Mat &matrix) {
       QPoint p1{x1, y1}, p2{x2, y2};
       ImageTextObject *textObject = new ImageTextObject{nullptr};
 
-      textObject->setText(word);
+      textObject->setText(string);
       textObject->lineSpace = QPair<QPoint, QPoint>{p1, p2};
       textObject->topLeft = p1;
       textObject->bottomRight = p2;

@@ -3,7 +3,7 @@
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
-      mat{__mat}, highlightButton{nullptr},
+      fontSize{14}, mat{__mat}, highlightButton{nullptr},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
@@ -15,6 +15,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
   fontIntensity = old.fontIntensity;
+  fontSize = old.fontSize;
   colorSet = old.colorSet;
 
   ui->setupUi(this);
@@ -48,7 +49,7 @@ void ImageTextObject::highlightSpaces() {
 
   QObject::connect(highlight, &QPushButton::clicked, this, [=] {
     if (isChanged) {
-      mUi->fontSizeInput->setText(QString::number(14));
+      mUi->fontSizeInput->setText(QString::number(fontSize));
       mUi->textEdit->setText(text);
       highlight->setStyleSheet(GREEN_HIGHLIGHT);
       emit selection();
@@ -77,19 +78,13 @@ void ImageTextObject::reposition(QPoint shift) {
   auto newPosBR = bottomRight + shift;
   auto frameSize = QSize{mat->cols, mat->rows};
 
-  auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
-                         cv::Point{bottomRight.x(), bottomRight.y()}};
-  cv::Mat draw;
-  (*mat)(region).copyTo(draw);
-  fillBackground();
-
   // bound x
   if (newPosTL.x() < 0) {
     QPoint shiftBack{newPosTL.x(), 0};
     newPosTL -= shiftBack;
     newPosBR -= shiftBack;
   } else if (newPosBR.x() >= frameSize.width()) {
-    QPoint shiftBack{newPosBR.x() - frameSize.width(), 0};
+    QPoint shiftBack{newPosBR.x() - frameSize.width() + 1, 0};
     newPosTL -= shiftBack;
     newPosBR -= shiftBack;
   }
@@ -100,13 +95,19 @@ void ImageTextObject::reposition(QPoint shift) {
     newPosTL -= shiftBack;
     newPosBR -= shiftBack;
   } else if (newPosBR.y() >= frameSize.height()) {
-    QPoint shiftBack{0, newPosBR.y() - frameSize.height()};
+    QPoint shiftBack{0, newPosBR.y() - frameSize.height() + 1};
     newPosTL -= shiftBack;
     newPosBR -= shiftBack;
   }
 
+  auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
+                         cv::Point{bottomRight.x(), bottomRight.y()}};
+  cv::Mat draw;
+  (*mat)(region).copyTo(draw);
+  fillBackground();
   topLeft = newPosTL;
   bottomRight = newPosBR;
+
   draw.copyTo(mat->rowRange(topLeft.y(), bottomRight.y())
                   .colRange(topLeft.x(), bottomRight.x()));
 }
@@ -145,6 +146,20 @@ void ImageTextObject::scaleAndPosition(double sx, double sy) {
   auto scaleString = mUi->zoomFactor->placeholderText();
   scaleString = scaleString.remove('%');
   this->move(topLeft * scaleString.toDouble() / 100);
+
+  // bound x
+  if (topLeft.x() < 0) {
+    topLeft.setX(0);
+  } else if (bottomRight.x() >= mat->cols) {
+    bottomRight.setX(mat->cols - 1);
+  }
+
+  // bound y
+  if (topLeft.y() < 0) {
+    topLeft.setY(0);
+  } else if (bottomRight.y() >= mat->rows) {
+    bottomRight.setY(mat->rows - 1);
+  }
 }
 
 // grabs most frequent colors;

@@ -190,7 +190,7 @@ void ImageTextObject::generatePalette() {
     pq.push(it);
   }
 
-  for (auto i = 0; i < PALETTE_LIMIT; i++) {
+  for (auto i = 0; i < PALETTE_LIMIT && !pq.empty(); i++) {
     __colorPalette.push_back(pq.top().key());
     pq.pop();
   }

@@ -126,6 +126,7 @@ void ImageFrame::pasteImage(QImage *img) {
   this->setMinimumSize(imagePixmap.size());
   this->setMaximumSize(imagePixmap.size());
   auto mat = QImageToCvMat(*img);
+  selection = nullptr;
 
   extract(&mat);
   populateTextObjects();
@@ -133,13 +134,11 @@ void ImageFrame::pasteImage(QImage *img) {
 
 void ImageFrame::changeImage(QImage *img) {
   try {
+    display = cv::Mat{};
     state->matrix.copyTo(display);
     cv::resize(display, display, cv::Size{}, scalar, scalar, cv::INTER_AREA);
   } catch (cv::Exception &e) {
-    // if no image in first state or resize failed
-    qDebug() << "In changeImage:";
-    qDebug() << e.what();
-
+    qDebug() << e.what() << "In changeImage:";
     delete scene;
     scene = new QGraphicsScene(this);
     return;
@@ -291,15 +290,12 @@ void ImageFrame::changeText() {
   p.restore();
   p.end();
 
-  // update state for changes
-  state->matrix =
-      cv::Mat{img->height(), img->width(), CV_8UC3, (void *)img->constBits(),
-              (size_t)img->bytesPerLine()};
+  auto swap = img->convertToFormat(QImage::Format_RGB888);
+  state->matrix = QImageToCvMat(swap);
   selection->isChanged = true;
   selection->showHighlight();
   selection->mat = &state->matrix;
   selection->fontIntensity = colorSelection;
-  /* selection->scaleAndPosition(scalar); */
   delete img;
 
   changeImage();
@@ -484,10 +480,6 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
   if (dropper) {
     auto point = event->pos();
     auto color = display.at<cv::Vec3b>(cv::Point{point.x(), point.y()});
-
-    /* QString style = ImageTextObject::formatStyle(color); */
-    /* ui->colorSelect->setStyleSheet(style); */
-    /* selection->colorSet = true; */
 
     this->setCursor(Qt::CursorShape::ArrowCursor);
     hideHighlights();

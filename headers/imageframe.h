@@ -1,9 +1,12 @@
 ﻿#ifndef IMAGEFRAME_H
 #define IMAGEFRAME_H
 
+#include "../headers/imagetextobject.h"
 #include "../headers/options.h"
-#include "imagetextobject.h"
+#include "opencv2/imgproc.hpp"
 #include "options.h"
+#include "qnamespace.h"
+#include "qobject.h"
 #include "ui_mainwindow.h"
 
 #include <QFuture>
@@ -23,6 +26,7 @@
 #include <QVector>
 #include <QWidget>
 #include <QtConcurrent/QtConcurrent>
+#include <memory>
 
 constexpr double ZOOM_MAX = 5.0;
 

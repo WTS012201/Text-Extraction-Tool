@@ -1,9 +1,5 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
-#include "headers/imagetextobject.h"
-#include "opencv2/imgproc.hpp"
-#include "qnamespace.h"
-#include "qobject.h"
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -302,6 +298,30 @@ void ImageFrame::changeText() {
 }
 
 void ImageFrame::connections() {
+  connect(this, &ImageFrame::customContextMenuRequested, this,
+          [&](const QPoint &pos) {
+            QMenu contextMenu{"Context menu", this};
+            contextMenu.addAction(ui->actionUndo);
+            contextMenu.addSeparator();
+            contextMenu.addAction(ui->actionRedo_2);
+            contextMenu.addSeparator();
+            contextMenu.addAction(ui->actionHide_All);
+            contextMenu.addSeparator();
+
+            auto add = std::make_unique<QAction>("Add selection", this);
+            QObject::connect(add.get(), &QAction::triggered, this,
+                             &ImageFrame::highlightSelection);
+            contextMenu.addAction(add.get());
+            contextMenu.addSeparator();
+
+            auto remove = std::make_unique<QAction>("Remove selection", this);
+            QObject::connect(remove.get(), &QAction::triggered, this,
+                             &ImageFrame::removeSelection);
+            contextMenu.addAction(remove.get());
+
+            contextMenu.exec(mapToGlobal(pos));
+          });
+
   connect(spinner, &QMovie::frameChanged, this, [&] {
     ui->tab->setTabIcon(ui->tab->indexOf(tab), QIcon{spinner->currentPixmap()});
   });
@@ -397,6 +417,7 @@ void ImageFrame::highlightSelection() {
 }
 
 void ImageFrame::setWidgets() {
+  this->setContextMenuPolicy(Qt::CustomContextMenu);
   ui->zoomFactor->hide();
   ui->zoomLabel->hide();
 }
@@ -486,6 +507,10 @@ void ImageFrame::zoomOut() {
 }
 
 void ImageFrame::mousePressEvent(QMouseEvent *event) {
+  if (event->button() & Qt::RightButton) {
+    return;
+  }
+
   if (dropper) {
     auto point = event->pos();
     auto color = display.at<cv::Vec3b>(cv::Point{point.x(), point.y()});

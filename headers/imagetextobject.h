@@ -1,11 +1,13 @@
 ﻿#ifndef IMAGETEXTOBJECT_H
 #define IMAGETEXTOBJECT_H
 
+#include "../headers/options.h"
 #include "opencv2/core/mat.hpp"
 #include "opencv2/core/types.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 #include "ui_mainwindow.h"
+#include <opencv2/photo.hpp>
 
 #include <QDebug>
 #include <QFrame>
@@ -62,7 +64,7 @@ public:
   explicit ImageTextObject(QWidget *parent = nullptr, cv::Mat *__mat = nullptr);
   ~ImageTextObject();
   ImageTextObject(QWidget *parent, const ImageTextObject &old,
-                  Ui::MainWindow *__ui, cv::Mat *mat);
+                  Ui::MainWindow *__ui, cv::Mat *mat, Options *options);
 
   QPoint topLeft, bottomRight;
   QPair<QPoint, QPoint> lineSpace;
@@ -88,6 +90,7 @@ public:
   static QString formatStyle(cv::Scalar);
 
 private:
+  Options *options;
   QPushButton *highlightButton;
   Ui::MainWindow *mUi;
 
@@ -100,6 +103,8 @@ private:
   void determineBgColor();
   void generatePalette();
   void bound();
+  void neighboringFill();
+  void inpaintingFill();
 };
 
 #endif // IMAGETEXTOBJECT_H

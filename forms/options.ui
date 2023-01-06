@@ -308,7 +308,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QComboBox" name="comboBox">
+            <widget class="QComboBox" name="fillMethod">
              <item>
               <property name="text">
                <string>Inpainting Fill</string>

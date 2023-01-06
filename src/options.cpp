@@ -124,7 +124,18 @@ void Options::setPSM(tesseract::PageSegMode PSM) {
   case tesseract::PSM_SPARSE_TEXT:
     ui->pageSegMode->setCurrentIndex(9);
     return;
+  default:
+    ui->pageSegMode->setCurrentIndex(1);
+    return;
   }
+}
+
+void Options::setFillMethod(Options::fillMethod option) {
+  ui->fillMethod->setCurrentIndex(static_cast<int>(option));
+}
+
+Options::fillMethod Options::getFillMethod() {
+  return static_cast<Options::fillMethod>(ui->fillMethod->currentIndex());
 }
 
 void Options::on_pushButton_3_clicked() {

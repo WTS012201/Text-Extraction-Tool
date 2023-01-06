@@ -9,8 +9,10 @@ ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
 }
 
 ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
-                                 Ui::MainWindow *__ui, cv::Mat *__mat)
-    : QWidget(parent), mat{__mat}, mUi{__ui}, ui(new Ui::ImageTextObject) {
+                                 Ui::MainWindow *__ui, cv::Mat *__mat,
+                                 Options *__options)
+    : QWidget(parent), mat{__mat}, options{__options}, mUi{__ui},
+      ui(new Ui::ImageTextObject) {
   topLeft = old.topLeft;
   bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
@@ -282,6 +284,49 @@ void ImageTextObject::determineBgColor() {
 }
 
 void ImageTextObject::fillBackground() {
+  if (options->getFillMethod() == 0) {
+    inpaintingFill();
+  } else if (options->getFillMethod() == 1) {
+    neighboringFill();
+  }
+}
+
+void ImageTextObject::inpaintingFill() {
+  cv::Mat gray, draw;
+
+  auto bTL = topLeft, bBR = bottomRight;
+  auto borderWidth = 3;
+
+  if (bTL.x() - borderWidth >= 0) {
+    bTL.setX(bTL.x() - borderWidth);
+  }
+  if (bTL.y() - borderWidth >= 0) {
+    bTL.setY(bTL.y() - borderWidth);
+  }
+  if (bBR.x() + borderWidth < mat->cols) {
+    bBR.setX(bBR.x() + borderWidth);
+  }
+  if (bTL.y() + borderWidth < mat->rows) {
+    bBR.setY(bBR.y() + borderWidth);
+  }
+
+  auto region =
+      cv::Rect{cv::Point{bTL.x(), bTL.y()}, cv::Point{bBR.x(), bBR.y()}};
+
+  (*mat)(region).copyTo(draw);
+  cv::cvtColor(draw, gray, cv::COLOR_BGR2GRAY);
+
+  cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
+  auto ker = cv::getStructuringElement(cv::MORPH_RECT, {5, 3});
+  cv::dilate(gray, gray, ker, {-1, -1}, 1);
+
+  cv::Mat dst;
+  cv::inpaint(draw, gray, dst, 3, cv::INPAINT_NS);
+
+  dst.copyTo(mat->rowRange(bTL.y(), bBR.y()).colRange(bTL.x(), bBR.x()));
+}
+
+void ImageTextObject::neighboringFill() {
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
   cv::Vec3b bg;

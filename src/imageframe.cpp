@@ -179,7 +179,8 @@ void ImageFrame::changeText() {
   selection->hide();
   selection->setDisabled(true);
   auto *oldSelection = selection;
-  selection = new ImageTextObject{this, *selection, ui, &state->matrix};
+  selection =
+      new ImageTextObject{this, *selection, ui, &state->matrix, options};
   selection->setHighlightColor(GREEN_HIGHLIGHT);
   selection->isChanged = true;
   connectSelection(selection);
@@ -719,7 +720,8 @@ void ImageFrame::populateTextObjects() {
   QVector<ImageTextObject *> tempObjects;
 
   for (const auto &obj : state->textObjects) {
-    ImageTextObject *temp = new ImageTextObject{this, *obj, ui, &state->matrix};
+    ImageTextObject *temp =
+        new ImageTextObject{this, *obj, ui, &state->matrix, options};
     temp->hide();
 
     tempObjects.push_back(temp);
@@ -900,7 +902,8 @@ void ImageFrame::groupSelections() {
   textObject->topLeft = newTL;
   textObject->bottomRight = newBR;
 
-  textObject = new ImageTextObject{this, *textObject, ui, &state->matrix};
+  textObject =
+      new ImageTextObject{this, *textObject, ui, &state->matrix, options};
   textObject->reset();
   textObject->selectHighlight();
   textObject->scaleAndPosition(scalar);
@@ -978,7 +981,8 @@ void ImageFrame::move(QPoint shift) {
   selection->setDisabled(true);
   state->textObjects.remove(state->textObjects.indexOf(selection));
 
-  selection = new ImageTextObject{this, *selection, ui, &state->matrix};
+  selection =
+      new ImageTextObject{this, *selection, ui, &state->matrix, options};
   selection->setHighlightColor(GREEN_HIGHLIGHT);
   selection->isChanged = true;
   selection->showHighlight();

@@ -2,9 +2,7 @@
 #define IMAGEFRAME_H
 
 #include "../headers/imagetextobject.h"
-#include "../headers/options.h"
 #include "opencv2/imgproc.hpp"
-#include "options.h"
 #include "qnamespace.h"
 #include "qobject.h"
 #include "ui_mainwindow.h"

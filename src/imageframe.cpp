@@ -669,7 +669,7 @@ void ImageFrame::extract(cv::Mat *mat) {
 cv::Scalar ImageFrame::defaultColor;
 
 void ImageFrame::connectSelection(ImageTextObject *obj) {
-  connect(obj, &ImageTextObject::selection, this, [&]() {
+  connect(obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
     selection = qobject_cast<ImageTextObject *>(sender());
     for (const auto &tempObj : state->textObjects) {
       if (tempObj == selection) {
@@ -679,7 +679,7 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
       tempObj->deselect();
     }
 
-    if (!obj->colorSet) {
+    if (!curr->colorSet) {
       selection->fontIntensity = ImageFrame::defaultColor;
     }
 

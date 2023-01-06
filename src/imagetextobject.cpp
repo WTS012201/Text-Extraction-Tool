@@ -52,10 +52,26 @@ void ImageTextObject::highlightSpaces() {
       mUi->fontSizeInput->setText(QString::number(fontSize));
       mUi->textEdit->setText(text);
       highlight->setStyleSheet(GREEN_HIGHLIGHT);
-      emit selection();
+      emit selection(this);
     }
   });
   highlightButton = highlight;
+}
+
+void ImageTextObject::bound() {
+  // bound x
+  if (topLeft.x() < 0) {
+    topLeft.setX(0);
+  } else if (bottomRight.x() >= mat->cols) {
+    bottomRight.setX(mat->cols - 1);
+  }
+
+  // bound y
+  if (topLeft.y() < 0) {
+    topLeft.setY(0);
+  } else if (bottomRight.y() >= mat->rows) {
+    bottomRight.setY(mat->rows - 1);
+  }
 }
 
 void ImageTextObject::initSizeAndPos() {
@@ -71,6 +87,7 @@ void ImageTextObject::initSizeAndPos() {
   this->adjustSize();
   ui->frame->adjustSize();
   this->move(topLeft);
+  bound();
 }
 
 void ImageTextObject::reposition(QPoint shift) {
@@ -146,20 +163,7 @@ void ImageTextObject::scaleAndPosition(double sx, double sy) {
   auto scaleString = mUi->zoomFactor->placeholderText();
   scaleString = scaleString.remove('%');
   this->move(topLeft * scaleString.toDouble() / 100);
-
-  // bound x
-  if (topLeft.x() < 0) {
-    topLeft.setX(0);
-  } else if (bottomRight.x() >= mat->cols) {
-    bottomRight.setX(mat->cols - 1);
-  }
-
-  // bound y
-  if (topLeft.y() < 0) {
-    topLeft.setY(0);
-  } else if (bottomRight.y() >= mat->rows) {
-    bottomRight.setY(mat->rows - 1);
-  }
+  bound();
 }
 
 // grabs most frequent colors;

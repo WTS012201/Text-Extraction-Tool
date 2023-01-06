@@ -52,7 +52,7 @@ class ImageTextObject : public QWidget {
   Q_OBJECT
 
 signals:
-  void selection();
+  void selection(ImageTextObject *);
 
 public:
   bool isSelected, isChanged, colorSet;
@@ -99,6 +99,7 @@ private:
   cv::Mat QImageToMat();
   void determineBgColor();
   void generatePalette();
+  void bound();
 };
 
 #endif // IMAGETEXTOBJECT_H

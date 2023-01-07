@@ -525,7 +525,9 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
     for (const auto &obj : state->textObjects) {
       if (obj == selection) {
         selection->setHighlightColor(GREEN_HIGHLIGHT);
-        selection->showHighlight();
+        if (!hideAll) {
+          selection->showHighlight();
+        }
         continue;
       }
       obj->deselect();

@@ -13,7 +13,7 @@ class Options : public QDialog {
   Q_OBJECT
 
 public:
-  enum fillMethod { NEIGHBOR, INPAINT };
+  enum fillMethod { INPAINT, NEIGHBOR };
   explicit Options(QWidget *parent = nullptr);
   ~Options();
   tesseract::PageIteratorLevel getRIL();

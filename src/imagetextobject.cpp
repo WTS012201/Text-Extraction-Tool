@@ -284,9 +284,9 @@ void ImageTextObject::determineBgColor() {
 }
 
 void ImageTextObject::fillBackground() {
-  if (options->getFillMethod() == 0) {
+  if (options->getFillMethod() == Options::INPAINT) {
     inpaintingFill();
-  } else if (options->getFillMethod() == 1) {
+  } else if (options->getFillMethod() == Options::NEIGHBOR) {
     neighboringFill();
   }
 }

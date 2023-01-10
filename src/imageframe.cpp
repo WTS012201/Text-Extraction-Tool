@@ -991,7 +991,7 @@ void ImageFrame::move(QPoint shift) {
   connectSelection(selection);
   state->textObjects.push_back(selection);
 
-  selection->reposition(shift);
+  selection->reposition(shift, true);
   selection->scaleAndPosition(scalar);
   changeImage();
 }

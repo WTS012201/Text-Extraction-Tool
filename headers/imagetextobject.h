@@ -7,8 +7,6 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 #include "ui_mainwindow.h"
-#include <opencv2/photo.hpp>
-
 #include <QDebug>
 #include <QFrame>
 #include <QHash>
@@ -20,6 +18,8 @@
 #include <QVector>
 #include <QWidget>
 #include <cmath>
+#include <opencv2/photo.hpp>
+#include <optional>
 #include <queue>
 
 constexpr char BLUE_HIGHLIGHT[] = "background:  rgba(37,122,253,100);";
@@ -77,14 +77,15 @@ public:
   void scaleAndPosition(double scalar);
   void setImage(cv::Mat *__image);
   void setFilepath(QString __filepath);
-  void fillBackground();
+
+  std::optional<QPair<cv::Mat, cv::Mat>> fillBackground(bool move = false);
   void scaleAndPosition(double x, double y);
   void selectHighlight();
   void highlight();
   void deselect();
   void showHighlight();
   void setHighlightColor(QString colorStyle);
-  void reposition(QPoint shift);
+  void reposition(QPoint shift, bool move = false);
   QString getHighlightColor();
   void reset();
   static QString formatStyle(cv::Scalar);
@@ -104,7 +105,8 @@ private:
   void generatePalette();
   void bound();
   void neighboringFill();
-  void inpaintingFill();
+
+  std::optional<QPair<cv::Mat, cv::Mat>> inpaintingFill(bool move);
 };
 
 #endif // IMAGETEXTOBJECT_H

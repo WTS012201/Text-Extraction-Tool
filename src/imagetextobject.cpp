@@ -1,5 +1,7 @@
 ﻿#include "../headers/imagetextobject.h"
+#include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
+#include <optional>
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
@@ -92,7 +94,7 @@ void ImageTextObject::initSizeAndPos() {
   bound();
 }
 
-void ImageTextObject::reposition(QPoint shift) {
+void ImageTextObject::reposition(QPoint shift, bool move) {
   auto newPosTL = topLeft + shift;
   auto newPosBR = bottomRight + shift;
   auto frameSize = QSize{mat->cols, mat->rows};
@@ -122,13 +124,31 @@ void ImageTextObject::reposition(QPoint shift) {
   auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
                          cv::Point{bottomRight.x(), bottomRight.y()}};
   cv::Mat draw;
-  (*mat)(region).copyTo(draw);
-  fillBackground();
+  if (!move) {
+    (*mat)(region).copyTo(draw);
+  }
+  auto textMask = fillBackground(move);
+
   topLeft = newPosTL;
   bottomRight = newPosBR;
+  cv::Mat drawArea = mat->rowRange(topLeft.y(), bottomRight.y())
+                         .colRange(topLeft.x(), bottomRight.x());
 
-  draw.copyTo(mat->rowRange(topLeft.y(), bottomRight.y())
-                  .colRange(topLeft.x(), bottomRight.x()));
+  if (textMask) {
+    auto text = textMask.value().first;
+    auto mask = textMask.value().second;
+
+    cv::bitwise_not(mask, mask);
+    /* cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR); */
+    cv::bitwise_and(mask, drawArea, draw);
+    /* draw += textMat.value(); */
+    draw += text;
+
+    /* drawArea += textMat.value(); */
+  }
+  /* qDebug() << draw.rows << " " << draw.cols; */
+  /* qDebug() << drawArea.rows << " " << drawArea.cols; */
+  draw.copyTo(drawArea);
 }
 
 void ImageTextObject::scaleAndPosition(double scalar) {
@@ -283,31 +303,40 @@ void ImageTextObject::determineBgColor() {
   bgIntensity = intensity;
 }
 
-void ImageTextObject::fillBackground() {
+std::optional<QPair<cv::Mat, cv::Mat>>
+ImageTextObject::fillBackground(bool move) {
   if (options->getFillMethod() == Options::INPAINT) {
-    inpaintingFill();
+    return inpaintingFill(move);
   } else if (options->getFillMethod() == Options::NEIGHBOR) {
     neighboringFill();
   }
+  return {};
 }
 
-void ImageTextObject::inpaintingFill() {
-  cv::Mat gray, draw;
+std::optional<QPair<cv::Mat, cv::Mat>>
+ImageTextObject::inpaintingFill(bool move) {
+  cv::Mat gray, draw, mask, dst;
 
   auto bTL = topLeft, bBR = bottomRight;
   auto borderWidth = 3;
+  bool bX, tX, bY, tY;
+  bX = tX = bY = tY = false;
 
   if (bTL.x() - borderWidth >= 0) {
     bTL.setX(bTL.x() - borderWidth);
+    tX = true;
   }
   if (bTL.y() - borderWidth >= 0) {
     bTL.setY(bTL.y() - borderWidth);
+    tY = true;
   }
   if (bBR.x() + borderWidth < mat->cols) {
     bBR.setX(bBR.x() + borderWidth);
+    bX = true;
   }
-  if (bTL.y() + borderWidth < mat->rows) {
+  if (bBR.y() + borderWidth < mat->rows) {
     bBR.setY(bBR.y() + borderWidth);
+    bY = true;
   }
 
   auto region =
@@ -316,14 +345,33 @@ void ImageTextObject::inpaintingFill() {
   (*mat)(region).copyTo(draw);
   cv::cvtColor(draw, gray, cv::COLOR_BGR2GRAY);
 
-  cv::threshold(gray, gray, 0, 255, cv::THRESH_OTSU);
+  cv::threshold(gray, mask, 0, 255, cv::THRESH_OTSU);
   auto ker = cv::getStructuringElement(cv::MORPH_RECT, {5, 3});
-  cv::dilate(gray, gray, ker, {-1, -1}, 1);
+  cv::dilate(mask, gray, ker, {-1, -1}, 1);
 
-  cv::Mat dst;
   cv::inpaint(draw, gray, dst, 3, cv::INPAINT_NS);
 
+  cv::Mat trimmed;
+  if (move) {
+    cv::cvtColor(gray, gray, cv::COLOR_GRAY2BGR);
+    trimmed = draw & gray;
+    trimmed = trimmed
+                  .rowRange(tY ? borderWidth : 0,
+                            bY ? trimmed.rows - borderWidth : trimmed.rows)
+                  .colRange(tX ? borderWidth : 0,
+                            bX ? trimmed.cols - borderWidth : trimmed.cols);
+    gray = gray.rowRange(tY ? borderWidth : 0,
+                         bY ? gray.rows - borderWidth : gray.rows)
+               .colRange(tX ? borderWidth : 0,
+                         bX ? gray.cols - borderWidth : gray.cols);
+  }
+
   dst.copyTo(mat->rowRange(bTL.y(), bBR.y()).colRange(bTL.x(), bBR.x()));
+
+  if (move)
+    return QPair<cv::Mat, cv::Mat>{trimmed, gray};
+  else
+    return {};
 }
 
 void ImageTextObject::neighboringFill() {

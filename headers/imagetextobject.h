@@ -58,6 +58,7 @@ signals:
 
 public:
   bool isSelected, isChanged, colorSet;
+
   int fontSize;
   cv::Scalar bgIntensity, fontIntensity;
   cv::Mat *mat;
@@ -85,15 +86,19 @@ public:
   void deselect();
   void showHighlight();
   void setHighlightColor(QString colorStyle);
-  void reposition(QPoint shift, bool move = false);
+  void reposition(QPoint shift);
   QString getHighlightColor();
   void reset();
+  void unstageMove();
   static QString formatStyle(cv::Scalar);
 
 private:
+  bool moveReleased;
   Options *options;
   QPushButton *highlightButton;
   Ui::MainWindow *mUi;
+  cv::Mat draw;
+  std::optional<QPair<cv::Mat, cv::Mat>> textMask;
 
   Ui::ImageTextObject *ui;
   QString filepath;

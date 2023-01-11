@@ -1,11 +1,11 @@
-﻿#include "../headers/imagetextobject.h"
+#include "../headers/imagetextobject.h"
 #include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
 #include <optional>
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
-      fontSize{14}, mat{__mat}, highlightButton{nullptr},
+      fontSize{14}, mat{__mat}, moveReleased{false}, highlightButton{nullptr},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
@@ -15,12 +15,15 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
                                  Options *__options)
     : QWidget(parent), mat{__mat}, options{__options}, mUi{__ui},
       ui(new Ui::ImageTextObject) {
+
   topLeft = old.topLeft;
   bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
   fontIntensity = old.fontIntensity;
   fontSize = old.fontSize;
   colorSet = old.colorSet;
+  moveReleased = old.moveReleased;
+  textMask = old.textMask;
 
   ui->setupUi(this);
   setText(old.getText());
@@ -94,7 +97,7 @@ void ImageTextObject::initSizeAndPos() {
   bound();
 }
 
-void ImageTextObject::reposition(QPoint shift, bool move) {
+void ImageTextObject::reposition(QPoint shift) {
   auto newPosTL = topLeft + shift;
   auto newPosBR = bottomRight + shift;
   auto frameSize = QSize{mat->cols, mat->rows};
@@ -121,36 +124,39 @@ void ImageTextObject::reposition(QPoint shift, bool move) {
     newPosBR -= shiftBack;
   }
 
-  auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
-                         cv::Point{bottomRight.x(), bottomRight.y()}};
-  cv::Mat draw;
-  if (!move) {
-    (*mat)(region).copyTo(draw);
+  if (!moveReleased) {
+    if (options->getFillMethod() == Options::NEIGHBOR) {
+      auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
+                             cv::Point{bottomRight.x(), bottomRight.y()}};
+      (*mat)(region).copyTo(draw);
+    } else {
+      textMask = fillBackground(true);
+    }
+    moveReleased = true;
   }
-  auto textMask = fillBackground(move);
 
   topLeft = newPosTL;
   bottomRight = newPosBR;
+}
+
+void ImageTextObject::unstageMove() {
   cv::Mat drawArea = mat->rowRange(topLeft.y(), bottomRight.y())
                          .colRange(topLeft.x(), bottomRight.x());
+  moveReleased = false;
 
   if (textMask) {
     auto text = textMask.value().first;
     auto mask = textMask.value().second;
 
     cv::bitwise_not(mask, mask);
-    /* cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR); */
     cv::bitwise_and(mask, drawArea, draw);
-    /* draw += textMat.value(); */
     draw += text;
-
-    /* drawArea += textMat.value(); */
   }
-  /* qDebug() << draw.rows << " " << draw.cols; */
-  /* qDebug() << drawArea.rows << " " << drawArea.cols; */
   draw.copyTo(drawArea);
-}
 
+  draw = cv::Mat{};
+  textMask = std::optional<QPair<cv::Mat, cv::Mat>>{};
+}
 void ImageTextObject::scaleAndPosition(double scalar) {
   auto size = scalar * (lineSpace.second - lineSpace.first);
   highlightButton->setMinimumSize(QSize{size.x(), size.y()});
@@ -353,6 +359,8 @@ ImageTextObject::inpaintingFill(bool move) {
 
   cv::Mat trimmed;
   if (move) {
+    ker = cv::getStructuringElement(cv::MORPH_RECT, {2, 2});
+    cv::erode(gray, gray, ker, {-1, -1}, 1);
     cv::cvtColor(gray, gray, cv::COLOR_GRAY2BGR);
     trimmed = draw & gray;
     trimmed = trimmed

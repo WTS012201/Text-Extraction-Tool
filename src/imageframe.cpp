@@ -951,14 +951,15 @@ void ImageFrame::deleteSelection() {
 void ImageFrame::keyReleaseEvent(QKeyEvent *event) {
   keysPressed[event->key()] = false;
   if (!keysPressed[Qt::Key_Shift] && stagedState) {
-    undo.push(stagedState);
-    stagedState = nullptr;
+    stageState();
   }
 }
 
 void ImageFrame::stageState() {
   undo.push(stagedState);
   stagedState = nullptr;
+  selection->unstageMove();
+  changeImage();
 }
 
 void ImageFrame::move(QPoint shift) {
@@ -991,7 +992,7 @@ void ImageFrame::move(QPoint shift) {
   connectSelection(selection);
   state->textObjects.push_back(selection);
 
-  selection->reposition(shift, true);
+  selection->reposition(shift);
   selection->scaleAndPosition(scalar);
   changeImage();
 }

@@ -22,7 +22,7 @@ public:
   void setColor(cv::Scalar scalar);
   ~ColorTray();
   QColor color;
-  QHBoxLayout *palette;
+  QVBoxLayout *palette;
 
 private:
   Ui::ColorTray *ui;

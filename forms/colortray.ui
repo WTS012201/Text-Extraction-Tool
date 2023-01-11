@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>299</width>
-    <height>142</height>
+    <height>160</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -115,9 +115,6 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="palette"/>
-   </item>
-   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -129,6 +126,9 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item>
+    <layout class="QVBoxLayout" name="palette"/>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

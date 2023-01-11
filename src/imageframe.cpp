@@ -354,16 +354,16 @@ void ImageFrame::connections() {
       selection->fontSize = str.toInt();
     }
   });
-  connect(ui->highlightAll, &QPushButton::pressed, this,
-          &ImageFrame::highlightSelection);
+  /* connect(ui->highlightAll, &QPushButton::pressed, this, */
+  /*         &ImageFrame::highlightSelection); */
+  /* connect(ui->removeSelection, &QPushButton::pressed, this, */
+  /*     &ImageFrame::removeSelection); */
   connect(ui->changeButton, &QPushButton::pressed, this,
           &ImageFrame::changeText);
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this,
           &ImageFrame::changeZoom);
   connect(ui->find, &QLineEdit::editingFinished, this,
           &ImageFrame::findSubstrings);
-  connect(ui->removeSelection, &QPushButton::pressed, this,
-          &ImageFrame::removeSelection);
 }
 
 void ImageFrame::removeSelection() {

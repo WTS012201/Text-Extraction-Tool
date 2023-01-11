@@ -1,4 +1,5 @@
 ﻿#include "../headers/mainwindow.h"
+#include "qboxlayout.h"
 #include "ui_mainwindow.h"
 #include "ui_tabscroll.h"
 #include <tesseract/publictypes.h>
@@ -315,12 +316,20 @@ void MainWindow::colorTray() {
   colorMenu->setModal(true);
 
   QVector<QPushButton *> buttons;
+  QVector<QHBoxLayout *> layouts;
+  QHBoxLayout *curr;
   for (const auto &color : iFrame->selection->colorPalette) {
+    if (layouts.empty() || curr->count() % 5 == 0) {
+      layouts.push_back(curr = new QHBoxLayout);
+      colorMenu->palette->addLayout(curr);
+    }
+    curr = layouts.last();
+
     QPushButton *cb = new QPushButton{};
     QObject::connect(cb, &QPushButton::pressed, colorMenu,
                      [&]() { colorMenu->setColor(color); });
 
-    colorMenu->palette->addWidget(cb);
+    curr->addWidget(cb);
     QString style = ImageTextObject::formatStyle(color);
     cb->setStyleSheet(style);
     buttons.push_back(cb);
@@ -344,11 +353,12 @@ void MainWindow::colorTray() {
     colorMenu->palette->removeWidget(cb);
     delete cb;
   }
+  for (const auto &lay : layouts) {
+    colorMenu->palette->removeItem(lay);
+    delete lay;
+  }
 
   emit iFrame->colorSelected(color);
-  /* iFrame->selection->fontIntensity = color; */
-  /* QString style = ImageTextObject::formatStyle(color); */
-  /* ui->colorSelect->setStyleSheet(style); */
 }
 
 void MainWindow::fontSelected() {

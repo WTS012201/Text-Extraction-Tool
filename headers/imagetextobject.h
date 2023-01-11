@@ -26,15 +26,15 @@ constexpr char BLUE_HIGHLIGHT[] = "background:  rgba(37,122,253,100);";
 constexpr char YELLOW_HIGHLIGHT[] = "background:  rgba(255, 243, 0, 100);";
 constexpr char PURPLE_HIGHLIGHT[] = "background:  rgba(255, 0, 243, 100);";
 constexpr char GREEN_HIGHLIGHT[] = "background:  rgba(0, 255, 0, 100);";
-constexpr int PALETTE_LIMIT = 5;
+constexpr int PALETTE_LIMIT = 10;
 
 class QcvScalar : public cv::Scalar {
   friend inline bool operator==(const QcvScalar &e1,
                                 const QcvScalar &e2) noexcept {
-    bool rVal = (e1.val[0] == e2.val[0]);
-    rVal &= (e1.val[1] == e2.val[1]);
-    rVal &= (e1.val[2] == e2.val[2]);
-    return rVal;
+    bool ret = (e1.val[0] == e2.val[0]);
+    ret &= (e1.val[1] == e2.val[1]);
+    ret &= (e1.val[2] == e2.val[2]);
+    return ret;
   }
 
   friend inline uint qHash(const QcvScalar &key, uint seed) noexcept {

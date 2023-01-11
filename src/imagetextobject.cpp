@@ -350,11 +350,9 @@ ImageTextObject::inpaintingFill(bool move) {
 
   (*mat)(region).copyTo(draw);
   cv::cvtColor(draw, gray, cv::COLOR_BGR2GRAY);
-
   cv::threshold(gray, mask, 0, 255, cv::THRESH_OTSU);
-  auto ker = cv::getStructuringElement(cv::MORPH_RECT, {5, 3});
+  auto ker = cv::getStructuringElement(cv::MORPH_RECT, {3, 3});
   cv::dilate(mask, gray, ker, {-1, -1}, 1);
-
   cv::inpaint(draw, gray, dst, 3, cv::INPAINT_NS);
 
   cv::Mat trimmed;

@@ -278,7 +278,7 @@ void ImageFrame::changeText() {
   sub = label.mid(k, label.size() - k);
   QPoint translateY{0, (i * dy)};
 
-  QRect subrect{+selection->topLeft, translateY + selection->bottomRight};
+  QRect subrect{selection->topLeft, translateY + selection->bottomRight};
   p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
   k = ++j;
   i++;
@@ -307,17 +307,12 @@ void ImageFrame::connections() {
             contextMenu.addSeparator();
             contextMenu.addAction(ui->actionHide_All);
             contextMenu.addSeparator();
-
-            auto add = std::make_unique<QAction>("Add selection", this);
-            QObject::connect(add.get(), &QAction::triggered, this,
-                             &ImageFrame::highlightSelection);
-            contextMenu.addAction(add.get());
+            contextMenu.addAction(ui->actionAdd_Selection_Ctrl_A);
             contextMenu.addSeparator();
-
-            auto remove = std::make_unique<QAction>("Remove selection", this);
-            QObject::connect(remove.get(), &QAction::triggered, this,
-                             &ImageFrame::removeSelection);
-            contextMenu.addAction(remove.get());
+            contextMenu.addAction(ui->actionRemove_Selection_Ctrl_R);
+            contextMenu.addSeparator();
+            contextMenu.addAction(ui->actionGroup_Ctrl_G);
+            contextMenu.addSeparator();
 
             contextMenu.exec(mapToGlobal(pos));
           });
@@ -998,9 +993,9 @@ void ImageFrame::move(QPoint shift) {
 
 void ImageFrame::hideHighlights() {
   if ((hideAll = !hideAll)) {
-    ui->actionHide_All->setText("Show All");
+    ui->actionHide_All->setText("Show All (Ctrl + T)");
   } else {
-    ui->actionHide_All->setText("Hide All");
+    ui->actionHide_All->setText("Hide All (Ctrl + T)");
   }
 
   for (const auto &obj : state->textObjects) {

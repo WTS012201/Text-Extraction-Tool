@@ -32,6 +32,9 @@ signals:
   void switchConnections();
 
 private slots:
+  void on_actionRemove_Selection_Ctrl_R_triggered();
+  void on_actionAdd_Selection_Ctrl_A_triggered();
+  void on_actionGroup_Ctrl_G_triggered();
   void on_actionHide_All_triggered();
   void colorTray();
   void on_actionSave_Image_triggered();

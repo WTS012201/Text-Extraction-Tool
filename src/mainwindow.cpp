@@ -386,6 +386,21 @@ void MainWindow::on_actionUndo_triggered() { iFrame->undoAction(); }
 
 void MainWindow::on_actionRedo_2_triggered() { iFrame->redoAction(); }
 
+void MainWindow::on_actionRemove_Selection_Ctrl_R_triggered() {
+  if (iFrame)
+    iFrame->removeSelection();
+}
+
+void MainWindow::on_actionAdd_Selection_Ctrl_A_triggered() {
+  if (iFrame)
+    iFrame->highlightSelection();
+}
+
+void MainWindow::on_actionGroup_Ctrl_G_triggered() {
+  if (iFrame)
+    iFrame->groupSelections();
+}
+
 void MainWindow::keyPressEvent(QKeyEvent *event) {
   if (!iFrame)
     return;

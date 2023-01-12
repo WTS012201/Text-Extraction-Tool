@@ -1484,6 +1484,12 @@ background:transparent;
     <addaction name="actionRedo_2"/>
     <addaction name="separator"/>
     <addaction name="actionHide_All"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_Selection_Ctrl_A"/>
+    <addaction name="separator"/>
+    <addaction name="actionRemove_Selection_Ctrl_R"/>
+    <addaction name="separator"/>
+    <addaction name="actionGroup_Ctrl_G"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1514,7 +1520,7 @@ background:transparent;
   </action>
   <action name="actionUndo">
    <property name="text">
-    <string>Undo</string>
+    <string>Undo (Ctrl + Z)</string>
    </property>
   </action>
   <action name="actionRedo">
@@ -1524,7 +1530,7 @@ background:transparent;
   </action>
   <action name="actionRedo_2">
    <property name="text">
-    <string>Redo</string>
+    <string>Redo (Ctrl + Shift + Z)</string>
    </property>
   </action>
   <action name="actionSave_Image">
@@ -1534,7 +1540,22 @@ background:transparent;
   </action>
   <action name="actionHide_All">
    <property name="text">
-    <string>Hide All</string>
+    <string>Hide All (Ctrl + T)</string>
+   </property>
+  </action>
+  <action name="actionAdd_Selection_Ctrl_A">
+   <property name="text">
+    <string>Add (Ctrl + A)</string>
+   </property>
+  </action>
+  <action name="actionRemove_Selection_Ctrl_R">
+   <property name="text">
+    <string>Remove (Ctrl + R)</string>
+   </property>
+  </action>
+  <action name="actionGroup_Ctrl_G">
+   <property name="text">
+    <string>Group (Ctrl + G)</string>
    </property>
   </action>
  </widget>

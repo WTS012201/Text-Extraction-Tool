@@ -1,4 +1,4 @@
-#include "../headers/imagetextobject.h"
+﻿#include "../headers/imagetextobject.h"
 #include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
 #include <optional>

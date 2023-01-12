@@ -319,6 +319,19 @@ ImageTextObject::fillBackground(bool move) {
   return {};
 }
 
+double whiteComp(const cv::Mat &mat) {
+  int whiteCount = 0;
+  for (int i = 0; i < mat.rows; i++) {
+    for (int j = 0; j < mat.cols; j++) {
+      if (mat.at<uchar>(i, j) == 255) {
+        whiteCount += 1;
+      }
+    }
+  }
+
+  return static_cast<double>(whiteCount) / (mat.rows * mat.cols);
+}
+
 std::optional<QPair<cv::Mat, cv::Mat>>
 ImageTextObject::inpaintingFill(bool move) {
   cv::Mat gray, draw, mask, dst;
@@ -351,6 +364,13 @@ ImageTextObject::inpaintingFill(bool move) {
   (*mat)(region).copyTo(draw);
   cv::cvtColor(draw, gray, cv::COLOR_BGR2GRAY);
   cv::threshold(gray, mask, 0, 255, cv::THRESH_OTSU);
+
+  auto whites = whiteComp(mask);
+  if (whites > INVERT_MASK_THRESH) {
+    qDebug() << "inverting mask\n";
+    mask = ~mask;
+  }
+
   auto ker = cv::getStructuringElement(cv::MORPH_RECT, {3, 3});
   cv::dilate(mask, gray, ker, {-1, -1}, 1);
   cv::inpaint(draw, gray, dst, 3, cv::INPAINT_NS);

@@ -340,6 +340,10 @@ void MainWindow::colorTray() {
       colorMenu->palette->removeWidget(cb);
       delete cb;
     }
+    for (const auto &lay : layouts) {
+      colorMenu->palette->removeItem(lay);
+      delete lay;
+    }
     return;
   }
 

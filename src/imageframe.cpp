@@ -247,7 +247,7 @@ void ImageFrame::changeText() {
   // Scale back to normal size before resizing
   selection->scaleAndPosition(1);
   auto offset = wh.y() - selection->bottomRight.y();
-  selection->topLeft.setY(selection->topLeft.y() - offset);
+  selection->topLeft.setY(selection->topLeft.y());
   selection->bottomRight = wh;
   selection->bottomRight.setY(selection->bottomRight.y() - offset);
   QRect rect{selection->topLeft, selection->bottomRight};
@@ -278,8 +278,7 @@ void ImageFrame::changeText() {
   sub = label.mid(k, label.size() - k);
   QPoint translateY{0, (i * dy)};
 
-  QRect subrect{translateY + selection->topLeft,
-                translateY + selection->bottomRight};
+  QRect subrect{+selection->topLeft, translateY + selection->bottomRight};
   p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
   k = ++j;
   i++;

@@ -348,10 +348,6 @@ void ImageFrame::connections() {
       selection->fontSize = str.toInt();
     }
   });
-  /* connect(ui->highlightAll, &QPushButton::pressed, this, */
-  /*         &ImageFrame::highlightSelection); */
-  /* connect(ui->removeSelection, &QPushButton::pressed, this, */
-  /*     &ImageFrame::removeSelection); */
   connect(ui->changeButton, &QPushButton::pressed, this,
           &ImageFrame::changeText);
   connect(ui->zoomFactor, &QLineEdit::editingFinished, this,
@@ -361,6 +357,10 @@ void ImageFrame::connections() {
 }
 
 void ImageFrame::removeSelection() {
+  if (!this->isEnabled() || !tab) {
+    return;
+  }
+
   for (const auto &obj : state->textObjects) {
     if (obj->isSelected) {
       obj->deselect();
@@ -399,8 +399,9 @@ void ImageFrame::findSubstrings() {
 }
 
 void ImageFrame::highlightSelection() {
-  if (!this->isEnabled())
+  if (!this->isEnabled() || !tab) {
     return;
+  }
 
   for (const auto &obj : state->textObjects) {
     if (obj->isSelected) {
@@ -781,7 +782,7 @@ QString ImageFrame::collect(cv::Mat &matrix) {
 }
 
 void ImageFrame::undoAction() {
-  if (undo.empty() || isProcessing) {
+  if (undo.empty() || isProcessing || !tab) {
     return;
   }
 
@@ -815,7 +816,7 @@ void ImageFrame::undoAction() {
 }
 
 void ImageFrame::redoAction() {
-  if (redo.empty() || isProcessing) {
+  if (redo.empty() || isProcessing || !tab) {
     return;
   }
 
@@ -842,10 +843,12 @@ void ImageFrame::redoAction() {
 }
 
 void ImageFrame::groupSelections() {
-  if (!this->isEnabled())
+  if (!this->isEnabled() || !tab) {
     return;
-  if (state->textObjects.isEmpty())
+  }
+  if (state->textObjects.isEmpty()) {
     return;
+  }
 
   QString contiguousStr{""};
   QPoint newTL{-1, -1}, newBR{-1, -1};

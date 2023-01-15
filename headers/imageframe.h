@@ -7,6 +7,7 @@
 #include "qobject.h"
 #include "ui_mainwindow.h"
 
+#include <QDrag>
 #include <QFuture>
 #include <QGraphicsScene>
 #include <QGraphicsTextItem>
@@ -14,7 +15,6 @@
 #include <QLabel>
 #include <QLayout>
 #include <QLineEdit>
-#include <QMouseEvent>
 #include <QMovie>
 #include <QPair>
 #include <QPoint>
@@ -116,7 +116,7 @@ private:
   void populateTextObjects();
   void findSubstrings();
   void changeImage(QImage *img = nullptr);
-  QString collect(cv::Mat &matrix);
+  QString collect(const cv::Mat &matrix);
   void inliers(QPair<QPoint, QPoint>);
   void connectSelection(ImageTextObject *obj);
 };

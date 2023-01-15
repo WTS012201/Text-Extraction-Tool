@@ -5,7 +5,8 @@
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
-      fontSize{14}, mat{__mat}, moveReleased{false}, highlightButton{nullptr},
+      drag{false}, fontSize{14}, mat{__mat}, moveReleased{false},
+      highlightButton{nullptr},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
@@ -24,6 +25,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   colorSet = old.colorSet;
   moveReleased = old.moveReleased;
   textMask = old.textMask;
+  drag = old.drag;
 
   ui->setupUi(this);
   setText(old.getText());
@@ -46,7 +48,7 @@ ImageTextObject::~ImageTextObject() {
 }
 
 void ImageTextObject::highlightSpaces() {
-  QPushButton *highlight = new QPushButton{ui->frame};
+  Highlight *highlight = new Highlight{ui->frame};
   auto size = lineSpace.second - lineSpace.first;
 
   highlight->setCursor(Qt::CursorShape::PointingHandCursor);
@@ -54,7 +56,7 @@ void ImageTextObject::highlightSpaces() {
   highlight->setStyleSheet(YELLOW_HIGHLIGHT);
   highlight->show();
 
-  QObject::connect(highlight, &QPushButton::clicked, this, [=] {
+  QObject::connect(highlight, &Highlight::clicked, this, [=] {
     if (isChanged) {
       mUi->fontSizeInput->setText(QString::number(fontSize));
       mUi->textEdit->setText(text);
@@ -62,6 +64,11 @@ void ImageTextObject::highlightSpaces() {
       emit selection(this);
     }
   });
+
+  QObject::connect(highlight, &Highlight::pressed, this, [&] { drag = true; });
+  QObject::connect(highlight, &Highlight::released, this,
+                   [&] { drag = false; });
+
   highlightButton = highlight;
 }
 
@@ -97,9 +104,10 @@ void ImageTextObject::initSizeAndPos() {
   bound();
 }
 
-void ImageTextObject::reposition(QPoint shift) {
-  auto newPosTL = topLeft + shift;
-  auto newPosBR = bottomRight + shift;
+void ImageTextObject::reposition(QPoint shift, bool relative) {
+  auto newPosTL = relative ? topLeft + shift : shift;
+  auto newPosBR =
+      relative ? bottomRight + shift : shift + (bottomRight - topLeft);
   auto frameSize = QSize{mat->cols, mat->rows};
 
   // bound x

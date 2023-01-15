@@ -581,9 +581,7 @@ void ImageFrame::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void ImageFrame::mouseReleaseEvent(QMouseEvent *event) {
-  if (!this->isEnabled())
-    return;
-  if (state->textObjects.isEmpty())
+  if (state->textObjects.isEmpty() || !this->isEnabled())
     return;
   if (dropper) {
     dropper = false;
@@ -692,23 +690,32 @@ void ImageFrame::extract(cv::Mat *mat) {
 cv::Scalar ImageFrame::defaultColor;
 
 void ImageFrame::connectSelection(ImageTextObject *obj) {
-  connect(obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
-    selection = qobject_cast<ImageTextObject *>(sender());
-    for (const auto &tempObj : state->textObjects) {
-      if (tempObj == selection) {
-        continue;
-      }
-      tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
-      tempObj->deselect();
-    }
+  QObject::connect(
+      obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
+        selection = qobject_cast<ImageTextObject *>(sender());
+        for (const auto &tempObj : state->textObjects) {
+          if (tempObj == selection) {
+            continue;
+          }
+          tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
+          tempObj->deselect();
+        }
 
-    if (!curr->colorSet) {
-      selection->fontIntensity = ImageFrame::defaultColor;
-    }
+        if (!curr->colorSet) {
+          selection->fontIntensity = ImageFrame::defaultColor;
+        }
+        QString style = ImageTextObject::formatStyle(selection->fontIntensity);
+        ui->colorSelect->setStyleSheet(style);
 
-    QString style = ImageTextObject::formatStyle(selection->fontIntensity);
-    ui->colorSelect->setStyleSheet(style);
-  });
+        auto shift = [&](const QPoint &pos) {
+          if (selection->drag) {
+            selection->reposition(QWidget::mapFromGlobal(pos) / scalar, false);
+            selection->scaleAndPosition(scalar);
+          }
+        };
+        QObject::connect(selection->highlightButton, &Highlight::drag, this,
+                         shift);
+      });
 }
 
 ImageFrame::State *&ImageFrame::getState() { return state; }
@@ -730,7 +737,7 @@ void ImageFrame::populateTextObjects() {
   state->textObjects = tempObjects;
 }
 
-QString ImageFrame::collect(cv::Mat &matrix) {
+QString ImageFrame::collect(const cv::Mat &matrix) {
   tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
 
   const auto RIL = options->getRIL();
@@ -991,7 +998,6 @@ void ImageFrame::move(QPoint shift) {
 
   selection->reposition(shift);
   selection->scaleAndPosition(scalar);
-  changeImage();
 }
 
 void ImageFrame::hideHighlights() {

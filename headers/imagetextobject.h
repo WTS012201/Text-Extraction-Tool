@@ -12,6 +12,7 @@
 #include <QHash>
 #include <QImage>
 #include <QList>
+#include <QMouseEvent>
 #include <QPair>
 #include <QPushButton>
 #include <QTextEdit>
@@ -47,6 +48,19 @@ class QcvScalar : public cv::Scalar {
   }
 };
 
+class Highlight : public QPushButton {
+  Q_OBJECT
+
+public:
+  Highlight(QWidget *parent) : QPushButton{parent} {};
+
+signals:
+  void drag(const QPoint &) const;
+
+private:
+  void mouseMoveEvent(QMouseEvent *) { emit drag(QCursor::pos()); }
+};
+
 namespace Ui {
 class ImageTextObject;
 }
@@ -58,7 +72,7 @@ signals:
   void selection(ImageTextObject *);
 
 public:
-  bool isSelected, isChanged, colorSet;
+  bool isSelected, isChanged, colorSet, drag;
 
   int fontSize;
   cv::Scalar bgIntensity, fontIntensity;
@@ -68,6 +82,7 @@ public:
   ImageTextObject(QWidget *parent, const ImageTextObject &old,
                   Ui::MainWindow *__ui, cv::Mat *mat, Options *options);
 
+  Highlight *highlightButton;
   QPoint topLeft, bottomRight;
   QPair<QPoint, QPoint> lineSpace;
   QVector<cv::Scalar> colorPalette;
@@ -87,7 +102,7 @@ public:
   void deselect();
   void showHighlight();
   void setHighlightColor(QString colorStyle);
-  void reposition(QPoint shift);
+  void reposition(QPoint shift, bool relative = true);
   QString getHighlightColor();
   void reset();
   void unstageMove();
@@ -96,7 +111,6 @@ public:
 private:
   bool moveReleased;
   Options *options;
-  QPushButton *highlightButton;
   Ui::MainWindow *mUi;
   cv::Mat draw;
   std::optional<QPair<cv::Mat, cv::Mat>> textMask;

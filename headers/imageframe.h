@@ -30,7 +30,6 @@ constexpr double ZOOM_MAX = 5.0;
 
 class ImageFrame : public QGraphicsView {
   Q_OBJECT
-
 public:
   typedef struct State {
     QVector<ImageTextObject *> textObjects;
@@ -62,7 +61,7 @@ public:
   cv::Mat getImageMatrix();
 
   State *&getState();
-  void move(QPoint shift);
+  void move(QPoint shift, bool drag = false);
   void stageState();
   void hideHighlights();
 

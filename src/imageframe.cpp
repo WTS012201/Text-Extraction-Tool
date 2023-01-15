@@ -707,14 +707,20 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
         QString style = ImageTextObject::formatStyle(selection->fontIntensity);
         ui->colorSelect->setStyleSheet(style);
 
+        Highlight *hb = selection->highlightButton;
         auto shift = [&](const QPoint &pos) {
           if (selection->drag) {
-            selection->reposition(QWidget::mapFromGlobal(pos) / scalar, false);
-            selection->scaleAndPosition(scalar);
+            move(pos, true);
           }
         };
-        QObject::connect(selection->highlightButton, &Highlight::drag, this,
-                         shift);
+        auto release = [&] {
+          if (!selection->drag) {
+            move(QPoint{0, 0}, false);
+            stageState();
+          }
+        };
+        QObject::connect(hb, &Highlight::drag, this, shift);
+        QObject::connect(hb, &Highlight::released, this, release);
       });
 }
 
@@ -966,17 +972,18 @@ void ImageFrame::stageState() {
   changeImage();
 }
 
-void ImageFrame::move(QPoint shift) {
-  if (!selection) {
+void ImageFrame::move(QPoint shift, bool drag) {
+  if (!selection || !this->isEnabled()) {
     qDebug() << "No selection";
     return;
   }
-  if (!this->isEnabled())
+  if (state->textObjects.isEmpty()) {
     return;
-  if (state->textObjects.isEmpty())
-    return;
+  }
 
+  static QPoint before;
   if (!stagedState) {
+    before = selection->topLeft;
     QVector<ImageTextObject *> oldObjs = state->textObjects;
     State *oldState = new State{oldObjs, cv::Mat{}, selection};
     state->matrix.copyTo(oldState->matrix);
@@ -984,20 +991,34 @@ void ImageFrame::move(QPoint shift) {
   }
 
   // update selection on move
-  selection->hide();
-  selection->setDisabled(true);
-  state->textObjects.remove(state->textObjects.indexOf(selection));
+  if (!drag) {
+    selection->hide();
+    selection->setDisabled(true);
+    state->textObjects.remove(state->textObjects.indexOf(selection));
 
-  selection =
-      new ImageTextObject{this, *selection, ui, &state->matrix, options};
-  selection->setHighlightColor(GREEN_HIGHLIGHT);
-  selection->isChanged = true;
-  selection->showHighlight();
-  connectSelection(selection);
-  state->textObjects.push_back(selection);
+    selection =
+        new ImageTextObject{this, *selection, ui, &state->matrix, options};
+    selection->setHighlightColor(GREEN_HIGHLIGHT);
+    selection->isChanged = true;
+    selection->showHighlight();
+    selection->drag = drag;
+    connectSelection(selection);
+    state->textObjects.push_back(selection);
+  }
 
-  selection->reposition(shift);
-  selection->scaleAndPosition(scalar);
+  if (shift == QPoint{0, 0}) {
+    stagedState->selection->reposition(before - selection->topLeft);
+    stagedState->selection->scaleAndPosition(scalar);
+    return;
+  }
+
+  if (drag) {
+    selection->reposition(QWidget::mapFromGlobal(shift) / scalar, false);
+    selection->scaleAndPosition(scalar);
+  } else {
+    selection->reposition(shift);
+    selection->scaleAndPosition(scalar);
+  }
 }
 
 void ImageFrame::hideHighlights() {

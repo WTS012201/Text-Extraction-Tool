@@ -1,5 +1,6 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
+#include <mutex>
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -713,18 +714,26 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
         ui->colorSelect->setStyleSheet(style);
 
         Highlight *hb = selection->highlightButton;
-        auto shift = [&](const QPoint &pos) {
-          if (selection->drag) {
-            move(pos, true);
-          }
-        };
-
         auto release = [&] {
           if (!selection->drag) {
             move(QPoint{0, 0}, false);
             stageState(true);
           }
         };
+
+        auto shift = [&](const QPoint &pos) {
+          auto relPos = QWidget::mapFromGlobal(pos) / scalar;
+          if (selection->drag) {
+            move(relPos, true);
+          }
+
+          if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
+            selection->drag = false;
+          } else if (relPos.y() < 0 || relPos.x() < 0) {
+            selection->drag = false;
+          }
+        };
+
         QObject::connect(hb, &Highlight::drag, this, shift);
         QObject::connect(hb, &Highlight::released, this, release);
       });
@@ -1006,8 +1015,10 @@ void ImageFrame::move(QPoint shift, bool drag) {
         new ImageTextObject{this, *selection, ui, &state->matrix, options};
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->isChanged = true;
+    selection->drag = false;
     selection->showHighlight();
     connectSelection(selection);
+    emit selection->selection(selection);
     state->textObjects.push_back(selection);
   }
 
@@ -1018,7 +1029,7 @@ void ImageFrame::move(QPoint shift, bool drag) {
   }
 
   if (drag) {
-    selection->reposition(QWidget::mapFromGlobal(shift) / scalar, false);
+    selection->reposition(shift, false);
     selection->scaleAndPosition(scalar);
   } else {
     selection->reposition(shift);

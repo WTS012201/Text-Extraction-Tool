@@ -24,7 +24,6 @@
 #include <QVector>
 #include <QWidget>
 #include <QtConcurrent/QtConcurrent>
-#include <memory>
 
 constexpr double ZOOM_MAX = 5.0;
 

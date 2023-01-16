@@ -39,7 +39,7 @@ public:
 
   QHash<int, bool> keysPressed;
   ImageTextObject *selection;
-  bool isProcessing;
+  bool isProcessing, isDrag;
   State *stagedState;
 
   QString rawText;
@@ -62,7 +62,7 @@ public:
 
   State *&getState();
   void move(QPoint shift, bool drag = false);
-  void stageState();
+  void stageState(bool drag = false);
   void hideHighlights();
 
 public slots:

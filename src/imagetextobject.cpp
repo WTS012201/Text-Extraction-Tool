@@ -5,8 +5,8 @@
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
-      drag{false}, fontSize{14}, mat{__mat}, moveReleased{false},
-      highlightButton{nullptr},
+      drag{false}, fontSize{14}, mat{__mat}, highlightButton{nullptr},
+      moveReleased{false},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }

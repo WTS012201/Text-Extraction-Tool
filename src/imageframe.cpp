@@ -3,7 +3,7 @@
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
-    : selection{nullptr}, isProcessing{false},
+    : selection{nullptr}, isProcessing{false}, isDrag{false},
       stagedState{nullptr}, scalar{1.0}, scaleIncrement{0.1}, tab{__tab},
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
@@ -692,6 +692,11 @@ cv::Scalar ImageFrame::defaultColor;
 void ImageFrame::connectSelection(ImageTextObject *obj) {
   QObject::connect(
       obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
+        if (isDrag) {
+          isDrag = false;
+          return;
+        }
+
         selection = qobject_cast<ImageTextObject *>(sender());
         for (const auto &tempObj : state->textObjects) {
           if (tempObj == selection) {
@@ -713,10 +718,11 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
             move(pos, true);
           }
         };
+
         auto release = [&] {
           if (!selection->drag) {
             move(QPoint{0, 0}, false);
-            stageState();
+            stageState(true);
           }
         };
         QObject::connect(hb, &Highlight::drag, this, shift);
@@ -938,14 +944,13 @@ void ImageFrame::groupSelections() {
 }
 
 void ImageFrame::deleteSelection() {
-  if (!selection) {
+  if (!selection || !this->isEnabled()) {
     qDebug() << "No selection";
     return;
   }
-  if (!this->isEnabled())
+  if (state->textObjects.isEmpty()) {
     return;
-  if (state->textObjects.isEmpty())
-    return;
+  }
 
   auto idx = state->textObjects.indexOf(selection);
   selection->reset();
@@ -965,10 +970,11 @@ void ImageFrame::keyReleaseEvent(QKeyEvent *event) {
   }
 }
 
-void ImageFrame::stageState() {
+void ImageFrame::stageState(bool drag) {
   undo.push(stagedState);
   stagedState = nullptr;
   selection->unstageMove();
+  isDrag = drag;
   changeImage();
 }
 
@@ -1001,7 +1007,6 @@ void ImageFrame::move(QPoint shift, bool drag) {
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->isChanged = true;
     selection->showHighlight();
-    selection->drag = drag;
     connectSelection(selection);
     state->textObjects.push_back(selection);
   }

@@ -1,6 +1,5 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
-#include <mutex>
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -130,10 +129,14 @@ void ImageFrame::pasteImage(QImage *img) {
 }
 
 void ImageFrame::changeImage(QImage *img) {
+  if (state->matrix.empty()) {
+    return;
+  }
+
   try {
     display = cv::Mat{};
     state->matrix.copyTo(display);
-    cv::resize(display, display, cv::Size{}, scalar, scalar, cv::INTER_AREA);
+    cv::resize(display, display, {}, scalar, scalar, cv::INTER_AREA);
   } catch (cv::Exception &e) {
     qDebug() << e.what() << "In changeImage:";
     delete scene;
@@ -825,10 +828,6 @@ void ImageFrame::undoAction() {
     obj->setDisabled(true);
   }
 
-  /* State *currState = new State{state->textObjects, cv::Mat{}, selection}; */
-
-  /* state->matrix.copyTo(currState->matrix); */
-  /* redo.push(currState); */
   redo.push(state);
   state = undo.pop();
 
@@ -846,8 +845,6 @@ void ImageFrame::undoAction() {
   }
 
   changeImage();
-  qDebug() << "On " << selection->mat;
-  qDebug() << "state mat  " << &state->matrix;
 }
 
 void ImageFrame::redoAction() {
@@ -867,11 +864,13 @@ void ImageFrame::redoAction() {
     obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
+    obj->mat = &state->matrix;
   }
 
   if ((selection = state->selection)) {
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->showHighlight();
+    selection->mat = &state->matrix;
   }
 
   changeImage();

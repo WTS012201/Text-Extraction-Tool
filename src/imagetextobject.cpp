@@ -153,13 +153,9 @@ void ImageTextObject::unstageMove() {
                          .colRange(topLeft.x(), bottomRight.x());
   moving = false;
 
-  qDebug() << "Writing to " << mat;
   if (textMask) {
-    qDebug() << "fill";
     auto text = textMask.value().first;
     auto mask = textMask.value().second;
-    cv::imwrite("text.png", text);
-    cv::imwrite("mask.png", mask);
 
     cv::bitwise_not(mask, mask);
     cv::bitwise_and(mask, drawArea, draw);

@@ -750,7 +750,6 @@ void ImageFrame::populateTextObjects() {
     temp->hide();
 
     tempObjects.push_back(temp);
-
     connectSelection(temp);
     delete obj;
   }
@@ -813,6 +812,9 @@ void ImageFrame::undoAction() {
   if (undo.empty() || isProcessing || !tab) {
     return;
   }
+  if (!state->selection) {
+    state->selection = selection;
+  }
 
   if (selection) {
     selection->setHighlightColor(YELLOW_HIGHLIGHT);
@@ -823,24 +825,29 @@ void ImageFrame::undoAction() {
     obj->setDisabled(true);
   }
 
-  State *currState = new State{state->textObjects, cv::Mat{}, selection};
+  /* State *currState = new State{state->textObjects, cv::Mat{}, selection}; */
 
-  state->matrix.copyTo(currState->matrix);
-  redo.push(currState);
+  /* state->matrix.copyTo(currState->matrix); */
+  /* redo.push(currState); */
+  redo.push(state);
   state = undo.pop();
 
   for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
+    obj->mat = &state->matrix;
   }
 
   if ((selection = state->selection)) {
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->showHighlight();
+    selection->mat = &state->matrix;
   }
 
   changeImage();
+  qDebug() << "On " << selection->mat;
+  qDebug() << "state mat  " << &state->matrix;
 }
 
 void ImageFrame::redoAction() {

@@ -50,12 +50,11 @@ class QcvScalar : public cv::Scalar {
 
 class Highlight : public QPushButton {
   Q_OBJECT
+signals:
+  void drag(const QPoint &) const;
 
 public:
   Highlight(QWidget *parent) : QPushButton{parent} {};
-
-signals:
-  void drag(const QPoint &) const;
 
 private:
   void mouseMoveEvent(QMouseEvent *) { emit drag(QCursor::pos()); }
@@ -73,10 +72,10 @@ signals:
 
 public:
   bool isSelected, isChanged, colorSet, drag;
-
   int fontSize;
   cv::Scalar bgIntensity, fontIntensity;
   cv::Mat *mat;
+
   explicit ImageTextObject(QWidget *parent = nullptr, cv::Mat *__mat = nullptr);
   ~ImageTextObject();
   ImageTextObject(QWidget *parent, const ImageTextObject &old,
@@ -109,7 +108,7 @@ public:
   static QString formatStyle(cv::Scalar);
 
 private:
-  bool moveReleased;
+  static bool moving;
   Options *options;
   Ui::MainWindow *mUi;
   cv::Mat draw;

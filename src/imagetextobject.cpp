@@ -6,10 +6,11 @@
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
     : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
       drag{false}, fontSize{14}, mat{__mat}, highlightButton{nullptr},
-      moveReleased{false},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
+
+bool ImageTextObject::moving = false;
 
 ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
                                  Ui::MainWindow *__ui, cv::Mat *__mat,
@@ -23,7 +24,6 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   fontIntensity = old.fontIntensity;
   fontSize = old.fontSize;
   colorSet = old.colorSet;
-  moveReleased = old.moveReleased;
   textMask = old.textMask;
   drag = old.drag;
 
@@ -132,7 +132,7 @@ void ImageTextObject::reposition(QPoint shift, bool relative) {
     newPosBR -= shiftBack;
   }
 
-  if (!moveReleased) {
+  if (!moving) {
     if (options->getFillMethod() == Options::NEIGHBOR) {
       auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
                              cv::Point{bottomRight.x(), bottomRight.y()}};
@@ -140,24 +140,30 @@ void ImageTextObject::reposition(QPoint shift, bool relative) {
     } else {
       textMask = fillBackground(true);
     }
-    moveReleased = true;
+    moving = true;
   }
 
   topLeft = newPosTL;
   bottomRight = newPosBR;
 }
 
+// subtract and fill text in new position
 void ImageTextObject::unstageMove() {
   cv::Mat drawArea = mat->rowRange(topLeft.y(), bottomRight.y())
                          .colRange(topLeft.x(), bottomRight.x());
-  moveReleased = false;
+  moving = false;
 
+  qDebug() << "Writing to " << mat;
   if (textMask) {
+    qDebug() << "fill";
     auto text = textMask.value().first;
     auto mask = textMask.value().second;
+    cv::imwrite("text.png", text);
+    cv::imwrite("mask.png", mask);
 
     cv::bitwise_not(mask, mask);
     cv::bitwise_and(mask, drawArea, draw);
+
     draw += text;
   }
   draw.copyTo(drawArea);
@@ -222,7 +228,7 @@ void ImageTextObject::generatePalette() {
 
   for (auto i = left; i < right; i++) {
     for (auto j = top; j < bottom; j++) {
-      QcvScalar key = QcvScalar{mat->at<cv::Vec3b>(cv::Point{i, j})};
+      QcvScalar key = QcvScalar{mat->at<cv::Vec3b>({i, j})};
       if (!scalars.contains(key)) {
         scalars[key] = 1;
       } else {
@@ -236,12 +242,12 @@ void ImageTextObject::generatePalette() {
   }
 
   QVector<cv::Scalar> __colorPalette;
-  typedef QHash<QcvScalar, int>::iterator T;
+  typedef QHash<QcvScalar, int>::iterator I;
 
-  auto cmp = [](T lhs, T rhs) -> bool { return lhs.value() > rhs.value(); };
-  std::priority_queue<T, QVector<T>, decltype(cmp)> pq(cmp);
+  auto cmp = [](I lhs, I rhs) -> bool { return lhs.value() > rhs.value(); };
+  std::priority_queue<I, QVector<I>, decltype(cmp)> pq(cmp);
 
-  for (T it = scalars.begin(); it != scalars.end(); ++it) {
+  for (I it = scalars.begin(); it != scalars.end(); ++it) {
     pq.push(it);
   }
 

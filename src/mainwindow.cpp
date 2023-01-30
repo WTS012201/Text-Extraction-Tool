@@ -1,4 +1,5 @@
 ﻿#include "../headers/mainwindow.h"
+#include "headers/imagetextobject.h"
 #include "qboxlayout.h"
 #include "ui_mainwindow.h"
 #include "ui_tabscroll.h"
@@ -275,17 +276,19 @@ void MainWindow::connections() {
                                        "%");
     ui->textEdit->setText(iFrame->selection ? iFrame->selection->getText()
                                             : "");
-    QObject::connect(iFrame, &ImageFrame::colorSelected, this,
-                     [&](cv::Scalar color) {
-                       if (iFrame && iFrame->selection) {
-                         QString style = ImageTextObject::formatStyle(color);
-                         ImageFrame::defaultColor = color;
 
-                         iFrame->selection->colorSet = true;
-                         iFrame->selection->fontIntensity = color;
-                         ui->colorSelect->setStyleSheet(style);
-                       }
-                     });
+    auto fill = [&](cv::Scalar color) {
+      if (iFrame && iFrame->selection) {
+        QString style = ImageTextObject::formatStyle(color);
+        ImageFrame::defaultColor = color;
+
+        iFrame->selection->colorSet = true;
+        iFrame->selection->fontIntensity = color;
+        ui->colorSelect->setStyleSheet(style);
+      }
+    };
+
+    QObject::connect(iFrame, &ImageFrame::colorSelected, this, fill);
   });
 }
 
@@ -310,7 +313,8 @@ void MainWindow::colorTray() {
     return;
 
   if (iFrame->selection) {
-    colorMenu->setColor(iFrame->selection->fontIntensity);
+    auto intensity = iFrame->selection->colorPalette.first();
+    colorMenu->setColor(intensity);
   }
 
   colorMenu->setModal(true);
@@ -318,6 +322,7 @@ void MainWindow::colorTray() {
   QVector<QPushButton *> buttons;
   QVector<QHBoxLayout *> layouts;
   QHBoxLayout *curr;
+
   for (const auto &color : iFrame->selection->colorPalette) {
     if (layouts.empty() || curr->count() % 5 == 0) {
       layouts.push_back(curr = new QHBoxLayout);

@@ -106,6 +106,7 @@ public:
   void reset();
   void unstageMove();
   static QString formatStyle(cv::Scalar);
+  cv::Mat generateTextMask(const cv::Rect &roi);
 
 private:
   static bool moving;

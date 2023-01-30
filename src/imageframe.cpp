@@ -710,9 +710,6 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
           tempObj->deselect();
         }
 
-        if (!curr->colorSet) {
-          selection->fontIntensity = ImageFrame::defaultColor;
-        }
         QString style = ImageTextObject::formatStyle(selection->fontIntensity);
         ui->colorSelect->setStyleSheet(style);
 

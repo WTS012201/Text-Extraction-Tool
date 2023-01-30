@@ -1,4 +1,5 @@
 ﻿#include "../headers/imagetextobject.h"
+#include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
 #include <optional>
@@ -31,9 +32,9 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   setText(old.getText());
 
   initSizeAndPos();
-  highlightSpaces();
   determineBgColor();
   generatePalette();
+  highlightSpaces();
 }
 
 void ImageTextObject::setFilepath(QString __filepath) { filepath = __filepath; }
@@ -61,6 +62,10 @@ void ImageTextObject::highlightSpaces() {
       mUi->fontSizeInput->setText(QString::number(fontSize));
       mUi->textEdit->setText(text);
       highlight->setStyleSheet(GREEN_HIGHLIGHT);
+
+      mUi->colorSelect->setStyleSheet(
+          ImageTextObject::formatStyle(fontIntensity));
+
       emit selection(this);
     }
   });
@@ -167,6 +172,7 @@ void ImageTextObject::unstageMove() {
   draw = cv::Mat{};
   textMask = std::optional<QPair<cv::Mat, cv::Mat>>{};
 }
+
 void ImageTextObject::scaleAndPosition(double scalar) {
   auto size = scalar * (lineSpace.second - lineSpace.first);
   highlightButton->setMinimumSize(QSize{size.x(), size.y()});
@@ -215,16 +221,23 @@ void ImageTextObject::generatePalette() {
 
   auto left{topLeft.x()}, top{topLeft.y()};
   auto right{bottomRight.x()}, bottom{bottomRight.y()};
-  QHash<QcvScalar, int> scalars;
-  int max = 0;
-
   if (left == right || top == bottom) {
     return;
   }
 
-  for (auto i = left; i < right; i++) {
-    for (auto j = top; j < bottom; j++) {
-      QcvScalar key = QcvScalar{mat->at<cv::Vec3b>({i, j})};
+  auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
+                         cv::Point{bottomRight.x(), bottomRight.y()}};
+  cv::Mat mask = generateTextMask(region);
+  auto ker = cv::getStructuringElement(cv::MORPH_RECT, {3, 3});
+  /* cv::erode(mask, mask, ker, {}, 1); */
+  cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR);
+  cv::Mat text = mask & draw;
+
+  QHash<QcvScalar, int> scalars;
+  int max = 0;
+  for (auto i = 0; i < right - left; i++) {
+    for (auto j = 0; j < bottom - top; j++) {
+      QcvScalar key = QcvScalar{text.at<cv::Vec3b>({i, j})};
       if (!scalars.contains(key)) {
         scalars[key] = 1;
       } else {
@@ -240,7 +253,7 @@ void ImageTextObject::generatePalette() {
   QVector<cv::Scalar> __colorPalette;
   typedef QHash<QcvScalar, int>::iterator I;
 
-  auto cmp = [](I lhs, I rhs) -> bool { return lhs.value() > rhs.value(); };
+  auto cmp = [](I lhs, I rhs) -> bool { return lhs.value() < rhs.value(); };
   std::priority_queue<I, QVector<I>, decltype(cmp)> pq(cmp);
 
   for (I it = scalars.begin(); it != scalars.end(); ++it) {
@@ -248,11 +261,15 @@ void ImageTextObject::generatePalette() {
   }
 
   for (auto i = 0; i < PALETTE_LIMIT && !pq.empty(); i++) {
-    __colorPalette.push_back(pq.top().key());
+    auto key = pq.top().key();
+    if (cv::Scalar{0, 0, 0} != key) {
+      __colorPalette.push_back(key);
+    }
     pq.pop();
   }
 
   colorPalette = __colorPalette;
+  fontIntensity = colorPalette.first();
 }
 
 void ImageTextObject::determineBgColor() {
@@ -342,9 +359,25 @@ double whiteComp(const cv::Mat &mat) {
   return static_cast<double>(whiteCount) / (mat.rows * mat.cols);
 }
 
+cv::Mat ImageTextObject::generateTextMask(const cv::Rect &roi) {
+  cv::Mat mask;
+
+  (*mat)(roi).copyTo(draw);
+  cv::cvtColor(draw, mask, cv::COLOR_BGR2GRAY);
+  cv::threshold(mask, mask, 0, 255, cv::THRESH_OTSU);
+
+  auto whites = whiteComp(mask);
+  if (whites > INVERT_MASK_THRESH) {
+    qDebug() << "inverting mask\n";
+    mask = ~mask;
+  }
+
+  return mask;
+}
+
 std::optional<QPair<cv::Mat, cv::Mat>>
 ImageTextObject::inpaintingFill(bool move) {
-  cv::Mat gray, draw, mask, dst;
+  cv::Mat gray, mask, dst;
 
   auto bTL = topLeft, bBR = bottomRight;
   auto borderWidth = 3;
@@ -370,17 +403,7 @@ ImageTextObject::inpaintingFill(bool move) {
 
   auto region =
       cv::Rect{cv::Point{bTL.x(), bTL.y()}, cv::Point{bBR.x(), bBR.y()}};
-
-  (*mat)(region).copyTo(draw);
-  cv::cvtColor(draw, gray, cv::COLOR_BGR2GRAY);
-  cv::threshold(gray, mask, 0, 255, cv::THRESH_OTSU);
-
-  auto whites = whiteComp(mask);
-  if (whites > INVERT_MASK_THRESH) {
-    qDebug() << "inverting mask\n";
-    mask = ~mask;
-  }
-
+  mask = generateTextMask(region);
   auto ker = cv::getStructuringElement(cv::MORPH_RECT, {3, 3});
   cv::dilate(mask, gray, ker, {-1, -1}, 1);
   cv::inpaint(draw, gray, dst, 3, cv::INPAINT_NS);

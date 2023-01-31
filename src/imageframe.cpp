@@ -1,5 +1,6 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
+#include "headers/imagetextobject.h"
 #include <bits/chrono.h>
 #include <chrono>
 
@@ -696,45 +697,52 @@ void ImageFrame::extract(cv::Mat *mat) {
 cv::Scalar ImageFrame::defaultColor;
 
 void ImageFrame::connectSelection(ImageTextObject *obj) {
-  QObject::connect(obj, &ImageTextObject::selection, this, [&] {
-    if (isDrag) {
-      isDrag = false;
-      return;
-    }
+  QObject::connect(
+      obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
+        if (isDrag) {
+          isDrag = false;
+          return;
+        }
 
-    if (selection) {
-      selection->setHighlightColor(YELLOW_HIGHLIGHT);
-      selection->deselect();
-    }
-    selection = qobject_cast<ImageTextObject *>(sender());
+        selection = qobject_cast<ImageTextObject *>(sender());
+        for (const auto &tempObj : state->textObjects) {
+          if (tempObj == selection) {
+            continue;
+          }
+          tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
+          tempObj->deselect();
+        }
 
-    QString style = ImageTextObject::formatStyle(selection->fontIntensity);
-    ui->colorSelect->setStyleSheet(style);
+        if (!curr->colorSet) {
+          selection->fontIntensity = ImageFrame::defaultColor;
+        }
+        QString style = ImageTextObject::formatStyle(selection->fontIntensity);
+        ui->colorSelect->setStyleSheet(style);
 
-    Highlight *hb = selection->highlightButton;
-    auto release = [&] {
-      if (!selection->drag) {
-        move(QPoint{0, 0}, false);
-        stageState(true);
-      }
-    };
+        Highlight *hb = selection->highlightButton;
+        auto release = [&] {
+          if (!selection->drag) {
+            move(QPoint{0, 0}, false);
+            stageState(true);
+          }
+        };
 
-    auto shift = [&](const QPoint &pos) {
-      auto relPos = QWidget::mapFromGlobal(pos) / scalar;
-      if (selection->drag) {
-        move(relPos, true);
-      }
+        auto shift = [&](const QPoint &pos) {
+          auto relPos = QWidget::mapFromGlobal(pos) / scalar;
+          if (selection->drag) {
+            move(relPos, true);
+          }
 
-      if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
-        selection->drag = false;
-      } else if (relPos.y() < 0 || relPos.x() < 0) {
-        selection->drag = false;
-      }
-    };
+          if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
+            selection->drag = false;
+          } else if (relPos.y() < 0 || relPos.x() < 0) {
+            selection->drag = false;
+          }
+        };
 
-    QObject::connect(hb, &Highlight::drag, this, shift);
-    QObject::connect(hb, &Highlight::released, this, release);
-  });
+        QObject::connect(hb, &Highlight::drag, this, shift);
+        QObject::connect(hb, &Highlight::released, this, release);
+      });
 }
 
 ImageFrame::State *&ImageFrame::getState() { return state; }

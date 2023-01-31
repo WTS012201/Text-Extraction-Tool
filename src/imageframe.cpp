@@ -719,7 +719,7 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
 
         // this doesnt reconnect after first click which leads to issues
         // i think when this is called out of scope, u have to use from sender
-        // for setting selection
+        // for correct context on drag
         Highlight *hb = selection->highlightButton;
         auto release = [&] {
           selection->setHighlightColor(YELLOW_HIGHLIGHT);

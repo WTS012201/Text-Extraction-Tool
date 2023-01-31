@@ -68,7 +68,7 @@ class ImageTextObject : public QWidget {
   Q_OBJECT
 
 signals:
-  void selection(ImageTextObject *);
+  void selection();
 
 public:
   bool isSelected, isChanged, colorSet, drag;
@@ -80,6 +80,8 @@ public:
   ~ImageTextObject();
   ImageTextObject(QWidget *parent, const ImageTextObject &old,
                   Ui::MainWindow *__ui, cv::Mat *mat, Options *options);
+  ImageTextObject(QWidget *parent, ImageTextObject &&old, Ui::MainWindow *__ui,
+                  cv::Mat *mat, Options *options);
 
   Highlight *highlightButton;
   QPoint topLeft, bottomRight;

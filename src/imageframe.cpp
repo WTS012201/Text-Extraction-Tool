@@ -1,5 +1,7 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
+#include <bits/chrono.h>
+#include <chrono>
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -694,49 +696,45 @@ void ImageFrame::extract(cv::Mat *mat) {
 cv::Scalar ImageFrame::defaultColor;
 
 void ImageFrame::connectSelection(ImageTextObject *obj) {
-  QObject::connect(
-      obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
-        if (isDrag) {
-          isDrag = false;
-          return;
-        }
+  QObject::connect(obj, &ImageTextObject::selection, this, [&] {
+    if (isDrag) {
+      isDrag = false;
+      return;
+    }
 
-        selection = qobject_cast<ImageTextObject *>(sender());
-        for (const auto &tempObj : state->textObjects) {
-          if (tempObj == selection) {
-            continue;
-          }
-          tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
-          tempObj->deselect();
-        }
+    if (selection) {
+      selection->setHighlightColor(YELLOW_HIGHLIGHT);
+      selection->deselect();
+    }
+    selection = qobject_cast<ImageTextObject *>(sender());
 
-        QString style = ImageTextObject::formatStyle(selection->fontIntensity);
-        ui->colorSelect->setStyleSheet(style);
+    QString style = ImageTextObject::formatStyle(selection->fontIntensity);
+    ui->colorSelect->setStyleSheet(style);
 
-        Highlight *hb = selection->highlightButton;
-        auto release = [&] {
-          if (!selection->drag) {
-            move(QPoint{0, 0}, false);
-            stageState(true);
-          }
-        };
+    Highlight *hb = selection->highlightButton;
+    auto release = [&] {
+      if (!selection->drag) {
+        move(QPoint{0, 0}, false);
+        stageState(true);
+      }
+    };
 
-        auto shift = [&](const QPoint &pos) {
-          auto relPos = QWidget::mapFromGlobal(pos) / scalar;
-          if (selection->drag) {
-            move(relPos, true);
-          }
+    auto shift = [&](const QPoint &pos) {
+      auto relPos = QWidget::mapFromGlobal(pos) / scalar;
+      if (selection->drag) {
+        move(relPos, true);
+      }
 
-          if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
-            selection->drag = false;
-          } else if (relPos.y() < 0 || relPos.x() < 0) {
-            selection->drag = false;
-          }
-        };
+      if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
+        selection->drag = false;
+      } else if (relPos.y() < 0 || relPos.x() < 0) {
+        selection->drag = false;
+      }
+    };
 
-        QObject::connect(hb, &Highlight::drag, this, shift);
-        QObject::connect(hb, &Highlight::released, this, release);
-      });
+    QObject::connect(hb, &Highlight::drag, this, shift);
+    QObject::connect(hb, &Highlight::released, this, release);
+  });
 }
 
 ImageFrame::State *&ImageFrame::getState() { return state; }
@@ -746,12 +744,11 @@ void ImageFrame::populateTextObjects() {
 
   for (const auto &obj : state->textObjects) {
     ImageTextObject *temp =
-        new ImageTextObject{this, *obj, ui, &state->matrix, options};
+        new ImageTextObject{this, std::move(*obj), ui, &state->matrix, options};
     temp->hide();
 
     tempObjects.push_back(temp);
     connectSelection(temp);
-    delete obj;
   }
 
   state->textObjects = tempObjects;
@@ -991,6 +988,7 @@ void ImageFrame::stageState(bool drag) {
 }
 
 void ImageFrame::move(QPoint shift, bool drag) {
+
   if (!selection || !this->isEnabled()) {
     qDebug() << "No selection";
     return;
@@ -999,7 +997,7 @@ void ImageFrame::move(QPoint shift, bool drag) {
     return;
   }
 
-  static QPoint before;
+  static QPoint before{0, 0};
   if (!stagedState) {
     before = selection->topLeft;
     QVector<ImageTextObject *> oldObjs = state->textObjects;
@@ -1021,13 +1019,12 @@ void ImageFrame::move(QPoint shift, bool drag) {
     selection->drag = false;
     selection->showHighlight();
     connectSelection(selection);
-    emit selection->selection(selection);
     state->textObjects.push_back(selection);
   }
 
   if (shift == QPoint{0, 0}) {
-    stagedState->selection->reposition(before - selection->topLeft);
     stagedState->selection->scaleAndPosition(scalar);
+    stagedState->selection->reposition(before - selection->topLeft);
     return;
   }
 

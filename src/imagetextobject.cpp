@@ -37,6 +37,29 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   highlightSpaces();
 }
 
+ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &&old,
+                                 Ui::MainWindow *__ui, cv::Mat *__mat,
+                                 Options *__options)
+    : QWidget(parent), mat{__mat}, options{__options}, mUi{__ui},
+      ui(new Ui::ImageTextObject) {
+  topLeft = old.topLeft;
+  bottomRight = old.bottomRight;
+  lineSpace = old.lineSpace;
+  fontIntensity = old.fontIntensity;
+  fontSize = old.fontSize;
+  colorSet = old.colorSet;
+  textMask = old.textMask;
+  drag = old.drag;
+
+  ui->setupUi(this);
+  setText(old.getText());
+
+  initSizeAndPos();
+  determineBgColor();
+  generatePalette();
+  highlightSpaces();
+}
+
 void ImageTextObject::setFilepath(QString __filepath) { filepath = __filepath; }
 
 void ImageTextObject::setText(QString __text) { text = __text; }
@@ -66,7 +89,8 @@ void ImageTextObject::highlightSpaces() {
       mUi->colorSelect->setStyleSheet(
           ImageTextObject::formatStyle(fontIntensity));
 
-      emit selection(this);
+      qDebug() << "TEST";
+      emit selection();
     }
   });
 

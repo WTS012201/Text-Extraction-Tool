@@ -34,6 +34,7 @@ public:
     QVector<ImageTextObject *> textObjects;
     cv::Mat matrix;
     ImageTextObject *selection;
+    /* ~State() { delete selection; } */
   } State;
 
   QHash<int, bool> keysPressed;

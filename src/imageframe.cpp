@@ -698,13 +698,14 @@ cv::Scalar ImageFrame::defaultColor;
 
 void ImageFrame::connectSelection(ImageTextObject *obj) {
   QObject::connect(
-      obj, &ImageTextObject::selection, this, [&](ImageTextObject *curr) {
+      obj, &ImageTextObject::selection, this, [&](ImageTextObject *) {
         if (isDrag) {
           isDrag = false;
           return;
         }
 
         selection = qobject_cast<ImageTextObject *>(sender());
+        qDebug() << "selection " << selection;
         for (const auto &tempObj : state->textObjects) {
           if (tempObj == selection) {
             continue;
@@ -713,14 +714,19 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
           tempObj->deselect();
         }
 
-        if (!curr->colorSet) {
-          selection->fontIntensity = ImageFrame::defaultColor;
-        }
         QString style = ImageTextObject::formatStyle(selection->fontIntensity);
         ui->colorSelect->setStyleSheet(style);
 
+        // this doesnt reconnect after first click which leads to issues
+        // i think when this is called out of scope, u have to use from sender
+        // for setting selection
         Highlight *hb = selection->highlightButton;
         auto release = [&] {
+          selection->setHighlightColor(YELLOW_HIGHLIGHT);
+          selection->deselect();
+
+          auto curr = sender()->parent()->parent();
+          selection = qobject_cast<ImageTextObject *>(curr);
           if (!selection->drag) {
             move(QPoint{0, 0}, false);
             stageState(true);
@@ -849,6 +855,7 @@ void ImageFrame::undoAction() {
   changeImage();
 }
 
+// flush redo if change
 void ImageFrame::redoAction() {
   if (redo.empty() || isProcessing || !tab) {
     return;

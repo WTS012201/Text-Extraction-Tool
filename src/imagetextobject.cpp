@@ -82,6 +82,7 @@ void ImageTextObject::highlightSpaces() {
 
   QObject::connect(highlight, &Highlight::clicked, this, [=] {
     if (isChanged) {
+      qDebug() << "from clicked " << this;
       mUi->fontSizeInput->setText(QString::number(fontSize));
       mUi->textEdit->setText(text);
       highlight->setStyleSheet(GREEN_HIGHLIGHT);

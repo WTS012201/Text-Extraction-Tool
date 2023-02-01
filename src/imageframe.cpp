@@ -715,6 +715,7 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
 
     QString style = ImageTextObject::formatStyle(selection->fontIntensity);
     ui->colorSelect->setStyleSheet(style);
+    qDebug() << selection;
   });
 
   Highlight *hb = obj->highlightButton;
@@ -885,6 +886,7 @@ void ImageFrame::redoAction() {
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->showHighlight();
     selection->mat = &state->matrix;
+    qDebug() << selection;
   }
 
   changeImage();
@@ -1011,7 +1013,6 @@ void ImageFrame::stageState(bool drag) {
 }
 
 void ImageFrame::move(QPoint shift, bool drag) {
-
   if (!selection || !this->isEnabled()) {
     qDebug() << "No selection";
     return;
@@ -1035,14 +1036,17 @@ void ImageFrame::move(QPoint shift, bool drag) {
     selection->setDisabled(true);
     state->textObjects.remove(state->textObjects.indexOf(selection));
 
-    selection =
-        new ImageTextObject{this, *selection, ui, &state->matrix, options};
+    auto colors = selection->colorPalette;
+    selection = new ImageTextObject{this, std::move(*selection), ui,
+                                    &state->matrix, options};
+    selection->colorPalette = colors;
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->isChanged = true;
     selection->drag = false;
     selection->showHighlight();
     connectSelection(selection);
     state->textObjects.push_back(selection);
+    state->selection = selection;
   }
 
   if (shift == QPoint{0, 0}) {

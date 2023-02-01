@@ -68,7 +68,7 @@ class ImageTextObject : public QWidget {
   Q_OBJECT
 
 signals:
-  void selection(ImageTextObject *);
+  void selection();
 
 public:
   bool isSelected, isChanged, colorSet, drag;

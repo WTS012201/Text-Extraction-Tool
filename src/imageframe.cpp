@@ -697,58 +697,65 @@ void ImageFrame::extract(cv::Mat *mat) {
 cv::Scalar ImageFrame::defaultColor;
 
 void ImageFrame::connectSelection(ImageTextObject *obj) {
-  QObject::connect(
-      obj, &ImageTextObject::selection, this, [&](ImageTextObject *) {
-        if (isDrag) {
-          isDrag = false;
-          return;
-        }
+  QObject::connect(obj, &ImageTextObject::selection, this, [&]() {
+    if (isDrag) {
+      isDrag = false;
+      return;
+    }
 
-        selection = qobject_cast<ImageTextObject *>(sender());
-        qDebug() << "selection " << selection;
-        for (const auto &tempObj : state->textObjects) {
-          if (tempObj == selection) {
-            continue;
-          }
-          tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
-          tempObj->deselect();
-        }
+    selection = qobject_cast<ImageTextObject *>(sender());
+    for (const auto &tempObj : state->textObjects) {
+      if (tempObj == selection) {
+        continue;
+      }
+      tempObj->setHighlightColor(YELLOW_HIGHLIGHT);
+      tempObj->deselect();
+    }
 
-        QString style = ImageTextObject::formatStyle(selection->fontIntensity);
-        ui->colorSelect->setStyleSheet(style);
+    QString style = ImageTextObject::formatStyle(selection->fontIntensity);
+    ui->colorSelect->setStyleSheet(style);
+  });
 
-        // this doesnt reconnect after first click which leads to issues
-        // i think when this is called out of scope, u have to use from sender
-        // for correct context on drag
-        Highlight *hb = selection->highlightButton;
-        auto release = [&] {
-          selection->setHighlightColor(YELLOW_HIGHLIGHT);
-          selection->deselect();
+  // this doesnt reconnect after first click which leads to issues
+  // i think when this is called out of scope, u have to use from sender
+  // for correct context on drag
+  Highlight *hb = obj->highlightButton;
+  auto release = [&] {
+    if (!selection) {
+      return;
+    }
 
-          auto curr = sender()->parent()->parent();
-          selection = qobject_cast<ImageTextObject *>(curr);
-          if (!selection->drag) {
-            move(QPoint{0, 0}, false);
-            stageState(true);
-          }
-        };
+    selection->setHighlightColor(YELLOW_HIGHLIGHT);
+    selection->deselect();
 
-        auto shift = [&](const QPoint &pos) {
-          auto relPos = QWidget::mapFromGlobal(pos) / scalar;
-          if (selection->drag) {
-            move(relPos, true);
-          }
+    auto prev = selection;
+    selection = qobject_cast<ImageTextObject *>(sender()->parent()->parent());
 
-          if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
-            selection->drag = false;
-          } else if (relPos.y() < 0 || relPos.x() < 0) {
-            selection->drag = false;
-          }
-        };
+    if (!selection->drag && prev == selection) {
+      move(QPoint{0, 0}, false);
+      stageState(true);
+    }
+  };
 
-        QObject::connect(hb, &Highlight::drag, this, shift);
-        QObject::connect(hb, &Highlight::released, this, release);
-      });
+  auto shift = [&](const QPoint &pos) {
+    if (!selection) {
+      return;
+    }
+
+    auto relPos = QWidget::mapFromGlobal(pos) / scalar;
+    if (selection->drag) {
+      move(relPos, true);
+    }
+
+    if (relPos.y() >= display.rows || relPos.x() >= display.cols) {
+      selection->drag = false;
+    } else if (relPos.y() < 0 || relPos.x() < 0) {
+      selection->drag = false;
+    }
+  };
+
+  QObject::connect(hb, &Highlight::drag, this, shift);
+  QObject::connect(hb, &Highlight::released, this, release);
 }
 
 ImageFrame::State *&ImageFrame::getState() { return state; }

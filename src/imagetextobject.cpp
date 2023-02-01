@@ -90,7 +90,7 @@ void ImageTextObject::highlightSpaces() {
       mUi->colorSelect->setStyleSheet(
           ImageTextObject::formatStyle(fontIntensity));
 
-      emit selection(this);
+      emit selection();
     }
   });
 

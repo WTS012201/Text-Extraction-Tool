@@ -1037,9 +1037,12 @@ void ImageFrame::move(QPoint shift, bool drag) {
     state->textObjects.remove(state->textObjects.indexOf(selection));
 
     auto colors = selection->colorPalette;
+    auto fontIntensity = selection->fontIntensity;
     selection = new ImageTextObject{this, std::move(*selection), ui,
                                     &state->matrix, options};
     selection->colorPalette = colors;
+    selection->fontIntensity = fontIntensity;
+
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->isChanged = true;
     selection->drag = false;

@@ -716,9 +716,6 @@ void ImageFrame::connectSelection(ImageTextObject *obj) {
     ui->colorSelect->setStyleSheet(style);
   });
 
-  // this doesnt reconnect after first click which leads to issues
-  // i think when this is called out of scope, u have to use from sender
-  // for correct context on drag
   Highlight *hb = obj->highlightButton;
   auto release = [&] {
     if (!selection) {

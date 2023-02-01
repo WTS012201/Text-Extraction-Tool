@@ -2,7 +2,6 @@
 #include "../headers/tabscroll.h"
 #include "headers/imagetextobject.h"
 #include <bits/chrono.h>
-#include <chrono>
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -111,6 +110,7 @@ void ImageFrame::pasteImage(QImage *img) {
 
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState); // scene dims
+  redo = QStack<State *>{};
   state->textObjects.erase(state->textObjects.begin(),
                            state->textObjects.end());
 
@@ -196,6 +196,7 @@ void ImageFrame::changeText() {
   State *oldState = new State{oldObjs, cv::Mat{}, oldSelection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
+  redo = QStack<State *>{};
 
   selection->fillBackground();
 
@@ -904,6 +905,7 @@ void ImageFrame::groupSelections() {
   State *oldState = new State{oldObjs, cv::Mat{}, selection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
+  redo = QStack<State *>{};
 
   ImageTextObject *textObject = new ImageTextObject{nullptr};
   QVector<ImageTextObject *> newTextObjects;
@@ -986,6 +988,7 @@ void ImageFrame::deleteSelection() {
   State *oldState = new State{oldObjs, cv::Mat{}, selection};
   state->matrix.copyTo(oldState->matrix);
   undo.push(oldState);
+  redo = QStack<State *>{};
 
   state->textObjects.remove(idx);
   selection = nullptr;
@@ -1000,6 +1003,7 @@ void ImageFrame::keyReleaseEvent(QKeyEvent *event) {
 
 void ImageFrame::stageState(bool drag) {
   undo.push(stagedState);
+  redo = QStack<State *>{};
   stagedState = nullptr;
   selection->unstageMove();
   isDrag = drag;

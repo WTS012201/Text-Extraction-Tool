@@ -248,16 +248,15 @@ void ImageFrame::changeText() {
 
   double x = max;
   double y = fm.height();
+  qDebug() << "y: " << y;
 
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
   QRect oldRect{selection->topLeft, selection->bottomRight};
 
   // Scale back to normal size before resizing
   selection->scaleAndPosition(1);
-  auto offset = wh.y() - selection->bottomRight.y();
   selection->topLeft.setY(selection->topLeft.y());
   selection->bottomRight = wh;
-  selection->bottomRight.setY(selection->bottomRight.y() - offset);
   QRect rect{selection->topLeft, selection->bottomRight};
 
   double newWidth = rect.width() * 1.0 / oldRect.width();

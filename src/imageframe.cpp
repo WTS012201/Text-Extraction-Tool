@@ -188,6 +188,7 @@ void ImageFrame::changeText() {
   auto *oldSelection = selection;
   selection =
       new ImageTextObject{this, *selection, ui, &state->matrix, options};
+  state->selection = selection;
   selection->setHighlightColor(GREEN_HIGHLIGHT);
   selection->isChanged = true;
   connectSelection(selection);
@@ -248,7 +249,6 @@ void ImageFrame::changeText() {
 
   double x = max;
   double y = fm.height();
-  qDebug() << "y: " << y;
 
   QPoint wh{selection->topLeft.x() + (int)x, selection->topLeft.y() + (int)y};
   QRect oldRect{selection->topLeft, selection->bottomRight};
@@ -885,7 +885,6 @@ void ImageFrame::redoAction() {
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->showHighlight();
     selection->mat = &state->matrix;
-    qDebug() << selection;
   }
 
   changeImage();
@@ -1054,6 +1053,7 @@ void ImageFrame::move(QPoint shift, bool drag) {
   if (shift == QPoint{0, 0}) {
     stagedState->selection->scaleAndPosition(scalar);
     stagedState->selection->reposition(before - selection->topLeft);
+    selection->scaleAndPosition(scalar);
     return;
   }
 

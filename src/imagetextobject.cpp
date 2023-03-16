@@ -5,9 +5,9 @@
 #include <optional>
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
-    : QWidget(parent), wasSelected{false}, isSelected{false}, isChanged{false},
-      colorSet{false}, drag{false}, fontSize{14}, mat{__mat},
-      highlightButton{nullptr},
+    : QWidget(parent), wasSelected{false}, isSelected{false},
+      isPersistent{false}, colorSet{false}, drag{false}, fontSize{14},
+      mat{__mat}, highlightButton{nullptr},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
@@ -84,7 +84,7 @@ void ImageTextObject::highlightSpaces() {
   highlight->show();
 
   QObject::connect(highlight, &Highlight::clicked, this, [=] {
-    if (isChanged) {
+    if (isPersistent) {
       mUi->fontSizeInput->setText(QString::number(fontSize));
       mUi->textEdit->setText(text);
       highlight->setStyleSheet(GREEN_HIGHLIGHT);
@@ -508,7 +508,7 @@ void ImageTextObject::selectHighlight() {
 void ImageTextObject::deselect() {
   highlightButton->setStyleSheet(colorStyle);
   isSelected = false;
-  if (isChanged) {
+  if (isPersistent) {
     return;
   }
   highlightButton->hide();
@@ -517,7 +517,7 @@ void ImageTextObject::deselect() {
 void ImageTextObject::reset() {
   deselect();
   hide();
-  isChanged = false;
+  isPersistent = false;
 }
 
 QString ImageTextObject::formatStyle(cv::Scalar color) {

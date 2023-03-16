@@ -190,7 +190,7 @@ void ImageFrame::changeText() {
       new ImageTextObject{this, *selection, ui, &state->matrix, options};
   state->selection = selection;
   selection->setHighlightColor(GREEN_HIGHLIGHT);
-  selection->isChanged = true;
+  selection->isPersistent = true;
   connectSelection(selection);
 
   state->textObjects.push_back(selection);
@@ -298,7 +298,7 @@ void ImageFrame::changeText() {
 
   auto swap = img->convertToFormat(QImage::Format_RGB888);
   state->matrix = QImageToCvMat(swap);
-  selection->isChanged = true;
+  selection->isPersistent = true;
   selection->showHighlight();
   selection->mat = &state->matrix;
   selection->fontIntensity = colorSelection;
@@ -375,7 +375,7 @@ void ImageFrame::removeSelection() {
     if (obj->isSelected) {
       obj->deselect();
       obj->hide();
-      obj->isChanged = false;
+      obj->isPersistent = false;
       if (obj == selection) {
         selection = nullptr;
       }
@@ -394,7 +394,7 @@ void ImageFrame::findSubstrings() {
           obj->wasSelected = false;
         } else {
           obj->setHighlightColor(BLUE_HIGHLIGHT);
-          obj->isChanged = false;
+          obj->isPersistent = false;
         }
       }
     }
@@ -406,7 +406,7 @@ void ImageFrame::findSubstrings() {
       obj->wasSelected = obj->getHighlightColor() == YELLOW_HIGHLIGHT;
       obj->setHighlightColor(PURPLE_HIGHLIGHT);
       obj->showHighlight();
-      obj->isChanged = true;
+      obj->isPersistent = true;
     }
   }
 }
@@ -419,7 +419,7 @@ void ImageFrame::highlightSelection() {
   for (const auto &obj : state->textObjects) {
     if (obj->isSelected) {
       obj->setHighlightColor(YELLOW_HIGHLIGHT);
-      obj->isChanged = true;
+      obj->isPersistent = true;
       obj->deselect();
     }
   }
@@ -539,7 +539,7 @@ void ImageFrame::mousePressEvent(QMouseEvent *event) {
         continue;
       }
       obj->deselect();
-      if (!obj->isChanged) {
+      if (!obj->isPersistent) {
         obj->hide();
       }
     }
@@ -866,7 +866,6 @@ void ImageFrame::undoAction() {
   changeImage();
 }
 
-// flush redo if change
 void ImageFrame::redoAction() {
   if (redo.empty() || isProcessing || !tab) {
     return;
@@ -1048,7 +1047,7 @@ void ImageFrame::move(QPoint shift, bool drag) {
     selection->fontIntensity = fontIntensity;
 
     selection->setHighlightColor(GREEN_HIGHLIGHT);
-    selection->isChanged = true;
+    selection->isPersistent = true;
     selection->drag = false;
     selection->showHighlight();
     connectSelection(selection);
@@ -1082,7 +1081,7 @@ void ImageFrame::hideHighlights() {
   for (const auto &obj : state->textObjects) {
     if (hideAll) {
       obj->hide();
-      if (!obj->isChanged) {
+      if (!obj->isPersistent) {
         obj->deselect();
       }
     } else {

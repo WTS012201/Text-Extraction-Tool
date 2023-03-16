@@ -282,6 +282,8 @@ void ImageFrame::changeText() {
     k = ++j;
     i++;
   }
+
+  // last line
   sub = label.mid(k, label.size() - k);
   QPoint translateY{0, (i * dy)};
 
@@ -289,6 +291,7 @@ void ImageFrame::changeText() {
   p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
   k = ++j;
   i++;
+  // ------
 
   p.restore();
   p.end();
@@ -384,11 +387,15 @@ void ImageFrame::findSubstrings() {
   QString query = ui->find->text();
 
   if (query.isEmpty()) {
-
     for (const auto &obj : state->textObjects) {
       if (obj->getHighlightColor() == PURPLE_HIGHLIGHT) {
-        obj->setHighlightColor(BLUE_HIGHLIGHT);
-        obj->isChanged = false;
+        if (obj->wasSelected) {
+          obj->setHighlightColor(YELLOW_HIGHLIGHT);
+          obj->wasSelected = false;
+        } else {
+          obj->setHighlightColor(BLUE_HIGHLIGHT);
+          obj->isChanged = false;
+        }
       }
     }
     return;
@@ -396,11 +403,10 @@ void ImageFrame::findSubstrings() {
 
   for (const auto &obj : state->textObjects) {
     if (obj->getText().contains(query, Qt::CaseInsensitive)) {
+      obj->wasSelected = obj->getHighlightColor() == YELLOW_HIGHLIGHT;
       obj->setHighlightColor(PURPLE_HIGHLIGHT);
       obj->showHighlight();
       obj->isChanged = true;
-    } else {
-      obj->setHighlightColor(YELLOW_HIGHLIGHT);
     }
   }
 }

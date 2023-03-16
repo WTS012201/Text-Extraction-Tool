@@ -5,8 +5,9 @@
 #include <optional>
 
 ImageTextObject::ImageTextObject(QWidget *parent, cv::Mat *__mat)
-    : QWidget(parent), isSelected{false}, isChanged{false}, colorSet{false},
-      drag{false}, fontSize{14}, mat{__mat}, highlightButton{nullptr},
+    : QWidget(parent), wasSelected{false}, isSelected{false}, isChanged{false},
+      colorSet{false}, drag{false}, fontSize{14}, mat{__mat},
+      highlightButton{nullptr},
       ui(new Ui::ImageTextObject), colorStyle{YELLOW_HIGHLIGHT} {
   ui->setupUi(this);
 }
@@ -26,6 +27,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, const ImageTextObject &old,
   fontSize = old.fontSize;
   colorSet = old.colorSet;
   textMask = old.textMask;
+  wasSelected = old.wasSelected;
   drag = old.drag;
 
   ui->setupUi(this);
@@ -50,6 +52,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &&old,
   colorSet = old.colorSet;
   textMask = old.textMask;
   drag = old.drag;
+  wasSelected = old.wasSelected;
 
   ui->setupUi(this);
   setText(old.getText());

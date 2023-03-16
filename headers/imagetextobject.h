@@ -71,7 +71,7 @@ signals:
   void selection();
 
 public:
-  bool isSelected, isChanged, colorSet, drag;
+  bool wasSelected, isSelected, isChanged, colorSet, drag;
   int fontSize;
   cv::Scalar bgIntensity, fontIntensity;
   cv::Mat *mat;

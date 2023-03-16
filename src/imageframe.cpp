@@ -777,6 +777,7 @@ void ImageFrame::populateTextObjects() {
   }
 
   state->textObjects = tempObjects;
+  removeSelection();
 }
 
 QString ImageFrame::collect(const cv::Mat &matrix) {

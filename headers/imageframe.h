@@ -25,7 +25,7 @@
 #include <QWidget>
 #include <QtConcurrent/QtConcurrent>
 
-constexpr double ZOOM_MAX = 5.0;
+constexpr const double ZOOM_MAX = 5.0;
 
 class ImageFrame : public QGraphicsView {
   Q_OBJECT
@@ -34,7 +34,7 @@ public:
     QVector<ImageTextObject *> textObjects;
     cv::Mat matrix;
     ImageTextObject *selection;
-    /* ~State() { delete selection; } */
+    ~State() { delete selection; }
   } State;
 
   QHash<int, bool> keysPressed;

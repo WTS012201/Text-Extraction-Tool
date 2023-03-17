@@ -855,6 +855,7 @@ void ImageFrame::undoAction() {
     obj->scaleAndPosition(scalar);
     obj->show();
     obj->setDisabled(false);
+    obj->isPersistent = obj->getHighlightColor() == YELLOW_HIGHLIGHT;
     obj->mat = &state->matrix;
   }
 
@@ -882,8 +883,10 @@ void ImageFrame::redoAction() {
 
   for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
-    obj->show();
     obj->setDisabled(false);
+    if (obj->isPersistent) {
+      obj->show();
+    }
     obj->mat = &state->matrix;
   }
 

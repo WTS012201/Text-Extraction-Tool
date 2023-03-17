@@ -23,12 +23,14 @@
 #include <optional>
 #include <queue>
 
-constexpr char BLUE_HIGHLIGHT[] = "background:  rgba(37,122,253,100);";
-constexpr char YELLOW_HIGHLIGHT[] = "background:  rgba(255, 243, 0, 100);";
-constexpr char PURPLE_HIGHLIGHT[] = "background:  rgba(255, 0, 243, 100);";
-constexpr char GREEN_HIGHLIGHT[] = "background:  rgba(0, 255, 0, 100);";
-constexpr int PALETTE_LIMIT = 10;
-constexpr double INVERT_MASK_THRESH = 0.75;
+constexpr const char BLUE_HIGHLIGHT[] = "background:  rgba(37,122,253,100);";
+constexpr const char YELLOW_HIGHLIGHT[] =
+    "background:  rgba(255, 243, 0, 100);";
+constexpr const char PURPLE_HIGHLIGHT[] =
+    "background:  rgba(255, 0, 243, 100);";
+constexpr const char GREEN_HIGHLIGHT[] = "background:  rgba(0, 255, 0, 100);";
+constexpr const int PALETTE_LIMIT = 10;
+constexpr const double INVERT_MASK_THRESH = 0.75;
 
 class QcvScalar : public cv::Scalar {
   friend inline bool operator==(const QcvScalar &e1,

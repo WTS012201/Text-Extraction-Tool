@@ -4,6 +4,7 @@
 
 Options::Options(QWidget *parent) : QDialog(parent), ui(new Ui::Options) {
   ui->setupUi(this);
+
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 }
@@ -138,13 +139,8 @@ Options::fillMethod Options::getFillMethod() {
   return static_cast<Options::fillMethod>(ui->fillMethod->currentIndex());
 }
 
+// shortcuts
 void Options::on_pushButton_3_clicked() {
-  ui->stackedWidget->setCurrentIndex(2);
-}
-
-void Options::on_pushButton_clicked() { ui->stackedWidget->setCurrentIndex(0); }
-
-void Options::on_pushButton_2_clicked() {
   ui->stackedWidget->setCurrentIndex(1);
 }
 
@@ -156,3 +152,5 @@ void Options::setDataFile(QString fileName) { ui->dataFile->setText(fileName); }
 QString Options::getDataDir() { return ui->dataDir->text(); }
 
 QString Options::getDataFile() { return ui->dataFile->text(); }
+
+void Options::on_pushButton_clicked() { ui->stackedWidget->setCurrentIndex(0); }

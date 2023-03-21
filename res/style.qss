@@ -9,6 +9,17 @@ QWidget
 }
 
 
+QDialog
+{
+	background-color: #FFFFFF;
+	color: #fff;
+	border: 15px solid #000;
+	selection-background-color: #2ee6e6;
+	selection-color: #000;
+
+}
+
+
 /*-----QLabel-----*/
 QLabel
 {

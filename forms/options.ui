@@ -13,19 +13,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <property name="styleSheet">
-   <string notr="true"/>
-  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>Help</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <widget class="QPushButton" name="pushButton_3">
        <property name="text">
@@ -54,7 +44,7 @@
      <item>
       <widget class="QStackedWidget" name="stackedWidget">
        <property name="currentIndex">
-        <number>2</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="page">
         <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -351,13 +341,6 @@
          </item>
         </layout>
        </widget>
-       <widget class="QWidget" name="page_3">
-        <layout class="QVBoxLayout" name="verticalLayout_8">
-         <item>
-          <layout class="QVBoxLayout" name="verticalLayout_7"/>
-         </item>
-        </layout>
-       </widget>
        <widget class="QWidget" name="page_2">
         <layout class="QVBoxLayout" name="verticalLayout_3">
          <item>
@@ -442,7 +425,12 @@
              </item>
              <item>
               <property name="text">
-               <string>Group (Ctrl + G)</string>
+               <string>Group all selections into one highlight (Ctrl + G)</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Delete a single highlight from the page (Ctrl + D)</string>
               </property>
              </item>
             </widget>

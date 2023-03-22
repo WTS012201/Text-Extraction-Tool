@@ -107,6 +107,7 @@ private:
   void keyReleaseEvent(QKeyEvent *event) override;
   bool eventFilter(QObject *obj, QEvent *event) override;
 
+  void configureDragSelection();
   void connections();
   void initUi(QWidget *parent);
   void showAll();

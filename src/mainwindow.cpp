@@ -21,6 +21,7 @@ MainWindow::~MainWindow() { delete ui; }
 void MainWindow::initUi() {
   ui->setupUi(this);
   ui->dropper->setIcon(QIcon(":/img/dropper.png"));
+  ui->hide->setIcon(QIcon(":/img/hide.png"));
   options = new Options{this};
   colorMenu = new ColorTray{this};
 }
@@ -107,6 +108,12 @@ void MainWindow::on_actionOptions_triggered() {
   writeSettings(false);
   readSettings();
   scanSettings();
+}
+
+void MainWindow::on_hide_clicked() {
+  if (iFrame) {
+    iFrame->hideHighlights();
+  }
 }
 
 void MainWindow::connections() {

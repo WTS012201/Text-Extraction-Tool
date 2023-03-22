@@ -32,6 +32,7 @@ signals:
   void switchConnections();
 
 private slots:
+  void on_hide_clicked();
   void on_actionRemove_Selection_Ctrl_R_triggered();
   void on_actionAdd_Selection_Ctrl_A_triggered();
   void on_actionGroup_Ctrl_G_triggered();

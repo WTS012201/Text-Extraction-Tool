@@ -6,6 +6,8 @@
         <file>galaxy.jpg</file>
         <file>spinner.gif</file>
         <file>dropper.png</file>
+        <file>show.png</file>
+        <file>hide.png</file>
     </qresource>
     <qresource prefix="/other">
         <file>eng.traineddata</file>

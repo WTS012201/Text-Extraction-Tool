@@ -5,11 +5,11 @@
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
-    : selection{nullptr}, isProcessing{false}, isDrag{false},
+    : selection{nullptr}, isProcessing{false}, isDrag{false}, hideAll{false},
       stagedState{nullptr}, scalar{1.0}, scaleIncrement{0.1}, tab{__tab},
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
-      zoomChanged{false}, hideAll{false}, state{new State} {
+      zoomChanged{false}, state{new State} {
 
   qApp->installEventFilter(this);
   initUi(parent);
@@ -346,7 +346,8 @@ void ImageFrame::connections() {
   });
   connect(ui->dropper, &QPushButton::pressed, this, [&] {
     this->setCursor(Qt::CursorShape::CrossCursor);
-    hideHighlights();
+    if (!hideAll)
+      hideHighlights();
     dropper = true;
   });
   connect(ui->fontSizeInput, &QLineEdit::editingFinished, this, [&] {
@@ -1076,6 +1077,8 @@ void ImageFrame::move(QPoint shift, bool drag) {
 }
 
 void ImageFrame::hideHighlights() {
+  ui->hide->setIcon(QIcon(hideAll ? ":/img/hide.png" : ":/img/show.png"));
+  ui->hide->setToolTip(hideAll ? "Hide all highlights" : "Show all highlights");
   if ((hideAll = !hideAll)) {
     ui->actionHide_All->setText("Show All (Ctrl + T)");
   } else {

@@ -75,12 +75,15 @@ void MainWindow::readSettings() {
       settings->value("tesseract/DataDir", options->getDataDir()).toString();
   auto dataFile =
       settings->value("tesseract/DataFile", options->getDataFile()).toString();
+  auto fillMethod =
+      settings->value("highlight/FillMethod", options->getFillMethod()).toInt();
 
   options->setRIL(static_cast<tesseract::PageIteratorLevel>(RIL));
   options->setOEM(static_cast<tesseract::OcrEngineMode>(OEM));
   options->setPSM(static_cast<tesseract::PageSegMode>(PSM));
   options->setDataDir(dataDir);
   options->setDataFile(dataFile);
+  options->setFillMethod((Options::fillMethod)fillMethod);
 }
 
 void MainWindow::writeSettings(bool __default) {
@@ -88,6 +91,7 @@ void MainWindow::writeSettings(bool __default) {
     options->setRIL(tesseract::RIL_WORD);
     options->setOEM(tesseract::OEM_DEFAULT);
     options->setPSM(tesseract::PSM_AUTO);
+    options->setFillMethod(Options::INPAINT);
     options->setDataDir(QDir::homePath() + "/.config/tfi/");
     options->setDataFile("eng");
   }
@@ -97,6 +101,7 @@ void MainWindow::writeSettings(bool __default) {
   settings->setValue("tesseract/PSM", options->getPSM());
   settings->setValue("tesseract/DataDir", options->getDataDir());
   settings->setValue("tesseract/DataFile", options->getDataFile());
+  settings->setValue("highlight/FillMethod", options->getFillMethod());
   settings->sync();
 }
 
@@ -160,7 +165,7 @@ void MainWindow::connections() {
   QObject::connect(
       ui->tab->tabBar(), &QTabBar::tabCloseRequested, this, [&](int idx) {
         if (!iFrame || iFrame->isProcessing)
-          return; // to prevent closing on concurrent
+          return; // to prevent closing on concurrent tess process
         delete ui->tab->widget(idx);
 
         if (ui->tab->count() > 0) {

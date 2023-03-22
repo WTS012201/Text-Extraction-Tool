@@ -7,6 +7,20 @@ Options::Options(QWidget *parent) : QDialog(parent), ui(new Ui::Options) {
 
   connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
   connect(ui->buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+
+  QObject::connect(
+      ui->fillMethod,
+      static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
+      this, [&](int idx) {
+        if (static_cast<Options::fillMethod>(idx) == Options::NEIGHBOR) {
+          ui->fillMethod->setToolTip(
+              "Use the most frequent color around the edges of the highlight");
+        } else {
+          ui->fillMethod->setToolTip(
+              "Use inpainting to fill in the missing background (Useful if the "
+              "background pixels are not the same color)");
+        }
+      });
 }
 
 Options::~Options() { delete ui; }
@@ -132,6 +146,14 @@ void Options::setPSM(tesseract::PageSegMode PSM) {
 }
 
 void Options::setFillMethod(Options::fillMethod option) {
+  if (option == Options::NEIGHBOR) {
+    ui->fillMethod->setToolTip(
+        "Use the most frequent color around the edges of the highlight");
+  } else {
+    ui->fillMethod->setToolTip(
+        "Use inpainting to fill in the missing background (Useful if the "
+        "background pixels are not the same color)");
+  }
   ui->fillMethod->setCurrentIndex(static_cast<int>(option));
 }
 
@@ -139,12 +161,10 @@ Options::fillMethod Options::getFillMethod() {
   return static_cast<Options::fillMethod>(ui->fillMethod->currentIndex());
 }
 
-// shortcuts
 void Options::on_pushButton_3_clicked() {
   ui->stackedWidget->setCurrentIndex(1);
 }
 
-// MAKE SURE THEY EXIST
 void Options::setDataDir(QString dirName) { ui->dataDir->setText(dirName); }
 
 void Options::setDataFile(QString fileName) { ui->dataFile->setText(fileName); }

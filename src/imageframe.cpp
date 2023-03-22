@@ -311,18 +311,11 @@ void ImageFrame::connections() {
   connect(this, &ImageFrame::customContextMenuRequested, this,
           [&](const QPoint &pos) {
             QMenu contextMenu{"Context menu", this};
-            contextMenu.addAction(ui->actionUndo);
-            contextMenu.addSeparator();
-            contextMenu.addAction(ui->actionRedo_2);
-            contextMenu.addSeparator();
-            contextMenu.addAction(ui->actionHide_All);
-            contextMenu.addSeparator();
-            contextMenu.addAction(ui->actionAdd_Selection_Ctrl_A);
-            contextMenu.addSeparator();
-            contextMenu.addAction(ui->actionRemove_Selection_Ctrl_R);
-            contextMenu.addSeparator();
-            contextMenu.addAction(ui->actionGroup_Ctrl_G);
-            contextMenu.addSeparator();
+
+            for (const auto &a : ui->menuEdit->actions()) {
+              contextMenu.addAction(a);
+              contextMenu.addSeparator();
+            }
 
             contextMenu.exec(mapToGlobal(pos));
           });

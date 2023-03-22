@@ -59,6 +59,9 @@
            </item>
            <item>
             <widget class="QComboBox" name="partialBox">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Iterates over the images and highlights by the selected option&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
              <item>
               <property name="text">
                <string>Word</string>
@@ -160,6 +163,9 @@
            </item>
            <item>
             <widget class="QComboBox" name="pageSegMode">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Scans the image by the selected option&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
              <item>
               <property name="text">
                <string>Auto OSD</string>
@@ -299,6 +305,9 @@
            </item>
            <item>
             <widget class="QComboBox" name="fillMethod">
+             <property name="toolTip">
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+             </property>
              <item>
               <property name="text">
                <string>Inpainting Fill</string>

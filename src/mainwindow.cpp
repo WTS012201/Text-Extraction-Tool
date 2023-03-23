@@ -7,7 +7,7 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), iFrame{nullptr},
-      ui(new Ui::MainWindow), currTab{nullptr}, shift{1} {
+      ui(new Ui::MainWindow), currTab{nullptr}, shift{1}, enableEditing(true) {
   initUi();
   scanSettings();
   connections();
@@ -441,23 +441,42 @@ void MainWindow::keyReleaseEvent(QKeyEvent *event) {
   }
 }
 
+void MainWindow::disableEditing() {
+  ui->textOptions_2->hide();
+  ui->textOptions_2->setDisabled(true);
+  enableEditing = false;
+}
+
+void MainWindow::loadArgs(QVector<QString> args) {
+  auto idx = args.indexOf("--no-edit");
+
+  if (idx != -1) {
+    args.remove(idx);
+    disableEditing();
+  }
+
+  for (const auto &file : args)
+    loadImage(file);
+
+  emit switchConnections();
+}
+
 void MainWindow::on_actionOpen_Image_triggered(bool paste) {
   QStringList selection, filters{"*.png *.jpeg *.jpg"};
 
   if (!paste) {
     QDir::setCurrent(QDir::homePath());
     QFileDialog dialog(this);
+
     dialog.setNameFilters(filters);
     dialog.setFileMode(QFileDialog::ExistingFiles);
     if (!dialog.exec()) {
       return;
     }
-
     selection = dialog.selectedFiles();
 
-    for (const auto &file : selection) {
+    for (const auto &file : selection)
       loadImage(file);
-    }
 
     QDir::setCurrent(options->getDataDir());
     emit switchConnections();
@@ -495,6 +514,10 @@ void MainWindow::loadImage(QString fileName) {
 
   iFrame =
       new ImageFrame(tabUi->scrollAreaWidgetContents, tabScroll, ui, options);
+  if (!enableEditing) {
+    iFrame->disableMove = true;
+  }
+
   tabUi->scrollHorizontalLayout->addWidget(iFrame);
   iFrame->setImage(fileName);
   tabScroll->iFrame = iFrame;

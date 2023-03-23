@@ -27,6 +27,7 @@ class MainWindow : public QMainWindow {
 public:
   MainWindow(QWidget *parent = nullptr);
   ~MainWindow();
+  void loadArgs(QVector<QString> files);
 
 signals:
   void switchConnections();
@@ -57,6 +58,7 @@ private:
   TabScroll *currTab;
   quint8 shift;
   QSettings *settings;
+  bool enableEditing;
 
   void keyReleaseEvent(QKeyEvent *event) override;
   void keyPressEvent(QKeyEvent *event) override;
@@ -66,5 +68,6 @@ private:
   void connections();
   void readSettings();
   void writeSettings(bool __default = false);
+  void disableEditing();
 };
 #endif // MAINWINDOW_H

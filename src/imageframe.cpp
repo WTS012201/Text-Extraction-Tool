@@ -6,7 +6,8 @@
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
     : selection{nullptr}, isProcessing{false}, isDrag{false}, hideAll{false},
-      stagedState{nullptr}, scalar{1.0}, scaleIncrement{0.1}, tab{__tab},
+      disableMove(false), stagedState{nullptr}, scalar{1.0},
+      scaleIncrement{0.1}, tab{__tab},
       rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
       ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
       zoomChanged{false}, state{new State} {
@@ -855,7 +856,6 @@ void ImageFrame::undoAction() {
     selection->showHighlight();
     selection->mat = &state->matrix;
 
-    qDebug() << selection->getText();
     ui->textEdit->setText(selection->getText());
     ui->fontSizeInput->setText(QString::number(selection->fontSize));
     emit selection->highlightButton->clicked();
@@ -894,7 +894,6 @@ void ImageFrame::redoAction() {
     selection->setHighlightColor(GREEN_HIGHLIGHT);
     selection->showHighlight();
     selection->mat = &state->matrix;
-    qDebug() << "test";
     emit selection->highlightButton->clicked();
   }
 
@@ -1047,7 +1046,7 @@ void ImageFrame::move(QPoint shift, bool drag) {
     qDebug() << "No selection";
     return;
   }
-  if (state->textObjects.isEmpty()) {
+  if (state->textObjects.isEmpty() || disableMove) {
     return;
   }
 

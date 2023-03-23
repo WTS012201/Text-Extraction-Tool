@@ -39,7 +39,7 @@ public:
 
   QHash<int, bool> keysPressed;
   ImageTextObject *selection;
-  bool isProcessing, isDrag, hideAll;
+  bool isProcessing, isDrag, hideAll, disableMove;
   State *stagedState;
 
   QString rawText;

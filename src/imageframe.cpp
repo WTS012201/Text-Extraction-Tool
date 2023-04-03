@@ -1012,11 +1012,19 @@ void ImageFrame::keyReleaseEvent(QKeyEvent *event) {
 }
 
 void ImageFrame::stageState(bool drag) {
+  if (options->getFillMethod() == Options::NEIGHBOR) {
+    stagedState->selection->fillBackground();
+  }
   undo.push(stagedState);
   redo = QStack<State *>{};
   stagedState = nullptr;
   selection->unstageMove();
   isDrag = drag;
+
+  if (options->getFillMethod() == Options::NEIGHBOR) {
+    changeText();
+    undo.pop();
+  }
   changeImage();
 }
 

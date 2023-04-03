@@ -394,7 +394,6 @@ cv::Mat ImageTextObject::generateTextMask(const cv::Rect &roi) {
 
   auto whites = whiteComp(mask);
   if (whites > INVERT_MASK_THRESH) {
-    qDebug() << "inverting mask\n";
     mask = ~mask;
   }
 

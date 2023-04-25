@@ -3,6 +3,7 @@
 
 #include "../headers/imagetextobject.h"
 #include "opencv2/imgproc.hpp"
+#include "qhash.h"
 #include "qnamespace.h"
 #include "qobject.h"
 #include "ui_mainwindow.h"
@@ -64,6 +65,7 @@ public:
   void move(QPoint shift, bool drag = false);
   void stageState(bool drag = false);
   void hideHighlights();
+  void renderListView();
 
 public slots:
   void zoomIn();
@@ -92,7 +94,7 @@ private:
   Options *options;
   Ui::MainWindow *ui;
   QMovie *spinner;
-
+  QHash<ImageTextObject *, int> itemListMap;
   bool dropper;
   bool middleDown;
   bool zoomChanged;

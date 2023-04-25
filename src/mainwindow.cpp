@@ -6,8 +6,8 @@
 #include <tesseract/publictypes.h>
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), iFrame{nullptr},
-      ui(new Ui::MainWindow), currTab{nullptr}, shift{1}, enableEditing(true) {
+    : QMainWindow(parent), iFrame{nullptr}, ui(new Ui::MainWindow),
+      currTab{nullptr}, shift{1}, enableEditing(true) {
   initUi();
   scanSettings();
   connections();
@@ -20,6 +20,8 @@ MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::initUi() {
   ui->setupUi(this);
+  ui->splitter->setSizes({800, 400});
+  ui->splitter_2->setSizes({2, 5});
   ui->dropper->setIcon(QIcon(":/img/dropper.png"));
   ui->hide->setIcon(QIcon(":/img/hide.png"));
   options = new Options{this};
@@ -289,6 +291,7 @@ void MainWindow::connections() {
     ui->textEdit->setText(iFrame->selection ? iFrame->selection->getText()
                                             : "");
 
+    iFrame->renderListView();
     auto fill = [&](cv::Scalar color) {
       if (iFrame && iFrame->selection) {
         QString style = ImageTextObject::formatStyle(color);

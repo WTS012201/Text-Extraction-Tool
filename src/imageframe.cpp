@@ -1,6 +1,7 @@
 ﻿#include "../headers/imageframe.h"
 #include "../headers/tabscroll.h"
 #include "headers/imagetextobject.h"
+#include "qlistwidget.h"
 #include <bits/chrono.h>
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
@@ -20,6 +21,8 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
 }
 
 ImageFrame::~ImageFrame() {
+  ui->listWidget->clear();
+
   for (const auto &obj : state->textObjects) {
     delete obj;
   }
@@ -309,6 +312,18 @@ void ImageFrame::changeText() {
 }
 
 void ImageFrame::connections() {
+  connect(ui->listWidget, &QListWidget::itemPressed, this,
+          [&](QListWidgetItem *_) {
+            for (auto i = 0; i < ui->listWidget->count(); i++) {
+              const auto &item = ui->listWidget->item(i);
+              const auto &obj = state->textObjects[i];
+              if (item->isSelected()) {
+                obj->selectHighlight();
+              } else {
+                obj->deselect();
+              }
+            }
+          });
   connect(this, &ImageFrame::customContextMenuRequested, this,
           [&](const QPoint &pos) {
             QMenu contextMenu{"Context menu", this};
@@ -371,6 +386,7 @@ void ImageFrame::removeSelection() {
       obj->deselect();
       obj->hide();
       obj->isPersistent = false;
+      ui->listWidget->item(itemListMap[obj])->setSelected(false);
       if (obj == selection) {
         selection = nullptr;
       }
@@ -415,6 +431,7 @@ void ImageFrame::highlightSelection() {
     if (obj->isSelected) {
       obj->setHighlightColor(YELLOW_HIGHLIGHT);
       obj->isPersistent = true;
+      ui->listWidget->item(itemListMap[obj])->setSelected(true);
       obj->deselect();
     }
   }
@@ -635,6 +652,9 @@ void ImageFrame::inliers(QPair<QPoint, QPoint> boundingBox) {
 
     if (xOverlap && yOverlap) {
       obj->selectHighlight();
+      ui->listWidget->item(itemListMap[obj])->setSelected(true);
+    } else if (!obj->isSelected && !obj->isPersistent) {
+      ui->listWidget->item(itemListMap[obj])->setSelected(false);
     }
   }
 }
@@ -765,12 +785,12 @@ void ImageFrame::populateTextObjects() {
     ImageTextObject *temp =
         new ImageTextObject{this, std::move(*obj), ui, &state->matrix, options};
     temp->hide();
-
     tempObjects.push_back(temp);
     connectSelection(temp);
   }
 
   state->textObjects = tempObjects;
+  renderListView();
   removeSelection();
 }
 
@@ -863,6 +883,7 @@ void ImageFrame::undoAction() {
     emit selection->highlightButton->clicked();
   }
 
+  renderListView();
   changeImage();
 }
 
@@ -899,6 +920,7 @@ void ImageFrame::redoAction() {
     emit selection->highlightButton->clicked();
   }
 
+  renderListView();
   changeImage();
 }
 
@@ -983,6 +1005,18 @@ void ImageFrame::groupSelections() {
 
   state->textObjects = final;
   connectSelection(textObject);
+  renderListView();
+}
+
+void ImageFrame::renderListView() {
+  ui->listWidget->clear();
+  itemListMap.clear();
+  for (const auto &obj : state->textObjects) {
+    ui->listWidget->addItem(obj->getText());
+    itemListMap[obj] = ui->listWidget->count() - 1;
+    ui->listWidget->item(itemListMap[obj])
+        ->setSelected(obj->isSelected || obj->isPersistent);
+  }
 }
 
 void ImageFrame::deleteSelection() {
@@ -1062,7 +1096,6 @@ void ImageFrame::move(QPoint shift, bool drag) {
 
   static QPoint before{0, 0};
   if (!stagedState) {
-    qDebug() << "STAGING";
     before = selection->topLeft;
     QVector<ImageTextObject *> oldObjs = state->textObjects;
     State *oldState = new State{oldObjs, cv::Mat{}, selection};

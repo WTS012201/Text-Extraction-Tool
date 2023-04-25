@@ -44,6 +44,7 @@ ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &&old,
                                  Options *__options)
     : QWidget(parent), mat{__mat}, options{__options}, mUi{__ui},
       ui(new Ui::ImageTextObject) {
+
   topLeft = old.topLeft;
   bottomRight = old.bottomRight;
   lineSpace = old.lineSpace;
@@ -255,7 +256,6 @@ void ImageTextObject::generatePalette() {
                          cv::Point{bottomRight.x(), bottomRight.y()}};
   cv::Mat mask = generateTextMask(region);
   auto ker = cv::getStructuringElement(cv::MORPH_RECT, {3, 3});
-  /* cv::erode(mask, mask, ker, {}, 1); */
   cv::cvtColor(mask, mask, cv::COLOR_GRAY2BGR);
   cv::Mat text = mask & draw;
 
@@ -295,6 +295,9 @@ void ImageTextObject::generatePalette() {
   }
 
   colorPalette = __colorPalette;
+  if (colorPalette.isEmpty()) {
+    colorPalette.push_back(cv::Scalar{0, 0, 0});
+  }
   fontIntensity = colorPalette.first();
 }
 

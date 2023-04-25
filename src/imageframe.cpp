@@ -7,10 +7,10 @@ ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
     : selection{nullptr}, isProcessing{false}, isDrag{false}, hideAll{false},
       disableMove(false), stagedState{nullptr}, scalar{1.0},
-      scaleIncrement{0.1}, tab{__tab},
-      rubberBand{nullptr}, scene{new QGraphicsScene(this)}, options{__options},
-      ui{__ui}, spinner{nullptr}, dropper{false}, middleDown{false},
-      zoomChanged{false}, state{new State} {
+      scaleIncrement{0.1}, tab{__tab}, rubberBand{nullptr},
+      scene{new QGraphicsScene(this)}, options{__options}, ui{__ui},
+      spinner{nullptr}, dropper{false}, middleDown{false}, zoomChanged{false},
+      state{new State} {
 
   qApp->installEventFilter(this);
   initUi(parent);
@@ -845,9 +845,11 @@ void ImageFrame::undoAction() {
 
   for (const auto &obj : state->textObjects) {
     obj->scaleAndPosition(scalar);
-    obj->show();
     obj->setDisabled(false);
-    obj->isPersistent = obj->getHighlightColor() == YELLOW_HIGHLIGHT;
+
+    if (obj->isPersistent) {
+      obj->show();
+    }
     obj->mat = &state->matrix;
   }
 
@@ -965,7 +967,7 @@ void ImageFrame::groupSelections() {
   textObject->reset();
   textObject->selectHighlight();
   textObject->scaleAndPosition(scalar);
-  selection = textObject;
+  /* selection = textObject; */
 
   // reindex after grouping
   QVector<ImageTextObject *> final;
@@ -1060,6 +1062,7 @@ void ImageFrame::move(QPoint shift, bool drag) {
 
   static QPoint before{0, 0};
   if (!stagedState) {
+    qDebug() << "STAGING";
     before = selection->topLeft;
     QVector<ImageTextObject *> oldObjs = state->textObjects;
     State *oldState = new State{oldObjs, cv::Mat{}, selection};

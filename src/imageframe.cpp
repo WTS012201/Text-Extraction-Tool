@@ -313,6 +313,16 @@ void ImageFrame::changeText() {
 }
 
 void ImageFrame::connections() {
+  connect(static_cast<::ObjectListView *>(ui->listWidget),
+          &ObjectListView::reorder, this, [&] {
+            QVector<ImageTextObject *> textObjects;
+            for (auto i = 0; i < ui->listWidget->count(); i++) {
+              const auto &item = ui->listWidget->item(i);
+              textObjects.push_back(objectFromItemsMap[item]);
+            }
+            state->textObjects = textObjects;
+          });
+
   connect(ui->listWidget, &QListWidget::itemPressed, this,
           [&](QListWidgetItem *) {
             for (auto i = 0; i < ui->listWidget->count(); i++) {
@@ -1015,8 +1025,9 @@ void ImageFrame::renderListView() {
   objectFromItemsMap.clear();
   for (const auto &obj : state->textObjects) {
     ui->listWidget->addItem(obj->getText());
-    const auto currItem = ui->listWidget->item(itemListMap[obj]);
     itemListMap[obj] = ui->listWidget->count() - 1;
+
+    const auto currItem = ui->listWidget->item(itemListMap[obj]);
     objectFromItemsMap[currItem] = obj;
     currItem->setSelected(obj->isSelected || obj->isPersistent);
   }

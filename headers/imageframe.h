@@ -32,7 +32,7 @@ class ObjectListView : public QListWidget {
   Q_OBJECT
 
 signals:
-  void reorderObjects() const;
+  void reorder();
 
 public:
   ObjectListView(const QListWidget *widget) {
@@ -45,7 +45,7 @@ public:
 private:
   void dropEvent(QDropEvent *event) override {
     QListWidget::dropEvent(event);
-    emit reorderObjects();
+    emit reorder();
   }
 };
 

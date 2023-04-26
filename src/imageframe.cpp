@@ -397,7 +397,7 @@ void ImageFrame::removeSelection() {
       obj->deselect();
       obj->hide();
       obj->isPersistent = false;
-      ui->listWidget->item(itemListMap[obj])->setSelected(false);
+      itemListMap[obj]->setSelected(false);
       if (obj == selection) {
         selection = nullptr;
       }
@@ -442,7 +442,7 @@ void ImageFrame::highlightSelection() {
     if (obj->isSelected) {
       obj->setHighlightColor(YELLOW_HIGHLIGHT);
       obj->isPersistent = true;
-      ui->listWidget->item(itemListMap[obj])->setSelected(true);
+      itemListMap[obj]->setSelected(true);
       obj->deselect();
     }
   }
@@ -663,9 +663,9 @@ void ImageFrame::inliers(QPair<QPoint, QPoint> boundingBox) {
 
     if (xOverlap && yOverlap) {
       obj->selectHighlight();
-      ui->listWidget->item(itemListMap[obj])->setSelected(true);
+      itemListMap[obj]->setSelected(true);
     } else if (!obj->isSelected && !obj->isPersistent) {
-      ui->listWidget->item(itemListMap[obj])->setSelected(false);
+      itemListMap[obj]->setSelected(false);
     }
   }
 }
@@ -1025,10 +1025,9 @@ void ImageFrame::renderListView() {
   objectFromItemsMap.clear();
   for (const auto &obj : state->textObjects) {
     ui->listWidget->addItem(obj->getText());
-    itemListMap[obj] = ui->listWidget->count() - 1;
-
-    const auto currItem = ui->listWidget->item(itemListMap[obj]);
+    const auto currItem = ui->listWidget->item(ui->listWidget->count() - 1);
     objectFromItemsMap[currItem] = obj;
+    itemListMap[obj] = currItem;
     currItem->setSelected(obj->isSelected || obj->isPersistent);
   }
 }

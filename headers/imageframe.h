@@ -115,7 +115,7 @@ private:
   Options *options;
   Ui::MainWindow *ui;
   QMovie *spinner;
-  QHash<ImageTextObject *, int> itemListMap;
+  QHash<ImageTextObject *, QListWidgetItem *> itemListMap;
   QHash<QListWidgetItem *, ImageTextObject *> objectFromItemsMap;
   bool dropper;
   bool middleDown;

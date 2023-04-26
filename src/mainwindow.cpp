@@ -326,7 +326,7 @@ void MainWindow::pastImage() {
 }
 
 void MainWindow::colorTray() {
-  if (!iFrame)
+  if (!iFrame || !enableEditing)
     return;
   if (!iFrame->selection)
     return;
@@ -464,8 +464,6 @@ void MainWindow::loadArgs(QVector<QString> args) {
 
   for (const auto &file : args)
     loadImage(file);
-
-  emit switchConnections();
 }
 
 void MainWindow::on_actionOpen_Image_triggered(bool paste) {

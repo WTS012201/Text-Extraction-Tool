@@ -32,7 +32,6 @@ HEADERS = \
 
 FORMS = \
     ./forms/mainwindow.ui \
-    #./forms/_mainwindow.ui \
     ./forms/imagetextobject.ui \
     ./forms/options.ui \
     ./forms/colortray.ui \
@@ -42,7 +41,7 @@ RESOURCES += \
     ./res/res.qrc \
 
 #INCLUDEPATH += /usr/include/opencv4/opencv2
-#LIBS += -L/usr/lib -lopencv_imgproc -lopencv_core -lopencv_imgcodecs -lopencv_photo
+#LIBS += -L/usr/lib -lopencv_imgproc -lopencv_core -lopencv_imgcodecs -lopencv_photo -lopencv_mat
 
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin

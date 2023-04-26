@@ -1156,9 +1156,12 @@ QProgressBar::chunk
             <number>10</number>
            </property>
            <widget class="QWidget" name="verticalLayoutWidget">
-            <layout class="QVBoxLayout" name="verticalLayout_6">
+            <layout class="QVBoxLayout" name="listWidgetLayout">
              <property name="spacing">
               <number>9</number>
+             </property>
+             <property name="sizeConstraint">
+              <enum>QLayout::SetMinAndMaxSize</enum>
              </property>
              <property name="leftMargin">
               <number>9</number>
@@ -1174,6 +1177,12 @@ QProgressBar::chunk
              </property>
              <item>
               <widget class="QListWidget" name="listWidget">
+               <property name="maximumSize">
+                <size>
+                 <width>800</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="dragDropMode">
                 <enum>QAbstractItemView::InternalMove</enum>
                </property>

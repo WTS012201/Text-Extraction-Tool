@@ -1,4 +1,5 @@
 ﻿#include "../headers/mainwindow.h"
+#include "headers/imageframe.h"
 #include "headers/imagetextobject.h"
 #include "qboxlayout.h"
 #include "ui_mainwindow.h"
@@ -20,6 +21,9 @@ MainWindow::~MainWindow() { delete ui; }
 
 void MainWindow::initUi() {
   ui->setupUi(this);
+  ui->listWidget = new ObjectListView{ui->listWidget};
+  ui->listWidgetLayout->addWidget(ui->listWidget);
+  ui->listWidget->setMaximumSize({800, 16777215});
   ui->splitter->setSizes({800, 400});
   ui->splitter_2->setSizes({2, 5});
   ui->dropper->setIcon(QIcon(":/img/dropper.png"));

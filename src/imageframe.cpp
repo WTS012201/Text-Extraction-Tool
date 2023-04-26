@@ -279,7 +279,6 @@ void ImageFrame::changeText() {
   while ((j = label.indexOf("\n", j)) != -1) {
     auto sub = label.mid(k, j - k);
     QPoint translateY{0, (i * dy)};
-
     QRect subrect{translateY + selection->topLeft,
                   translateY + selection->bottomRight};
     p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
@@ -291,7 +290,8 @@ void ImageFrame::changeText() {
   sub = label.mid(k, label.size() - k);
   QPoint translateY{0, (i * dy)};
 
-  QRect subrect{selection->topLeft, translateY + selection->bottomRight};
+  QRect subrect{translateY + selection->topLeft,
+                translateY + selection->bottomRight};
   p.drawText(subrect, sub, Qt::AlignLeft | Qt::AlignLeft);
   k = ++j;
   i++;
@@ -308,12 +308,13 @@ void ImageFrame::changeText() {
   selection->fontIntensity = colorSelection;
   delete img;
 
+  renderListView();
   changeImage();
 }
 
 void ImageFrame::connections() {
   connect(ui->listWidget, &QListWidget::itemPressed, this,
-          [&](QListWidgetItem *_) {
+          [&](QListWidgetItem *) {
             for (auto i = 0; i < ui->listWidget->count(); i++) {
               const auto &item = ui->listWidget->item(i);
               const auto &obj = state->textObjects[i];
@@ -1011,11 +1012,13 @@ void ImageFrame::groupSelections() {
 void ImageFrame::renderListView() {
   ui->listWidget->clear();
   itemListMap.clear();
+  objectFromItemsMap.clear();
   for (const auto &obj : state->textObjects) {
     ui->listWidget->addItem(obj->getText());
+    const auto currItem = ui->listWidget->item(itemListMap[obj]);
     itemListMap[obj] = ui->listWidget->count() - 1;
-    ui->listWidget->item(itemListMap[obj])
-        ->setSelected(obj->isSelected || obj->isPersistent);
+    objectFromItemsMap[currItem] = obj;
+    currItem->setSelected(obj->isSelected || obj->isPersistent);
   }
 }
 
@@ -1037,6 +1040,7 @@ void ImageFrame::deleteSelection() {
   redo = QStack<State *>{};
 
   state->textObjects.remove(idx);
+  renderListView();
   selection = nullptr;
 }
 

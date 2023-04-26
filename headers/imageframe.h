@@ -28,6 +28,27 @@
 
 constexpr const double ZOOM_MAX = 5.0;
 
+class ObjectListView : public QListWidget {
+  Q_OBJECT
+
+signals:
+  void reorderObjects() const;
+
+public:
+  ObjectListView(const QListWidget *widget) {
+    setDragDropMode(widget->dragDropMode());
+    setSelectionMode(widget->selectionMode());
+    setSelectionBehavior(widget->selectionBehavior());
+    delete widget;
+  };
+
+private:
+  void dropEvent(QDropEvent *event) override {
+    QListWidget::dropEvent(event);
+    emit reorderObjects();
+  }
+};
+
 class ImageFrame : public QGraphicsView {
   Q_OBJECT
 public:
@@ -95,6 +116,7 @@ private:
   Ui::MainWindow *ui;
   QMovie *spinner;
   QHash<ImageTextObject *, int> itemListMap;
+  QHash<QListWidgetItem *, ImageTextObject *> objectFromItemsMap;
   bool dropper;
   bool middleDown;
   bool zoomChanged;

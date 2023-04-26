@@ -45,15 +45,15 @@ ImageTextObject::ImageTextObject(QWidget *parent, ImageTextObject &&old,
     : QWidget(parent), mat{__mat}, options{__options}, mUi{__ui},
       ui(new Ui::ImageTextObject) {
 
-  topLeft = old.topLeft;
-  bottomRight = old.bottomRight;
-  lineSpace = old.lineSpace;
-  fontIntensity = old.fontIntensity;
-  fontSize = old.fontSize;
-  colorSet = old.colorSet;
-  textMask = old.textMask;
-  drag = old.drag;
-  wasSelected = old.wasSelected;
+  topLeft = std::move(old.topLeft);
+  bottomRight = std::move(old.bottomRight);
+  lineSpace = std::move(old.lineSpace);
+  fontIntensity = std::move(old.fontIntensity);
+  fontSize = std::move(old.fontSize);
+  colorSet = std::move(old.colorSet);
+  textMask = std::move(old.textMask);
+  drag = std::move(old.drag);
+  wasSelected = std::move(old.wasSelected);
 
   ui->setupUi(this);
   setText(old.getText());

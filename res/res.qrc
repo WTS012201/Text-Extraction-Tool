@@ -3,7 +3,6 @@
         <file>style.qss</file>
     </qresource>
     <qresource prefix="/img">
-        <file>galaxy.jpg</file>
         <file>spinner.gif</file>
         <file>dropper.png</file>
         <file>show.png</file>

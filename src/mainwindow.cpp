@@ -34,9 +34,12 @@ void MainWindow::initUi() {
 
 void MainWindow::scanSettings() {
   QString path = QDir::homePath() + "/.config/tfi/";
+  if (!QDir{path}.exists()) {
+    QDir{}.mkdir(path);
+  }
   QDir::setCurrent(path);
-  settings = new QSettings{"settings.ini", QSettings::IniFormat};
 
+  settings = new QSettings{"settings.ini", QSettings::IniFormat};
   if (!QFileInfo{"settings.ini"}.exists()) {
     writeSettings(true);
   } else {
@@ -96,10 +99,6 @@ void MainWindow::writeSettings(bool __default) {
     options->setOEM(tesseract::OEM_DEFAULT);
     options->setPSM(tesseract::PSM_AUTO);
     options->setFillMethod(Options::INPAINT);
-
-    if (!QDir{defaultPath}.exists()) {
-      QDir{}.mkdir(defaultPath);
-    }
     options->setDataDir(defaultPath);
     options->setDataFile("eng");
   }
@@ -466,6 +465,8 @@ void MainWindow::loadArgs(QVector<QString> args) {
 
   for (const auto &file : args) {
     loadImage(file);
+    iFrame->renderListView();
+    emit switchConnections();
   }
 }
 

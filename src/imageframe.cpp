@@ -360,6 +360,7 @@ void ImageFrame::connections() {
       populateTextObjects();
       spinner->stop();
       ui->tab->setTabIcon(ui->tab->indexOf(tab), QIcon{});
+      ui->tab->setCurrentWidget(tab);
     } else {
       spinner->start();
     }

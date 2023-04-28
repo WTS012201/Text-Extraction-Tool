@@ -47,9 +47,6 @@ void MainWindow::scanSettings() {
   if (QDir{dataDir}.exists()) {
     QDir::setCurrent(options->getDataDir());
   } else {
-    qDebug() << "Data directory " << dataDir
-             << " doesn't exists, using default path " << path;
-    options->setDataDir(path);
     QDir::setCurrent(path);
   }
 
@@ -94,11 +91,16 @@ void MainWindow::readSettings() {
 
 void MainWindow::writeSettings(bool __default) {
   if (__default) {
+    const QString defaultPath = QDir::homePath() + "/.config/tfi/";
     options->setRIL(tesseract::RIL_WORD);
     options->setOEM(tesseract::OEM_DEFAULT);
     options->setPSM(tesseract::PSM_AUTO);
     options->setFillMethod(Options::INPAINT);
-    options->setDataDir(QDir::homePath() + "/.config/tfi/");
+
+    if (!QDir{defaultPath}.exists()) {
+      QDir{}.mkdir(defaultPath);
+    }
+    options->setDataDir(defaultPath);
     options->setDataFile("eng");
   }
 
@@ -462,8 +464,9 @@ void MainWindow::loadArgs(QVector<QString> args) {
     disableEditing();
   }
 
-  for (const auto &file : args)
+  for (const auto &file : args) {
     loadImage(file);
+  }
 }
 
 void MainWindow::on_actionOpen_Image_triggered(bool paste) {

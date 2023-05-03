@@ -1,4 +1,5 @@
 ﻿#include "../headers/imagetextobject.h"
+#include "opencv2/core.hpp"
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/imgproc.hpp"
 #include "ui_imagetextobject.h"
@@ -168,7 +169,11 @@ void ImageTextObject::reposition(QPoint shift, bool relative) {
     if (options->getFillMethod() == Options::NEIGHBOR) {
       auto region = cv::Rect{cv::Point{topLeft.x(), topLeft.y()},
                              cv::Point{bottomRight.x(), bottomRight.y()}};
-      (*mat)(region).copyTo(draw);
+      try {
+        (*mat)(region).copyTo(draw);
+      } catch (const cv::Exception &e) {
+        qDebug() << e.what();
+      }
     } else {
       textMask = fillBackground(true);
     }
@@ -391,7 +396,12 @@ double whiteComp(const cv::Mat &mat) {
 cv::Mat ImageTextObject::generateTextMask(const cv::Rect &roi) {
   cv::Mat mask;
 
-  (*mat)(roi).copyTo(draw);
+  try {
+    (*mat)(roi).copyTo(draw);
+  } catch (const cv::Exception &e) {
+    qDebug() << e.what();
+  }
+
   cv::cvtColor(draw, mask, cv::COLOR_BGR2GRAY);
   cv::threshold(mask, mask, 0, 255, cv::THRESH_OTSU);
 

@@ -1017,6 +1017,7 @@ void ImageFrame::groupSelections() {
 
   state->textObjects = final;
   connectSelection(textObject);
+
   renderListView();
 }
 
@@ -1077,6 +1078,7 @@ void ImageFrame::stageState(bool drag) {
     undo.pop();
   }
   changeImage();
+  renderListView();
 }
 
 void ImageFrame::configureDragSelection() {

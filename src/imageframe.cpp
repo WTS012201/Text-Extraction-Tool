@@ -2,7 +2,6 @@
 #include "../headers/tabscroll.h"
 #include "headers/imagetextobject.h"
 #include "qlistwidget.h"
-#include <bits/chrono.h>
 
 ImageFrame::ImageFrame(QWidget *parent, QWidget *__tab, Ui::MainWindow *__ui,
                        Options *__options)
@@ -837,9 +836,9 @@ QString ImageFrame::collect(const cv::Mat &matrix) {
       x2 = x2 > matrix.cols ? matrix.cols - 1 : x2;
 
       y1 = y1 < 0 ? 0 : y1;
-      y1 = y1 > matrix.cols ? matrix.cols - 1 : y1;
+      y1 = y1 > matrix.rows ? matrix.rows - 1 : y1;
       y2 = y2 < 0 ? 0 : y2;
-      y2 = y2 > matrix.cols ? matrix.cols - 1 : y2;
+      y2 = y2 > matrix.rows ? matrix.rows - 1 : y2;
 
       QPoint p1{x1, y1}, p2{x2, y2};
       ImageTextObject *textObject = new ImageTextObject{nullptr};

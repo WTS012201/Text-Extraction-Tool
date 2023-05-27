@@ -3,7 +3,7 @@ Text from image (TFI) is an application for Linux that extracts text from an ima
 
 # Download
 
-**AUR:** <a href="https://aur.archlinux.org/packages/tfi">https://aur.archlinux.org/tfi.git</a>
+**AUR git clone URL:** <a href="https://aur.archlinux.org/packages/tfi">https://aur.archlinux.org/tfi.git</a>
 
 or clone and build with qmake. You will have to download OpenCV and Tesseract packages if not already on your system.
 
